@@ -1,1 +1,7 @@
+# python module cache
 __pycache__
+
+
+
+# security related
+.env
