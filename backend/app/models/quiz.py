@@ -131,6 +131,7 @@ class QuestionAttempt(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     quiz_attempt_id = Column(Integer, ForeignKey("quiz_attempts.id"), nullable=False)
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     response_data = Column(JSONB, nullable=False)  # Store user answer as JSON
     is_correct = Column(Boolean, nullable=False)
 

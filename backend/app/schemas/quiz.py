@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic import field_validator, BaseModel
 from enum import Enum
 
@@ -67,3 +67,22 @@ class UserInput(QuestionBase):
         if not value or str(value).strip() == "":
             raise ValueError("Correct answer cannot be empty")
         return value
+
+
+class CourseCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+
+
+class QuizCreate(BaseModel):
+    course_id: int
+    title: str
+    description: Optional[str] = None
+    tags: List[str] = []
+
+
+class QuestionCreate(BaseModel):
+    quiz_id: int
+    data: dict[str, str]
+    tag: Optional[str] = None
+    reference_image: Optional[str] = None

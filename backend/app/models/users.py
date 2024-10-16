@@ -37,3 +37,12 @@ class User(Base):
 
     # Okey
     session = relationship("QuizSession", back_populates="creator")
+
+    def to_dict(self) -> dict[str, str]:
+        return {
+            "id": str(self.id),
+            "username": str(self.username),
+            "email": str(self.email),
+            "role": str(self.role),
+            "joined_at": str(self.joined_at),
+        }
