@@ -108,7 +108,7 @@ class Question(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)
-    data = Column(JSONB, nullable=False)  # Store question details as JSONB
+    question_data = Column(JSONB, nullable=False)  # Store question details as JSONB
 
     tag = Column(String, nullable=True)  # Single string tag for the question
     # reference_image = Column(String, nullable=True)  # Image URL reference
@@ -131,7 +131,7 @@ class QuestionAttempt(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     quiz_attempt_id = Column(Integer, ForeignKey("quiz_attempts.id"), nullable=False)
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
-    answer = Column(JSONB, nullable=False)  # Store user answer as JSON
+    response_data = Column(JSONB, nullable=False)  # Store user answer as JSON
     is_correct = Column(Boolean, nullable=False)
 
     marked = Column(Boolean, default=False)  # Marked for review
