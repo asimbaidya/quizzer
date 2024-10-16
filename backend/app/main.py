@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.core.db import engine, SessionLocal
+from app.core.db import engine, SessionLocal, Base
 from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -8,6 +8,17 @@ from sqlalchemy import text
 from app.api.main import api_router
 from app.core.config import settings
 
+from app.models.quiz import (
+    Course,
+    Enrollment,
+    Question,
+    QuestionAttempt,
+    Quiz,
+    QuizAttempt,
+)
+from app.models.users import User
+from app.models.game import QuizSession, QuizParticipant
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -15,8 +26,23 @@ async def lifespan(app: FastAPI):
         # Try to create a session and perform an ORM operation
         db: Session = SessionLocal()
         db.execute(text("SELECT 1"))  # Executes a simple query to test the connection
-        db.close()
         print(f"`{app.title}` has Connected to the database: `{settings.POSTGRES_URI}`")
+        Base.metadata.create_all(engine)
+        tables = [  # type: ignore
+            Course,
+            Enrollment,
+            Question,
+            Quiz,
+            QuizAttempt,
+            Question,
+            QuestionAttempt,
+            User,
+            QuizSession,
+            QuizParticipant,
+        ]
+        for tab in tables:  # type: ignore
+            print(f"{tab} Table Created")  # type: ignore
+        db.close()
     except Exception as e:
         print(f"Database connection failed: {e}")
 
