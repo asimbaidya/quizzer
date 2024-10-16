@@ -8,7 +8,7 @@ from app.api.routes import quiz
 api_router = APIRouter()
 
 
-api_router.include_router(test.router, tags=["login"])
+api_router.include_router(login.router, tags=["login"])
+api_router.include_router(test.router, prefix="/test", tags=["test"])
 api_router.include_router(user.router, prefix="/user", tags=["user"])
-api_router.include_router(login.router, prefix="/login", tags=["login"])
 api_router.include_router(quiz.router, prefix="/quiz", tags=["quiz"])
