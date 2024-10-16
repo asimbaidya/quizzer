@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.schemas.quiz import CourseCreate, QuizCreate, QuestionCreate
-from app.crud import quiz as quiz_crud
+from app.crud import quiz_crud
 from app.api.deps import CurrentTeacher, SessionDep
 
 router = APIRouter()

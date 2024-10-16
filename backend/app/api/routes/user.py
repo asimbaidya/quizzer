@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.schemas.user import UserCreate
-from app.crud import user as user_crud
+from app.crud import user_crud
 from app.api.deps import SessionDep
 
 router = APIRouter()
