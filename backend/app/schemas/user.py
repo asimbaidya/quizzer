@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import Literal
 
 
@@ -10,13 +10,12 @@ class UserRole(str, Enum):
 
 
 class UserCreate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     username: str
     email: EmailStr
     password: str
     role: Literal["admin", "teacher", "student"]
-
-    class Config:
-        orm_mode = True
 
 
 class UserPublic(BaseModel):
