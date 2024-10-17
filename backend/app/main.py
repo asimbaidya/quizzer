@@ -17,7 +17,7 @@ from app.models.quizzer import (
     QuizAttempt,
 )
 from app.models.users import User
-from app.models.game import QuizSession, QuizParticipant
+from app.models.gamify import QuizSession, QuizParticipant
 
 
 @asynccontextmanager
