@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from app.models.quiz import Course, Quiz, Question
-from app.schemas.quiz import CourseCreate, QuizCreate, QuestionCreate
+from app.models.quizzer import Course, Quiz, Question
+from app.schemas.quizzer import CourseCreate, QuizCreate, QuestionCreate
 
 
 def create_course(db: Session, course_create: CourseCreate, creator_id: int) -> Course:
