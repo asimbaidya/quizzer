@@ -32,11 +32,11 @@ class User(Base):
     # Okey
     quiz_attempts = relationship("QuizAttempt", back_populates="user")
 
-    # Okey
-    participations = relationship("QuizParticipant", back_populates="user")
+    # Okey [for Live Game | for Student Role]
+    participations = relationship("GameParticipant", back_populates="user")
 
-    # Okey
-    session = relationship("QuizSession", back_populates="creator")
+    # Okey [ for Live Game | for Creator Role]
+    session = relationship("GameSession", back_populates="creator")
 
     def to_dict(self) -> dict[str, str]:
         return {

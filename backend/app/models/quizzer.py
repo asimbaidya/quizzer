@@ -90,8 +90,9 @@ class QuizAttempt(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)
     score = Column(Integer, nullable=True)  # Score for the quiz
-    attempt_time = Column(TIMESTAMP, server_default=func.now())  # Time of the attempt
-    duration = Column(Integer, nullable=True)  # Duration of the attempt
+
+    # attempt_time = Column(TIMESTAMP, server_default=func.now())  # Time of the attempt
+    # duration = Column(Integer, nullable=True)  # Duration of the attempt
 
     # Okey
     user = relationship("User", back_populates="quiz_attempts")
@@ -100,7 +101,7 @@ class QuizAttempt(Base):
     quiz = relationship("Quiz", back_populates="attempts")
 
     # Okey
-    question_attempts = relationship("QuestionAttempt", back_populates="quiz_attempt")
+    # question_attempts = relationship("QuestionAttempt", back_populates="quiz_attempt")
 
 
 class Question(Base):
@@ -132,17 +133,15 @@ class QuestionAttempt(Base):
     quiz_attempt_id = Column(Integer, ForeignKey("quiz_attempts.id"), nullable=False)
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    response_data = Column(JSONB, nullable=False)  # Store user answer as JSON
+    # response_data = Column(JSONB, nullable=False)  # Store user answer as JSON
     is_correct = Column(Boolean, nullable=False)
 
-    marked = Column(Boolean, default=False)  # Marked for review
+    # update only when new
+    type = Column(String, default=False)  # learnig, new, mastered
     received_mark = Column(Integer, nullable=True)  # Marked score
 
     attempt_time = Column(TIMESTAMP, server_default=func.now())  # Time of the attempt
     attempt_count = Column(Integer, default=1)
-
-    # State of the question (new, learning,mastered)
-    state = Column(String, default="new")
 
     # Okey
     user = relationship("User", back_populates="question_attempts")
