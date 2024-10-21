@@ -16,8 +16,8 @@ from app.models.quizzer import (
     Quiz,
     QuizAttempt,
 )
-from app.models.users import User
-from app.models.game import GameSession, GameParticipant
+from app.models.user import User
+# from app.models.game import GameSession, GameParticipant
 
 
 @asynccontextmanager
@@ -37,8 +37,8 @@ async def lifespan(app: FastAPI):
             Question,
             QuestionAttempt,
             User,
-            GameSession,
-            GameParticipant,
+            # GameSession,
+            # GameParticipant,
         ]
         for tab in tables:  # type: ignore
             print(f"{tab} Table Created")  # type: ignore
