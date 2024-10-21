@@ -15,7 +15,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     fist_name = Column(String, nullable=False)
-    last_name = Column(String)
+    last_name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     hashed_password = Column(String, nullable=False)
     role = Column(String, nullable=False)  # Enum of 'admin', 'teacher', 'student'

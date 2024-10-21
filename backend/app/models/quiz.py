@@ -22,6 +22,9 @@ class Course(Base):
     description = Column(Text, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
+    # [TODO]
+    is_open = Column(Boolean, default=True)  # Okey
+
     # auto-generate with random numbers(only creator can see)
     course_pin = Column(String, nullable=False, unique=True)
 

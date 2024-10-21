@@ -1,6 +1,6 @@
+from datetime import datetime
 from enum import Enum
-from pydantic import BaseModel, EmailStr, ConfigDict
-from typing import Literal
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
 
 class UserRole(str, Enum):
@@ -9,14 +9,20 @@ class UserRole(str, Enum):
     STUDENT = "student"
 
 
-class UserCreate(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+class User(BaseModel):
+    first_name: str = Field(default="John")
+    last_name: str = Field(default="Doe")
+    email: EmailStr = Field(default="john_doe@gmail.com")
+    role: UserRole = UserRole.STUDENT
+    joined_at: datetime = Field(default_factory=datetime.now)
 
-    username: str
-    email: EmailStr
-    password: str
-    role: Literal["admin", "teacher", "student"]
+
+class UserCreate(User):
+    password: str = Field("password", min_length=8, max_length=32)
 
 
-class UserPublic(BaseModel):
+class UserInDB(User):
     id: int
+    hashed_password: str
+
+    model_config = ConfigDict(from_attributes=True)
