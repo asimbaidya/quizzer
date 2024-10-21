@@ -8,7 +8,7 @@ from sqlalchemy import (
     TIMESTAMP,
     func,
 )
-from sqlalchemy.dialects.postgresql import JSONB, ARRAY
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from app.core.db import Base
 
@@ -21,14 +21,9 @@ class Course(Base):
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    # updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     # auto-generate with random numbers(only creator can see)
     course_pin = Column(String, nullable=False, unique=True)
-
-    # Timed Quiz
-    timed = Column(Boolean, default=False)  # Timed quiz or not
-    quiz_time = Column(Integer, nullable=True)  # allocated Time for the quiz
 
     # Okey
     creator = relationship("User", back_populates="course")
@@ -63,24 +58,23 @@ class Quiz(Base):
 
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
-    tags = Column(ARRAY(String), default=[])  # Array of tags for quiz
 
+    # for instructor to see
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    # to show in progreass
     total_mark = Column(Integer, nullable=False)  # Total marks for the quiz
 
     # Okey
     question = relationship("Question", back_populates="quiz")
 
-    # Okey
     course = relationship("Course", back_populates="quizzes")
 
-    # Okey
+    # [1-m] QuizAttempt one quiz can have multiple attempts
     attempts = relationship("QuizAttempt", back_populates="quiz")
 
-    # Okey
-    session = relationship("QuizSession", back_populates="quiz")
+    # session = relationship("GameSession", back_populates="quiz")
 
 
 class QuizAttempt(Base):
@@ -89,12 +83,14 @@ class QuizAttempt(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)
-    score = Column(Integer, nullable=True)  # Score for the quiz
+    received_mark = Column(Integer, nullable=True)  # Score for the quiz
 
-    # attempt_time = Column(TIMESTAMP, server_default=func.now())  # Time of the attempt
-    # duration = Column(Integer, nullable=True)  # Duration of the attempt
+    attempt_time = Column(TIMESTAMP, server_default=func.now())  # Time of the attempt
+    duration = Column(Integer, nullable=True)  # Duration of the attempt
 
-    # Okey
+    received_mark = Column(Integer, nullable=True)  # Marked score
+
+    # [student: 1-m] QuestionAttempt one student can attempt multiple questions
     user = relationship("User", back_populates="quiz_attempts")
 
     # Okey
@@ -109,15 +105,16 @@ class Question(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)
+
+    # Store question details as JSONB
     question_data = Column(JSONB, nullable=False)  # Store question details as JSONB
 
     tag = Column(String, nullable=True)  # Single string tag for the question
     # reference_image = Column(String, nullable=True)  # Image URL reference
 
-    created_at = Column(TIMESTAMP, server_default=func.now())
-    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
-
-    total_marks = Column(Integer, nullable=False)  # Total marks for the question
+    # individual question mark to very weight from other question
+    total_marks = Column(Integer, nullable=False, default=5)
+    # Total marks for the question
 
     # Okey
     quiz = relationship("Quiz", back_populates="question")
@@ -130,14 +127,19 @@ class QuestionAttempt(Base):
     __tablename__ = "question_attempts"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    quiz_attempt_id = Column(Integer, ForeignKey("quiz_attempts.id"), nullable=False)
+    # quiz_attempt_id = Column(Integer, ForeignKey("quiz_attempts.id"), nullable=False)
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    # response_data = Column(JSONB, nullable=False)  # Store user answer as JSON
+
+    response_data = Column(JSONB, nullable=False)  # Store user answer as JSON
     is_correct = Column(Boolean, nullable=False)
 
     # update only when new
-    type = Column(String, default=False)  # learnig, new, mastered
+    state = Column(String, default=False)  # learnig, new, mastered
+
+    # user this
+    next_attempt_time = Column(TIMESTAMP, server_default=func.now())
+
     received_mark = Column(Integer, nullable=True)  # Marked score
 
     attempt_time = Column(TIMESTAMP, server_default=func.now())  # Time of the attempt
@@ -150,4 +152,4 @@ class QuestionAttempt(Base):
     question = relationship("Question", back_populates="attempts")
 
     # Okey
-    quiz_attempt = relationship("QuizAttempt", back_populates="question_attempts")
+    # quiz_attempt = relationship("QuizAttempt", back_populates="question_attempts")

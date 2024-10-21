@@ -53,4 +53,4 @@
 #     user = relationship("User", back_populates="participations")
 
 #     # Okey
-#     session = relationship("QuizSession", back_populates="participants")
+#     session = relationship("GameSession", back_populates="participants")

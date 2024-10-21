@@ -33,6 +33,9 @@ class User(Base):
     # [student: 1-m] QuizAttempt one student can attempt multiple quizzes
     quiz_attempts = relationship("QuizAttempt", back_populates="user")
 
+    # [student: 1-m] Note one student can create multiple notes
+    notes = relationship("Note", back_populates="creator")
+
     # # Okey [for Live Game | for Student Role]
     # participations = relationship("GameParticipant", back_populates="user")
     # # Okey [ for Live Game | for Creator Role]

@@ -16,6 +16,6 @@ class Note(Base):
     title = Column(String, nullable=False, default="Untitled")
     note_data = Column(JSONB, nullable=False)  # Store question details as JSONB
 
-    creator = relationship("User", back_populates="course")
+    creator = relationship("User", back_populates="notes")
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())

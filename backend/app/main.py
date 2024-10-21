@@ -8,7 +8,7 @@ from sqlalchemy import text
 from app.api.main import api_router
 from app.core.config import settings
 
-from app.models.quizzer import (
+from app.models.quiz import (
     Course,
     Enrollment,
     Question,
