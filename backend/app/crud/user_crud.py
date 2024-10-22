@@ -5,17 +5,18 @@ from app.core.security import get_password_hash, verify_password
 
 
 def create_user(db: Session, user_create: UserCreate) -> User:
-    db_obj = User(
-        username=user_create.username,
+    user: User = User(
+        first_name=user_create.first_name,
+        last_name=user_create.last_name,
         email=user_create.email,
         hashed_password=get_password_hash(user_create.password),
         role=user_create.role,
     )
 
-    db.add(db_obj)
+    db.add(user)
     db.commit()
-    db.refresh(db_obj)
-    return db_obj
+    db.refresh(user)
+    return user
 
 
 def get_user_by_email(db: Session, email: str) -> User | None:

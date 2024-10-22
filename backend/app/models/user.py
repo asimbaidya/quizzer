@@ -14,7 +14,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    fist_name = Column(String, nullable=False)
+    first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     hashed_password = Column(String, nullable=False)
@@ -44,7 +44,8 @@ class User(Base):
     def to_dict(self) -> dict[str, str]:
         return {
             "id": str(self.id),
-            "username": str(self.username),
+            "first_name": str(self.first_name),
+            "last_name": str(self.last_name),
             "email": str(self.email),
             "role": str(self.role),
             "joined_at": str(self.joined_at),

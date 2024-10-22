@@ -17,6 +17,7 @@ from app.models.quiz import (
     QuizAttempt,
 )
 from app.models.user import User
+from app.models.note import Note
 # from app.models.game import GameSession, GameParticipant
 
 
@@ -37,6 +38,7 @@ async def lifespan(app: FastAPI):
             Question,
             QuestionAttempt,
             User,
+            Note,
             # GameSession,
             # GameParticipant,
         ]
