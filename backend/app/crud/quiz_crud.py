@@ -14,3 +14,7 @@ def create_quiz(db: Session, quiz_create: QuizCreate) -> Quiz:
     db.commit()
     db.refresh(db_obj)
     return db_obj
+
+
+def get_quiz_by_id(db: Session, quiz_id: int) -> Quiz | None:
+    return db.query(Quiz).filter(Quiz.id == quiz_id).first()
