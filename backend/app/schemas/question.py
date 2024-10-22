@@ -1,5 +1,5 @@
 from typing import List, Any
-from pydantic import field_validator, BaseModel
+from pydantic import field_validator, BaseModel, Field
 from enum import Enum
 
 
@@ -39,7 +39,7 @@ class SingleChoiceQuestion(QuestionBase):
 
         if len(correct_choices) != 1:
             raise ValueError(
-                "Single choice question must have exactly one correct answer."
+                f"Single choice question must have exactly one correct answer but {len(correct_choices)}  found"
             )
         return choices
 
@@ -56,7 +56,7 @@ class MultipleChoiceQuestion(QuestionBase):
         correct_choices = [choice for choice in choices if choice.correct]
         if len(correct_choices) < 1:
             raise ValueError(
-                "Multiple value Question At least Have one correct choices"
+                f"Multiple value Question At least Have one correct choices but {len(correct_choices)} found"
             )
         return choices
 
@@ -73,32 +73,35 @@ class UserInput(QuestionBase):
         return value
 
 
-## -- buggy implementation
-# class QuestionCreate(BaseModel):
-#     quiz_id: int
-#     question_data: dict[Any, Any]
-#     tag: str
-#     total_marks: int
-
-#     @field_validator("question_data")
-#     @classmethod
-#     def validate_question_ddata(
-#         cls, question_data: SingleChoiceQuestion | MultipleChoiceQuestion | UserInput
-#     ):
-#         if question_data.question_type == QuestionType.SINGLE_CHOICE:
-#             return SingleChoiceQuestion(**question_data.model_dump())
-#         if question_data.question_type == QuestionType.MULTIPLE_CHOICE:
-#             return MultipleChoiceQuestion(**question_data.model_dump())
-#         if question_data.question_type == QuestionType.USER_INPUT:
-#             return UserInput(**question_data.model_dump())
-#         raise ValueError("Invalid question type")
-
-
 ## -- this one initiliaze the question_data and validate correct way
 class QuestionCreate(BaseModel):
     quiz_id: int
-    question_data: dict[str, Any]  # Use str for keys in dict
-    # question_data: SingleChoiceQuestion | MultipleChoiceQuestion | UserInput
+    question_data: dict[str, Any] = Field(
+        examples=[
+            {
+                "question_text": "What is the chemical name of Water?",
+                "question_type": QuestionType.SINGLE_CHOICE,
+                "choices": [
+                    {
+                        "text": "H2O",
+                        "correct": True,
+                    },
+                    {
+                        "text": "CO2",
+                        "correct": False,
+                    },
+                    {
+                        "text": "NaCl",
+                        "correct": False,
+                    },
+                    {
+                        "text": "H2SO4",
+                        "correct": False,
+                    },
+                ],
+            }
+        ]
+    )
     tag: str
     total_marks: int
 
