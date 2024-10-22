@@ -6,7 +6,7 @@ from app.api.deps import SessionDep
 router = APIRouter()
 
 
-@router.post("/questions")
+@router.post("/")
 def create_question(db: SessionDep, question: QuestionCreate):
     new_question = question_crud.create_question(db, question_create=question)
     return {"question": new_question}
