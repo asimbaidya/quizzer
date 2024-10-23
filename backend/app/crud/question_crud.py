@@ -13,3 +13,7 @@ def create_question(db: Session, question_create: QuestionCreate) -> Question:
     db.commit()
     db.refresh(db_obj)
     return db_obj
+
+
+def get_questions_by_quiz_id(db: Session, quiz_id: int) -> list[Question]:
+    return db.query(Question).filter(Question.quiz_id == quiz_id).all()

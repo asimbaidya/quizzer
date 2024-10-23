@@ -18,3 +18,7 @@ def create_quiz(db: Session, quiz_create: QuizCreate) -> Quiz:
 
 def get_quiz_by_id(db: Session, quiz_id: int) -> Quiz | None:
     return db.query(Quiz).filter(Quiz.id == quiz_id).first()
+
+
+def get_quizzes_by_course_id(db: Session, course_id: int) -> list[Quiz]:
+    return db.query(Quiz).filter(Quiz.course_id == course_id).all()

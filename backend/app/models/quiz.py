@@ -18,7 +18,7 @@ class Course(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     creator_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    title = Column(String, nullable=False)
+    title = Column(String, nullable=False, unique=True, index=True)
     description = Column(Text, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
 

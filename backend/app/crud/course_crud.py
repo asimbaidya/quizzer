@@ -22,3 +22,7 @@ def get_course_creator_id(db: Session, course_id: int) -> int | None:
     if course is None:
         return None
     return course.creator_id  # type: ignore
+
+
+def get_course_by_title(db: Session, course_title: str) -> Course | None:
+    return db.query(Course).filter(Course.title == course_title).first()
