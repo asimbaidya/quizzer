@@ -26,3 +26,7 @@ class UserInDB(User):
     hashed_password: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserPublic(User):
+    id: int

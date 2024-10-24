@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserPublic
 from app.crud import user_crud
-from app.api.deps import SessionDep
+from app.api.deps import SessionDep, CurrentUser
 
 router = APIRouter()
 
@@ -20,3 +20,11 @@ def register_user(user: UserCreate, db: SessionDep):
         return new_user
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/me", response_model=UserPublic)
+def read_user_me(current_user: CurrentUser):
+    """
+    Get current user.
+    """
+    return current_user

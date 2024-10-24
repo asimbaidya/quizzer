@@ -42,7 +42,7 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 def get_current_active_admin(current_user: CurrentUser) -> User:
-    if not current_user.role == UserRole.ADMIN:
+    if not current_user.role == UserRole.ADMIN:  # type: ignore
         raise HTTPException(
             status_code=403,
             detail="The user doesn't have enough privileges, Admin Privileges Required",
@@ -51,7 +51,7 @@ def get_current_active_admin(current_user: CurrentUser) -> User:
 
 
 def get_current_active_teacher(current_user: CurrentUser) -> User:
-    if not current_user.role == UserRole.TEACHER:
+    if not current_user.role == UserRole.TEACHER:  # type: ignore
         raise HTTPException(
             status_code=403,
             detail="The user doesn't have enough privileges, Teacher Privileges Required",
@@ -60,7 +60,7 @@ def get_current_active_teacher(current_user: CurrentUser) -> User:
 
 
 def get_current_active_student(current_user: CurrentUser) -> User:
-    if not current_user.role == UserRole.STUDENT:
+    if not current_user.role == UserRole.STUDENT:  # type: ignore
         raise HTTPException(
             status_code=403,
             detail="The user doesn't have enough privileges, Student Privileges Required",
