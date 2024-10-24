@@ -30,7 +30,7 @@ def create_quiz(db: SessionDep, quiz: QuizCreate, teacher: CurrentTeacher):
 
 
 @router.get("/{course_title}/{quiz_id}")
-def get_quiz_by_id(db: SessionDep, course_title: str, quiz_id: int):
+def get_quiz_by_id(db: SessionDep, course_title: str, quiz_id: int,teacher: CurrentTeacher):
     course = course_crud.get_course_by_title(db, course_title)
     if course is None:
         raise HTTPException(status_code=404, detail="Course not found")
