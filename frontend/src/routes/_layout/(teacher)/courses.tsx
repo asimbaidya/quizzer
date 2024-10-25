@@ -1,5 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_layout/(teacher)/courses')({
-  component: () => <div>Here Teacher will get to view all create courses</div>,
+  component: () => (
+    <div>
+      <Outlet />
+    </div>
+  ),
 });
