@@ -12,7 +12,20 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as AboutImport } from './routes/about'
-import { Route as IndexImport } from './routes/index'
+import { Route as LayoutImport } from './routes/_layout'
+import { Route as LayoutIndexImport } from './routes/_layout/index'
+import { Route as LayoutProfileImport } from './routes/_layout/profile'
+import { Route as authSignupImport } from './routes/(auth)/signup'
+import { Route as authLoginImport } from './routes/(auth)/login'
+import { Route as LayoutteacherHostLiveImport } from './routes/_layout/(teacher)/hostLive'
+import { Route as LayoutteacherCoursesImport } from './routes/_layout/(teacher)/courses'
+import { Route as LayoutstudentNotesImport } from './routes/_layout/(student)/notes'
+import { Route as LayoutstudentJoinLiveImport } from './routes/_layout/(student)/joinLive'
+import { Route as LayoutstudentEnrolledCoursesImport } from './routes/_layout/(student)/enrolledCourses'
+import { Route as LayoutadminDashboardImport } from './routes/_layout/(admin)/dashboard'
+import { Route as LayoutadminAddUserImport } from './routes/_layout/(admin)/addUser'
+import { Route as LayoutteacherCourseCourseTitleImport } from './routes/_layout/(teacher)/course.$courseTitle'
+import { Route as LayoutstudentEnrolledCourseCourseTitleImport } from './routes/_layout/(student)/enrolledCourse.$courseTitle'
 
 // Create/Update Routes
 
@@ -22,21 +35,101 @@ const AboutRoute = AboutImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const IndexRoute = IndexImport.update({
-  id: '/',
-  path: '/',
+const LayoutRoute = LayoutImport.update({
+  id: '/_layout',
   getParentRoute: () => rootRoute,
 } as any)
+
+const LayoutIndexRoute = LayoutIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutProfileRoute = LayoutProfileImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const authSignupRoute = authSignupImport.update({
+  id: '/(auth)/signup',
+  path: '/signup',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const authLoginRoute = authLoginImport.update({
+  id: '/(auth)/login',
+  path: '/login',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LayoutteacherHostLiveRoute = LayoutteacherHostLiveImport.update({
+  id: '/(teacher)/hostLive',
+  path: '/hostLive',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutteacherCoursesRoute = LayoutteacherCoursesImport.update({
+  id: '/(teacher)/courses',
+  path: '/courses',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutstudentNotesRoute = LayoutstudentNotesImport.update({
+  id: '/(student)/notes',
+  path: '/notes',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutstudentJoinLiveRoute = LayoutstudentJoinLiveImport.update({
+  id: '/(student)/joinLive',
+  path: '/joinLive',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutstudentEnrolledCoursesRoute =
+  LayoutstudentEnrolledCoursesImport.update({
+    id: '/(student)/enrolledCourses',
+    path: '/enrolledCourses',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+
+const LayoutadminDashboardRoute = LayoutadminDashboardImport.update({
+  id: '/(admin)/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutadminAddUserRoute = LayoutadminAddUserImport.update({
+  id: '/(admin)/addUser',
+  path: '/addUser',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutteacherCourseCourseTitleRoute =
+  LayoutteacherCourseCourseTitleImport.update({
+    id: '/(teacher)/course/$courseTitle',
+    path: '/course/$courseTitle',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+
+const LayoutstudentEnrolledCourseCourseTitleRoute =
+  LayoutstudentEnrolledCourseCourseTitleImport.update({
+    id: '/(student)/enrolledCourse/$courseTitle',
+    path: '/enrolledCourse/$courseTitle',
+    getParentRoute: () => LayoutRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
+    '/_layout': {
+      id: '/_layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof LayoutImport
       parentRoute: typeof rootRoute
     }
     '/about': {
@@ -46,44 +139,254 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutImport
       parentRoute: typeof rootRoute
     }
+    '/(auth)/login': {
+      id: '/(auth)/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof authLoginImport
+      parentRoute: typeof rootRoute
+    }
+    '/(auth)/signup': {
+      id: '/(auth)/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof authSignupImport
+      parentRoute: typeof rootRoute
+    }
+    '/_layout/profile': {
+      id: '/_layout/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof LayoutProfileImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/': {
+      id: '/_layout/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof LayoutIndexImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/(admin)/addUser': {
+      id: '/_layout/(admin)/addUser'
+      path: '/addUser'
+      fullPath: '/addUser'
+      preLoaderRoute: typeof LayoutadminAddUserImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/(admin)/dashboard': {
+      id: '/_layout/(admin)/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof LayoutadminDashboardImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/(student)/enrolledCourses': {
+      id: '/_layout/(student)/enrolledCourses'
+      path: '/enrolledCourses'
+      fullPath: '/enrolledCourses'
+      preLoaderRoute: typeof LayoutstudentEnrolledCoursesImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/(student)/joinLive': {
+      id: '/_layout/(student)/joinLive'
+      path: '/joinLive'
+      fullPath: '/joinLive'
+      preLoaderRoute: typeof LayoutstudentJoinLiveImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/(student)/notes': {
+      id: '/_layout/(student)/notes'
+      path: '/notes'
+      fullPath: '/notes'
+      preLoaderRoute: typeof LayoutstudentNotesImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/(teacher)/courses': {
+      id: '/_layout/(teacher)/courses'
+      path: '/courses'
+      fullPath: '/courses'
+      preLoaderRoute: typeof LayoutteacherCoursesImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/(teacher)/hostLive': {
+      id: '/_layout/(teacher)/hostLive'
+      path: '/hostLive'
+      fullPath: '/hostLive'
+      preLoaderRoute: typeof LayoutteacherHostLiveImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/(student)/enrolledCourse/$courseTitle': {
+      id: '/_layout/(student)/enrolledCourse/$courseTitle'
+      path: '/enrolledCourse/$courseTitle'
+      fullPath: '/enrolledCourse/$courseTitle'
+      preLoaderRoute: typeof LayoutstudentEnrolledCourseCourseTitleImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/(teacher)/course/$courseTitle': {
+      id: '/_layout/(teacher)/course/$courseTitle'
+      path: '/course/$courseTitle'
+      fullPath: '/course/$courseTitle'
+      preLoaderRoute: typeof LayoutteacherCourseCourseTitleImport
+      parentRoute: typeof LayoutImport
+    }
   }
 }
 
 // Create and export the route tree
 
+interface LayoutRouteChildren {
+  LayoutProfileRoute: typeof LayoutProfileRoute
+  LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutadminAddUserRoute: typeof LayoutadminAddUserRoute
+  LayoutadminDashboardRoute: typeof LayoutadminDashboardRoute
+  LayoutstudentEnrolledCoursesRoute: typeof LayoutstudentEnrolledCoursesRoute
+  LayoutstudentJoinLiveRoute: typeof LayoutstudentJoinLiveRoute
+  LayoutstudentNotesRoute: typeof LayoutstudentNotesRoute
+  LayoutteacherCoursesRoute: typeof LayoutteacherCoursesRoute
+  LayoutteacherHostLiveRoute: typeof LayoutteacherHostLiveRoute
+  LayoutstudentEnrolledCourseCourseTitleRoute: typeof LayoutstudentEnrolledCourseCourseTitleRoute
+  LayoutteacherCourseCourseTitleRoute: typeof LayoutteacherCourseCourseTitleRoute
+}
+
+const LayoutRouteChildren: LayoutRouteChildren = {
+  LayoutProfileRoute: LayoutProfileRoute,
+  LayoutIndexRoute: LayoutIndexRoute,
+  LayoutadminAddUserRoute: LayoutadminAddUserRoute,
+  LayoutadminDashboardRoute: LayoutadminDashboardRoute,
+  LayoutstudentEnrolledCoursesRoute: LayoutstudentEnrolledCoursesRoute,
+  LayoutstudentJoinLiveRoute: LayoutstudentJoinLiveRoute,
+  LayoutstudentNotesRoute: LayoutstudentNotesRoute,
+  LayoutteacherCoursesRoute: LayoutteacherCoursesRoute,
+  LayoutteacherHostLiveRoute: LayoutteacherHostLiveRoute,
+  LayoutstudentEnrolledCourseCourseTitleRoute:
+    LayoutstudentEnrolledCourseCourseTitleRoute,
+  LayoutteacherCourseCourseTitleRoute: LayoutteacherCourseCourseTitleRoute,
+}
+
+const LayoutRouteWithChildren =
+  LayoutRoute._addFileChildren(LayoutRouteChildren)
+
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '': typeof LayoutRouteWithChildren
   '/about': typeof AboutRoute
+  '/login': typeof authLoginRoute
+  '/signup': typeof authSignupRoute
+  '/profile': typeof LayoutProfileRoute
+  '/': typeof LayoutIndexRoute
+  '/addUser': typeof LayoutadminAddUserRoute
+  '/dashboard': typeof LayoutadminDashboardRoute
+  '/enrolledCourses': typeof LayoutstudentEnrolledCoursesRoute
+  '/joinLive': typeof LayoutstudentJoinLiveRoute
+  '/notes': typeof LayoutstudentNotesRoute
+  '/courses': typeof LayoutteacherCoursesRoute
+  '/hostLive': typeof LayoutteacherHostLiveRoute
+  '/enrolledCourse/$courseTitle': typeof LayoutstudentEnrolledCourseCourseTitleRoute
+  '/course/$courseTitle': typeof LayoutteacherCourseCourseTitleRoute
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/login': typeof authLoginRoute
+  '/signup': typeof authSignupRoute
+  '/profile': typeof LayoutProfileRoute
+  '/': typeof LayoutIndexRoute
+  '/addUser': typeof LayoutadminAddUserRoute
+  '/dashboard': typeof LayoutadminDashboardRoute
+  '/enrolledCourses': typeof LayoutstudentEnrolledCoursesRoute
+  '/joinLive': typeof LayoutstudentJoinLiveRoute
+  '/notes': typeof LayoutstudentNotesRoute
+  '/courses': typeof LayoutteacherCoursesRoute
+  '/hostLive': typeof LayoutteacherHostLiveRoute
+  '/enrolledCourse/$courseTitle': typeof LayoutstudentEnrolledCourseCourseTitleRoute
+  '/course/$courseTitle': typeof LayoutteacherCourseCourseTitleRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/': typeof IndexRoute
+  '/_layout': typeof LayoutRouteWithChildren
   '/about': typeof AboutRoute
+  '/(auth)/login': typeof authLoginRoute
+  '/(auth)/signup': typeof authSignupRoute
+  '/_layout/profile': typeof LayoutProfileRoute
+  '/_layout/': typeof LayoutIndexRoute
+  '/_layout/(admin)/addUser': typeof LayoutadminAddUserRoute
+  '/_layout/(admin)/dashboard': typeof LayoutadminDashboardRoute
+  '/_layout/(student)/enrolledCourses': typeof LayoutstudentEnrolledCoursesRoute
+  '/_layout/(student)/joinLive': typeof LayoutstudentJoinLiveRoute
+  '/_layout/(student)/notes': typeof LayoutstudentNotesRoute
+  '/_layout/(teacher)/courses': typeof LayoutteacherCoursesRoute
+  '/_layout/(teacher)/hostLive': typeof LayoutteacherHostLiveRoute
+  '/_layout/(student)/enrolledCourse/$courseTitle': typeof LayoutstudentEnrolledCourseCourseTitleRoute
+  '/_layout/(teacher)/course/$courseTitle': typeof LayoutteacherCourseCourseTitleRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about'
+  fullPaths:
+    | ''
+    | '/about'
+    | '/login'
+    | '/signup'
+    | '/profile'
+    | '/'
+    | '/addUser'
+    | '/dashboard'
+    | '/enrolledCourses'
+    | '/joinLive'
+    | '/notes'
+    | '/courses'
+    | '/hostLive'
+    | '/enrolledCourse/$courseTitle'
+    | '/course/$courseTitle'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about'
-  id: '__root__' | '/' | '/about'
+  to:
+    | '/about'
+    | '/login'
+    | '/signup'
+    | '/profile'
+    | '/'
+    | '/addUser'
+    | '/dashboard'
+    | '/enrolledCourses'
+    | '/joinLive'
+    | '/notes'
+    | '/courses'
+    | '/hostLive'
+    | '/enrolledCourse/$courseTitle'
+    | '/course/$courseTitle'
+  id:
+    | '__root__'
+    | '/_layout'
+    | '/about'
+    | '/(auth)/login'
+    | '/(auth)/signup'
+    | '/_layout/profile'
+    | '/_layout/'
+    | '/_layout/(admin)/addUser'
+    | '/_layout/(admin)/dashboard'
+    | '/_layout/(student)/enrolledCourses'
+    | '/_layout/(student)/joinLive'
+    | '/_layout/(student)/notes'
+    | '/_layout/(teacher)/courses'
+    | '/_layout/(teacher)/hostLive'
+    | '/_layout/(student)/enrolledCourse/$courseTitle'
+    | '/_layout/(teacher)/course/$courseTitle'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  LayoutRoute: typeof LayoutRouteWithChildren
   AboutRoute: typeof AboutRoute
+  authLoginRoute: typeof authLoginRoute
+  authSignupRoute: typeof authSignupRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  LayoutRoute: LayoutRouteWithChildren,
   AboutRoute: AboutRoute,
+  authLoginRoute: authLoginRoute,
+  authSignupRoute: authSignupRoute,
 }
 
 export const routeTree = rootRoute
@@ -98,15 +401,80 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/",
-        "/about"
+        "/_layout",
+        "/about",
+        "/(auth)/login",
+        "/(auth)/signup"
       ]
     },
-    "/": {
-      "filePath": "index.tsx"
+    "/_layout": {
+      "filePath": "_layout.tsx",
+      "children": [
+        "/_layout/profile",
+        "/_layout/",
+        "/_layout/(admin)/addUser",
+        "/_layout/(admin)/dashboard",
+        "/_layout/(student)/enrolledCourses",
+        "/_layout/(student)/joinLive",
+        "/_layout/(student)/notes",
+        "/_layout/(teacher)/courses",
+        "/_layout/(teacher)/hostLive",
+        "/_layout/(student)/enrolledCourse/$courseTitle",
+        "/_layout/(teacher)/course/$courseTitle"
+      ]
     },
     "/about": {
       "filePath": "about.tsx"
+    },
+    "/(auth)/login": {
+      "filePath": "(auth)/login.tsx"
+    },
+    "/(auth)/signup": {
+      "filePath": "(auth)/signup.tsx"
+    },
+    "/_layout/profile": {
+      "filePath": "_layout/profile.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/": {
+      "filePath": "_layout/index.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/(admin)/addUser": {
+      "filePath": "_layout/(admin)/addUser.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/(admin)/dashboard": {
+      "filePath": "_layout/(admin)/dashboard.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/(student)/enrolledCourses": {
+      "filePath": "_layout/(student)/enrolledCourses.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/(student)/joinLive": {
+      "filePath": "_layout/(student)/joinLive.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/(student)/notes": {
+      "filePath": "_layout/(student)/notes.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/(teacher)/courses": {
+      "filePath": "_layout/(teacher)/courses.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/(teacher)/hostLive": {
+      "filePath": "_layout/(teacher)/hostLive.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/(student)/enrolledCourse/$courseTitle": {
+      "filePath": "_layout/(student)/enrolledCourse.$courseTitle.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/(teacher)/course/$courseTitle": {
+      "filePath": "_layout/(teacher)/course.$courseTitle.tsx",
+      "parent": "/_layout"
     }
   }
 }
