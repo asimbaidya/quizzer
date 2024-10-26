@@ -6,9 +6,10 @@ import SidebarItems from '../Sidebar/SideBarItems';
 
 const Sidebar = () => {
   const queryClient = useQueryClient();
-  const bgColor = useColorModeValue('ui.dark', 'ui.light');
-  const textColor = useColorModeValue('ui.light', 'ui.dark');
-  const secBgColor = useColorModeValue('ui.darkSlate', 'ui.secondary');
+  const bgColor = useColorModeValue('ui.light', 'ui.dark');
+  const textColor = useColorModeValue('ui.dark', 'ui.light');
+  const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate');
+
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const logout = () => {
