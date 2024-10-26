@@ -14,10 +14,10 @@ if (currentUser?.role === 'admin') {
   items.push({ icon: FiSettings, title: 'Dashboard', path: '/dashboard' });
   items.push({ icon: FiUsers, title: 'Add User', path: '/addUser' });
 } else if (currentUser?.role === 'teacher') {
-  items.push({ icon: FiBookOpen, title: 'Courses', path: '/courses' });
+  items.push({ icon: FiBookOpen, title: 'Course', path: '/course' });
   items.push({ icon: FiWifi, title: 'Host Live', path: '/hostLive' });
 } else if (currentUser?.role === 'student') {
-  items.push({ icon: FiBookOpen, title: 'Enrolled Courses', path: '/enrolledCourses' });
+  items.push({ icon: FiBookOpen, title: 'Enrolled Course', path: '/enrolledCourse' });
   items.push({ icon: FiFileText, title: 'Notes', path: '/notes' });
   items.push({ icon: FiWifi, title: 'Join Live', path: '/joinLive' });
 }
