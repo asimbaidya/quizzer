@@ -1,8 +1,8 @@
 from sqlalchemy import (
+    TIMESTAMP,
     Column,
     Integer,
     String,
-    TIMESTAMP,
     func,
 )
 from sqlalchemy.orm import relationship

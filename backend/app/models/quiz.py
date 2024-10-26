@@ -1,15 +1,16 @@
 from sqlalchemy import (
+    TIMESTAMP,
+    Boolean,
     Column,
+    ForeignKey,
     Integer,
     String,
     Text,
-    Boolean,
-    ForeignKey,
-    TIMESTAMP,
     func,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
+
 from app.core.db import Base
 
 

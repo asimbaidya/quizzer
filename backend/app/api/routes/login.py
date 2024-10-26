@@ -1,14 +1,14 @@
 from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.core.config import settings
-from app.schemas.util import Token
-from app.core import security
 from app.api.deps import SessionDep
+from app.core import security
+from app.core.config import settings
 from app.crud import user_crud as user_crud
+from app.schemas.util import Token
 
 router = APIRouter()
 

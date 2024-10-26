@@ -17,15 +17,16 @@ from app.schemas.util import TokenPayload
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="API/login/access-token")
 
 
+# this automatically call get_db and return the yielded value
 SessionDep = Annotated[Session, Depends(get_db)]
+
+# this automatically extract Bearer token from Authorization header
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
 def get_current_user(db: SessionDep, token: TokenDep) -> User:
     try:
-        payload = jwt.decode(  # type: ignore
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
-        )
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[security.ALGORITHM])
         token_data = TokenPayload(**payload)
     except (InvalidTokenError, ValidationError):
         raise HTTPException(
@@ -34,7 +35,10 @@ def get_current_user(db: SessionDep, token: TokenDep) -> User:
         )
     user = db.query(User).filter(User.email == token_data.sub).first()
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found with provided credentials",
+        )
     return user
 
 
@@ -71,3 +75,36 @@ def get_current_active_student(current_user: CurrentUser) -> User:
 CurrentAdmin = Annotated[User, Depends(get_current_active_admin)]
 CurrentTeacher = Annotated[User, Depends(get_current_active_teacher)]
 CurrentStudent = Annotated[User, Depends(get_current_active_student)]
+
+
+#
+def course_exist_or_404(db: SessionDep, course_id: int):
+    pass
+
+
+def quiz_exist_or_404(db: SessionDep, quiz_id: int):
+    pass
+
+
+def question_exist_or_404(db: SessionDep, question_id: int):
+    pass
+
+
+def answer_exist_or_create(db: SessionDep, answer_id: int):
+    pass
+
+
+def get_course_pin(db: SessionDep, course_id: int):
+    pass
+
+
+def get_course_creator(db: SessionDep, course_id: int):
+    pass
+
+
+def get_quiz_creator(db: SessionDep, quiz_id: int):
+    pass
+
+
+def get_enrolled_students(db: SessionDep, course_id: int):
+    pass
