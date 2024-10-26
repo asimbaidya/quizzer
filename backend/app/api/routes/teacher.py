@@ -7,6 +7,19 @@ from app.api.deps import SessionDep, CurrentTeacher
 
 router = APIRouter()
 
+# get
+# /courses [get list of courses]
+# course/{course_title}/{quiz_id} [get quiz Questions of a quiz]
+# course/{course_title}/{quiz_id}/{question_id}/answer [get answer]
+
+# course/{course_title}/info [list of enrolled students]
+# course/{course_title}/{quiz_id}/info [student progress] ]
+
+# post
+# /course [create course]
+# /course/{course_title}/ [create quiz]
+# /course/{course_title}/{quiz_id} [create question] [publish_quiz] [edit_quiz_details]
+
 
 @router.post("/course")
 def create_course(
