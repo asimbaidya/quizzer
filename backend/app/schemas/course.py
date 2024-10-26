@@ -1,5 +1,6 @@
+from uuid import UUID, uuid4
+
 from pydantic import BaseModel
-from uuid import uuid4, UUID
 
 
 class CourseCreate(BaseModel):

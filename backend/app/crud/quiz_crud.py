@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+
 from app.models.quiz import Quiz
 from app.schemas.quiz import QuizCreate
 

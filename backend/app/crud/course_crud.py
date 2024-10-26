@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+
 from app.models.quiz import Course
 from app.schemas.course import CourseCreate
 

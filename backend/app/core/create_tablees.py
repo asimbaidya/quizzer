@@ -1,8 +1,4 @@
-from app.core.db import engine, Base
-
-from app.models.note import Note  # type: ignore
-from app.models.user import User  # type: ignore
-from app.models.quiz import Question  # type: ignore
+from app.core.db import Base, engine
 
 
 def create_tables():

@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException
-from app.schemas.quiz import QuizCreate
-from app.schemas.question import QuestionCreate
+
+from app.api.deps import CurrentTeacher, SessionDep
+from app.crud import course_crud, question_crud, quiz_crud
 from app.schemas.course import CourseCreate
-from app.crud import quiz_crud, course_crud, question_crud
-from app.api.deps import SessionDep, CurrentTeacher
+from app.schemas.question import QuestionCreate
+from app.schemas.quiz import QuizCreate
 
 router = APIRouter()
 

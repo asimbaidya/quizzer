@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from app.api.ensure.math import ensure_math
 
+from app.api.ensure.math import ensure_math
 
 router = APIRouter()
 

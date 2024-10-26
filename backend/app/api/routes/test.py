@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-from app.core.config import settings
-from app.api.deps import TokenDep, CurrentUser
 
+from app.api.deps import CurrentUser, TokenDep
+from app.core.config import settings
 
 router = APIRouter()
 
