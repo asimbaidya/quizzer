@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.core import security
 from app.core.config import settings
 from app.core.db import get_db
+from app.crud import user_crud
 from app.models.user import User
 from app.schemas.user import UserRole
 from app.schemas.util import TokenPayload
@@ -35,7 +36,7 @@ def get_current_user(db: SessionDep, token: TokenDep) -> User:
             status_code=status.HTTP_403_FORBIDDEN,
             detail='Could not validate credentials',
         )
-    user = db.query(User).filter(User.email == token_data.sub).first()
+    user = user_crud.get_user_by_email(db, str(token_data.sub))
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
