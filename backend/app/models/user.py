@@ -14,8 +14,7 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    first_name = Column(String, nullable=False)
-    last_name = Column(String, nullable=False)
+    full_name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     hashed_password = Column(String, nullable=False)
     role = Column(String, nullable=False)  # Enum of 'admin', 'teacher', 'student'
@@ -30,8 +29,8 @@ class User(Base):
     # [student: 1-m] QuestionAttempt one student can attempt multiple questions
     question_attempts = relationship('QuestionAttempt', back_populates='user')
 
-    # [student: 1-m] QuizAttempt one student can attempt multiple quizzes
-    quiz_attempts = relationship('QuizAttempt', back_populates='user')
+    # # [student: 1-m] QuizAttempt one student can attempt multiple quizzes
+    # quiz_attempts = relationship('QuizAttempt', back_populates='user')
 
     # [student: 1-m] Note one student can create multiple notes
     notes = relationship('Note', back_populates='creator')
@@ -44,8 +43,7 @@ class User(Base):
     def to_dict(self) -> dict[str, str]:
         return {
             'id': str(self.id),
-            'first_name': str(self.first_name),
-            'last_name': str(self.last_name),
+            'full_name': str(self.full_name),
             'email': str(self.email),
             'role': str(self.role),
             'joined_at': str(self.joined_at),

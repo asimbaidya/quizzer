@@ -12,6 +12,7 @@ class Note(Base):
     note_data = Column(JSONB, nullable=False)  # Store question details as JSONB
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
-    creator = relationship('User', back_populates='notes')
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    creator = relationship('User', back_populates='notes')
