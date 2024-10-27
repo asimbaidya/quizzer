@@ -15,10 +15,10 @@ from app.core.db import Base
 
 
 class Course(Base):
-    __tablename__ = "courses"
+    __tablename__ = 'courses'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    creator_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    creator_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     title = Column(String, nullable=False, unique=True, index=True)
     description = Column(Text, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
@@ -30,35 +30,35 @@ class Course(Base):
     course_pin = Column(String, nullable=False, unique=True)
 
     # Okey
-    creator = relationship("User", back_populates="course")
+    creator = relationship('User', back_populates='course')
 
     # Okey
-    quizzes = relationship("Quiz", back_populates="course")
+    quizzes = relationship('Quiz', back_populates='course')
 
     # Okey
-    enrollments = relationship("Enrollment", back_populates="course")
+    enrollments = relationship('Enrollment', back_populates='course')
 
 
 class Enrollment(Base):
-    __tablename__ = "enrollments"
+    __tablename__ = 'enrollments'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
+    student_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    course_id = Column(Integer, ForeignKey('courses.id'), nullable=False)
     enrolled_at = Column(TIMESTAMP, server_default=func.now())
 
     # Okey
-    student = relationship("User", back_populates="enrollments")
+    student = relationship('User', back_populates='enrollments')
 
     # okey
-    course = relationship("Course", back_populates="enrollments")
+    course = relationship('Course', back_populates='enrollments')
 
 
 class Quiz(Base):
-    __tablename__ = "quizzes"
+    __tablename__ = 'quizzes'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
+    course_id = Column(Integer, ForeignKey('courses.id'), nullable=False)
 
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
@@ -71,22 +71,22 @@ class Quiz(Base):
     total_mark = Column(Integer, nullable=False)  # Total marks for the quiz
 
     # Okey
-    question = relationship("Question", back_populates="quiz")
+    question = relationship('Question', back_populates='quiz')
 
-    course = relationship("Course", back_populates="quizzes")
+    course = relationship('Course', back_populates='quizzes')
 
     # [1-m] QuizAttempt one quiz can have multiple attempts
-    attempts = relationship("QuizAttempt", back_populates="quiz")
+    attempts = relationship('QuizAttempt', back_populates='quiz')
 
     # session = relationship("GameSession", back_populates="quiz")
 
 
 class QuizAttempt(Base):
-    __tablename__ = "quiz_attempts"
+    __tablename__ = 'quiz_attempts'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    quiz_id = Column(Integer, ForeignKey('quizzes.id'), nullable=False)
     received_mark = Column(Integer, nullable=True)  # Score for the quiz
 
     attempt_time = Column(TIMESTAMP, server_default=func.now())  # Time of the attempt
@@ -95,20 +95,20 @@ class QuizAttempt(Base):
     received_mark = Column(Integer, nullable=True)  # Marked score
 
     # [student: 1-m] QuestionAttempt one student can attempt multiple questions
-    user = relationship("User", back_populates="quiz_attempts")
+    user = relationship('User', back_populates='quiz_attempts')
 
     # Okey
-    quiz = relationship("Quiz", back_populates="attempts")
+    quiz = relationship('Quiz', back_populates='attempts')
 
     # Okey
     # question_attempts = relationship("QuestionAttempt", back_populates="quiz_attempt")
 
 
 class Question(Base):
-    __tablename__ = "questions"
+    __tablename__ = 'questions'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)
+    quiz_id = Column(Integer, ForeignKey('quizzes.id'), nullable=False)
 
     # Store question details as JSONB
     question_data = Column(JSONB, nullable=False)  # Store question details as JSONB
@@ -121,19 +121,19 @@ class Question(Base):
     # Total marks for the question
 
     # Okey
-    quiz = relationship("Quiz", back_populates="question")
+    quiz = relationship('Quiz', back_populates='question')
 
     # Okey
-    attempts = relationship("QuestionAttempt", back_populates="question")
+    attempts = relationship('QuestionAttempt', back_populates='question')
 
 
 class QuestionAttempt(Base):
-    __tablename__ = "question_attempts"
+    __tablename__ = 'question_attempts'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     # quiz_attempt_id = Column(Integer, ForeignKey("quiz_attempts.id"), nullable=False)
-    question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    question_id = Column(Integer, ForeignKey('questions.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
     response_data = Column(JSONB, nullable=False)  # Store user answer as JSON
     is_correct = Column(Boolean, nullable=False)
@@ -150,10 +150,10 @@ class QuestionAttempt(Base):
     attempt_count = Column(Integer, default=1)
 
     # Okey
-    user = relationship("User", back_populates="question_attempts")
+    user = relationship('User', back_populates='question_attempts')
 
     # Okey
-    question = relationship("Question", back_populates="attempts")
+    question = relationship('Question', back_populates='attempts')
 
     # Okey
     # quiz_attempt = relationship("QuizAttempt", back_populates="question_attempts")

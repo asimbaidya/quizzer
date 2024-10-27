@@ -20,7 +20,7 @@ router = APIRouter()
 # /enrolled_courses/save/{course_id}/{quiz_id}/{question_id} [save answer in attempt]
 
 
-@router.get("/")
+@router.get('/')
 def home():
     ensure_math(1, 1)
-    return {"message": "Hello, World From Admin!"}
+    return {'message': 'Hello, World From Admin!'}

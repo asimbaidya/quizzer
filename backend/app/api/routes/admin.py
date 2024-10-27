@@ -7,7 +7,7 @@ router = APIRouter()
 # can add new user, delete user, view_all_users
 
 
-@router.get("/")
+@router.get('/')
 def home():
     ensure_math(1, 2)
-    return {"message": "Hello, World From Admin!"}
+    return {'message': 'Hello, World From Admin!'}

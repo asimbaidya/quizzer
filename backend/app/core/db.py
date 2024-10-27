@@ -13,8 +13,8 @@ def get_db():
     db = SessionLocal()
 
     try:
-        print("Giving DB access")
+        print('Giving DB access')
         yield db
     finally:
-        print("Closing DB access")
+        print('Closing DB access')
         db.close()

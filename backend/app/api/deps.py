@@ -14,7 +14,7 @@ from app.models.user import User
 from app.schemas.user import UserRole
 from app.schemas.util import TokenPayload
 
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="API/login/access-token")
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl='API/login/access-token')
 
 
 # this automatically call get_db and return the yielded value
@@ -26,18 +26,20 @@ TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 def get_current_user(db: SessionDep, token: TokenDep) -> User:
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[security.ALGORITHM])
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+        )
         token_data = TokenPayload(**payload)
     except (InvalidTokenError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Could not validate credentials",
+            detail='Could not validate credentials',
         )
     user = db.query(User).filter(User.email == token_data.sub).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found with provided credentials",
+            detail='User not found with provided credentials',
         )
     return user
 

@@ -6,12 +6,12 @@ from app.core.db import Base
 
 
 class Note(Base):
-    __tablename__ = "note"
+    __tablename__ = 'note'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    title = Column(String, nullable=False, default="Untitled")
+    title = Column(String, nullable=False, default='Untitled')
     note_data = Column(JSONB, nullable=False)  # Store question details as JSONB
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
-    creator = relationship("User", back_populates="notes")
+    creator = relationship('User', back_populates='notes')
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
