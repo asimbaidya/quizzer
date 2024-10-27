@@ -1,4 +1,5 @@
-from uuid import UUID, uuid4
+import random
+import string
 
 from pydantic import BaseModel
 
@@ -6,5 +7,7 @@ from pydantic import BaseModel
 class CourseCreate(BaseModel):
     title: str
     description: str
-    is_open: bool
-    course_pin: UUID = uuid4()
+    is_open: bool = True
+    course_pin: str = ''.join(
+        random.choices(string.ascii_uppercase + string.digits, k=8)
+    )

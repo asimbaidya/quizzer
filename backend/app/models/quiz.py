@@ -61,7 +61,8 @@ class Quiz(Base):
     course_id = Column(Integer, ForeignKey('courses.id'), nullable=False)
 
     title = Column(String, nullable=False, default='Untitled')
-    description = Column(Text, nullable=True, default='No Description')
+    # [todo]
+    # description = Column(Text, nullable=True, default='No Description')
 
     # for instructor to see
     created_at = Column(TIMESTAMP, server_default=func.now())

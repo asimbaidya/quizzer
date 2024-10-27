@@ -112,8 +112,8 @@ class QuestionCreate(BaseModel):
         question_type = question_data.get('question_type')
         if question_type == QuestionType.SINGLE_CHOICE:
             return SingleChoiceQuestion(**question_data)
-        elif question_type == QuestionType.MULTIPLE_CHOICE:
+        if question_type == QuestionType.MULTIPLE_CHOICE:
             return MultipleChoiceQuestion(**question_data)
-        elif question_type == QuestionType.USER_INPUT:
+        if question_type == QuestionType.USER_INPUT:
             return UserInput(**question_data)
         raise ValueError('Invalid question type')

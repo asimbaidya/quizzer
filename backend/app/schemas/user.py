@@ -11,8 +11,7 @@ class UserRole(str, Enum):
 
 
 class User(BaseModel):
-    first_name: str = Field(default='John')
-    last_name: str = Field(default='Doe')
+    full_name: str = Field(default='John Doe')
     email: EmailStr = Field(default='john_doe@gmail.com')
     role: UserRole = UserRole.STUDENT
     joined_at: datetime = Field(default_factory=datetime.now)
