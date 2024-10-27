@@ -1,9 +1,10 @@
 from app.core.db import Base, engine
-from app.models.note import Note
+
+# from app.models.note import Note
 from app.models.quiz import Quiz
 from app.models.user import User
 
-__imported_tables = [User, Note, Quiz]
+__imported_tables = [User, Quiz]
 
 
 def create_all_tables():

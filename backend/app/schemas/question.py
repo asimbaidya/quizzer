@@ -76,7 +76,6 @@ class UserInput(QuestionBase):
 
 ## -- this one initiliaze the question_data and validate correct way
 class QuestionCreate(BaseModel):
-    quiz_id: int
     question_data: dict[str, Any] = Field(
         examples=[
             {

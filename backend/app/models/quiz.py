@@ -27,7 +27,7 @@ class Course(Base):
     is_open = Column(Boolean, default=True)  # Okey
 
     # auto-generate with random numbers(only creator can see)
-    course_pin = Column(String, nullable=False, unique=True)
+    course_pin = Column(String, nullable=False)
 
     # Okey
     creator = relationship('User', back_populates='course')
