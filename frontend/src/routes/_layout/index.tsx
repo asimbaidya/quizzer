@@ -7,7 +7,7 @@ export const Route = createFileRoute('/_layout/')({
 
 function HomeComponent() {
   return (
-    <div className='p-2'>
+    <div className="p-2">
       <h3>Here user will get an Welcome message based on profile type </h3>
     </div>
   );

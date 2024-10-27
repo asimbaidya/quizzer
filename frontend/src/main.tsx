@@ -10,7 +10,11 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import theme from './theme';
 
 function App() {
-  return <QueryClientProvider client={queryClient}>{/* The rest of your application */}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      {/* The rest of your application */}
+    </QueryClientProvider>
+  );
 }
 
 // Set up a Router instance

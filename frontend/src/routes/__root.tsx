@@ -10,7 +10,7 @@ function RootComponent() {
   return (
     <>
       <Outlet />
-      <TanStackRouterDevtools position='bottom-left' />
+      <TanStackRouterDevtools position="bottom-left" />
     </>
   );
 }
