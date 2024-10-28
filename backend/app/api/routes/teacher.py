@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.api.deps import CurrentTeacher, SessionDep
 from app.crud import teacher_crud
-from app.schemas.common import CourseCreate, QuizCreate
+from app.schemas.common import CourseCreate, QuizCreate, TestCreate
 from app.schemas.question import QuestionTeacherView
 
 router = APIRouter()
@@ -20,6 +20,7 @@ def get_courses(db: SessionDep, teacher: CurrentTeacher):
 
 
 # /course/{course_title} -> Get all quizzes of a course
+# todo: also return tests into the response
 @router.get('/course/{course_title}')
 def get_quizzes_in_course(course_title: str, db: SessionDep, teacher: CurrentTeacher):
     return teacher_crud.get_quiz_by_course_title_creator_id(
@@ -42,6 +43,16 @@ def get_questions_in_quiz(
 ):
     return teacher_crud.get_questions_by_course_title_quiz_id_teacher_id(
         db, course_title, quiz_id, teacher.id
+    )
+
+
+# /course/{course_title}/{test_id} -> Get all questions in a test
+@router.get('/course/{course_title}/{test_id}')
+def get_questions_in_test(
+    course_title: str, test_id: int, db: SessionDep, teacher: CurrentTeacher
+):
+    return teacher_crud.get_questions_by_course_title_test_id_teacher_id(
+        db, course_title, test_id, teacher.id
     )
 
 
@@ -80,9 +91,22 @@ def create_quiz(
         raise HTTPException(status_code=400, detail=str(e))
 
 
+# /course/test/{course_title} -> Create a new test within a course
+@router.post('/course/test/{course_title}')
+def create_test(
+    course_title: str, test: TestCreate, db: SessionDep, teacher: CurrentTeacher
+):
+    try:
+        return teacher_crud.create_test_by_course_title_teacher_id(
+            db, test, course_title, teacher.id
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 # /course/{course_title}/{quiz_id} -> Create a new question in a quiz
 @router.post('/course/{course_title}/{quiz_id}', response_model=QuestionTeacherView)
-def create_question(
+def create_question_in_quiz(
     course_title: str,
     quiz_id: int,
     question: QuestionTeacherView,
@@ -92,6 +116,23 @@ def create_question(
     try:
         return teacher_crud.create_question_by_course_title_quiz_id_teacher_id(
             db, question, course_title, quiz_id, teacher.id
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+# /course/{course_title}/{quiz_id} -> Create a new question in a test
+@router.post('/course/{course_title}/{test_id}', response_model=QuestionTeacherView)
+def create_question_in_test(
+    course_title: str,
+    test_id: int,
+    question: QuestionTeacherView,
+    db: SessionDep,
+    teacher: CurrentTeacher,
+):
+    try:
+        return teacher_crud.create_question_by_course_title_test_id_teacher_id(
+            db, question, course_title, test_id, teacher.id
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
