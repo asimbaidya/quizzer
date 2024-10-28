@@ -29,16 +29,20 @@ class User(Base):
     joined_at = Column(TIMESTAMP, server_default=func.now())
 
     # [teacher: 1-m] Course one user can create multiple courses
-    course = relationship('Course', back_populates='creator')
+    course = relationship(
+        'Course', back_populates='creator', cascade='all, delete-orphan'
+    )
 
     # [student: m-m] Enrollment one student can enroll in multiple courses
     enrollments = relationship('Enrollment', back_populates='student')
 
-    # [student: 1-m] QuestionAttempt one student can attempt multiple questions
-    question_attempts = relationship('QuestionAttempt', back_populates='user')
+    # [student: 1-m] QuestionSubmission one student can attempt multiple questions
+    question_submssions = relationship(
+        'QuestionSubmission', back_populates='user', cascade='all, delete-orphan'
+    )
 
     # [student: 1-m] Note one student can create multiple notes
-    notes = relationship('Note', back_populates='creator')
+    notes = relationship('Note', back_populates='creator', cascade='all, delete-orphan')
 
     def to_dict(self) -> dict[str, str]:
         return {

@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Self
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 
 class QuestionType(str, Enum):
@@ -19,9 +19,51 @@ class Choice(BaseModel):
 class QuestionTeacherData(BaseModel):
     question_type: QuestionType
     question_text: str
-    choices: Optional[List[Choice]] = None
+    choices: Optional[List[Choice]] = Field(min_length=4, max_length=6)
     true_false_answer: Optional[bool] = None
     correct_answer: Optional[str] = None
+
+    @model_validator(mode='before')
+    @classmethod
+    def validate_data_before(cls, value: Any) -> Self:
+        question_type = value.get('question_type')
+        true_false_answer = value.get('true_false_answer')
+        correct_answer = value.get('correct_answer')
+        choices = value.get('choices')
+        if (
+            question_type == QuestionType.SINGLE_CHOICE
+            or question_type == QuestionType.MULTIPLE_CHOICE
+        ):
+            if true_false_answer is not None:
+                raise ValueError(
+                    'True/False answer is not required for single/multiple choice questions'
+                )
+            if correct_answer:
+                raise ValueError(
+                    'Correct answer is not required for single/multiple choice questions'
+                )
+        if question_type == QuestionType.TRUE_FALSE:
+            if correct_answer:
+                raise ValueError(
+                    'Correct answer is not required for true/false questions'
+                )
+            if true_false_answer is None:
+                raise ValueError('True/False answer must be provided')
+            if choices is not None:
+                raise ValueError('Choices are not required for true/false questions')
+        if question_type == QuestionType.USER_INPUT:
+            if true_false_answer is not None:
+                raise ValueError(
+                    'True/False answer is not required for user input questions'
+                )
+            if choices is not None:
+                raise ValueError('Choices are not required for user input questions')
+            if not correct_answer:
+                raise ValueError(
+                    'Correct answer must be provided for user input questions'
+                )
+
+        return value
 
     @model_validator(mode='after')
     @classmethod
