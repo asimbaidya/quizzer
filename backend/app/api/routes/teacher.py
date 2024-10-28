@@ -7,9 +7,8 @@ from app.api.deps import (
     check_quiz_owner,
 )
 from app.crud import teacher_crud
-from app.schemas.course import CourseCreate
-from app.schemas.question import QuestionCreate
-from app.schemas.quiz import QuizCreate
+from app.schemas.common import CourseCreate, QuizCreate
+from app.schemas.question import QuestionTeacherView
 
 router = APIRouter()
 
@@ -25,7 +24,7 @@ router = APIRouter()
 # post
 # /course [create course] -> teacher_crud.create_course(db, course: CourseCreate, teacher: CurrentTeacher)
 # /course/quiz/{course_title}/ -> teaccher_crud.create_quiz(db, quiz: QuizCreate)
-# /course/{course_title}/{quiz_id} -> teacher_crud.create_question(db, question: QuestionCreate)
+# /course/{course_title}/{quiz_id} -> teacher_crud.create_question(db, question: QuestionTeacherView, quiz_id: int)
 
 
 # ---- GET ROUTES ----
@@ -102,7 +101,7 @@ def create_quiz(
 def create_question(
     course_title: str,
     quiz_id: int,
-    question: QuestionCreate,
+    question: QuestionTeacherView,
     db: SessionDep,
     teacher: CurrentTeacher,
 ):

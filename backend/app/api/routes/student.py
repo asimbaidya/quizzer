@@ -8,7 +8,7 @@ from app.api.deps import (
 )
 from app.crud import student_crud
 from app.models.quiz import Course
-from app.schemas.question_submission import QuestionAttemptCreate
+from app.schemas.question_submission import QuestionStudentSubmission
 
 router = APIRouter()
 
@@ -58,7 +58,7 @@ def submit_answer_endpoint(
     quiz_id: int,
     question_attempt_id: int,
     student: CurrentStudent,
-    response_data: QuestionAttemptCreate,
+    response_data: QuestionStudentSubmission,
     db: SessionDep,
 ):
     course, _ = get_course_and_enrollment(course_title, student.id, db)  # type: ignore

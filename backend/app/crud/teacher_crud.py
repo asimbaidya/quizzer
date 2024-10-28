@@ -1,11 +1,8 @@
 from sqlalchemy.orm import Session
 
 from app.models.quiz import Course, Question, Quiz
-from app.schemas.course import CourseCreate
-from app.schemas.question import QuestionCreate
-from app.schemas.quiz import QuizCreate
-
-#  -- Course --
+from app.schemas.common import CourseCreate, QuizCreate
+from app.schemas.question import QuestionTeacherView
 
 
 def create_course(db: Session, course_create: CourseCreate, creator_id: int) -> Course:
@@ -35,7 +32,7 @@ def create_quiz(db: Session, quiz_create: QuizCreate, course_id: int) -> Quiz:
 
 
 def create_question(
-    db: Session, question_create: QuestionCreate, quiz_id: int
+    db: Session, question_create: QuestionTeacherView, quiz_id: int
 ) -> Question:
     db_obj = Question(
         quiz_id=quiz_id,

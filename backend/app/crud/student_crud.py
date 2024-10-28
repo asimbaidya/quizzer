@@ -1,8 +1,8 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.models.quiz import Course, Enrollment, Question, QuestionAttempt, Quiz
-from app.schemas.question_submission import QuestionAttemptCreate
+from app.models.quiz import Course, Enrollment, Question, QuestionSubmission, Quiz
+from app.schemas.question_submission import QuestionStudentSubmission
 
 
 def get_enrolled_courses(db: Session, student_id: int):
@@ -63,15 +63,15 @@ def get_quiz_questions(db: Session, quiz_id: int, user_id: int):
 
     for q in questions:
         question_attempt = (
-            db.query(QuestionAttempt)
+            db.query(QuestionSubmission)
             .filter(
-                QuestionAttempt.question_id == q.id,
-                QuestionAttempt.user_id == user_id,  # type: ignore
+                QuestionSubmission.question_id == q.id,
+                QuestionSubmission.user_id == user_id,  # type: ignore
             )
             .first()
         )
         if not question_attempt:
-            question_attempt = QuestionAttempt(
+            question_attempt = QuestionSubmission(
                 question_id=q.id,
                 user_id=user_id,
                 made_attempt=False,
@@ -86,10 +86,10 @@ def get_quiz_questions(db: Session, quiz_id: int, user_id: int):
     question_attempts = []
     for q in questions:
         question_attempt = (
-            db.query(QuestionAttempt)
+            db.query(QuestionSubmission)
             .filter(
-                QuestionAttempt.question_id == q.id,
-                QuestionAttempt.user_id == user_id,  # type: ignore
+                QuestionSubmission.question_id == q.id,
+                QuestionSubmission.user_id == user_id,  # type: ignore
             )
             .first()
         )
@@ -103,11 +103,11 @@ def submit_questions_answer(
     quiz_id: int,
     question_attempt_id: int,
     user_id: int,
-    response_data: QuestionAttemptCreate,
+    response_data: QuestionStudentSubmission,
 ):
     question_attempt = (
-        db.query(QuestionAttempt)
-        .filter(QuestionAttempt.id == question_attempt_id)
+        db.query(QuestionSubmission)
+        .filter(QuestionSubmission.id == question_attempt_id)
         .first()
     )
     if question_attempt is None:
