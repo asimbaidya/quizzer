@@ -12,7 +12,7 @@ class ChoiceAttempt(BaseModel):
 
 class SingleChoiceQuestionAttempt(QuestionBase):
     question_type: QuestionType = QuestionType.SINGLE_CHOICE
-    selected_choice: List[ChoiceAttempt]
+    selected_choices: List[ChoiceAttempt]
 
 
 class MultipleChoiceQuestionAttempt(QuestionBase):
@@ -26,7 +26,7 @@ class UserInputAttempt(QuestionBase):
     user_answer: int | str = ''
 
 
-class QuestionAttempt(BaseModel):
+class QuestionAttemptCreate(BaseModel):
     question_id: int
     user_id: int
 
@@ -41,26 +41,7 @@ class QuestionAttempt(BaseModel):
             {
                 'question_text': 'What is the chemical name of Water?',
                 'question_type': QuestionType.SINGLE_CHOICE,
-                'choices': [
-                    {
-                        'text': 'H2O',
-                    },
-                    {
-                        'text': 'CO2',
-                    },
-                    {
-                        'text': 'NaCl',
-                        'is_selected': True,
-                    },
-                    {
-                        'text': 'H2SO4',
-                    },
-                ],
-            },
-            {
-                'question_text': 'What is the chemical name of Water?',
-                'question_type': QuestionType.SINGLE_CHOICE,
-                'choices': [
+                'selected_choices': [
                     {
                         'text': 'H2O',
                         'is_selected': True,
