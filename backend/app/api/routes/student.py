@@ -1,11 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.api.deps import (
-    CurrentStudent,
-    SessionDep,
-    get_course_and_enrollment,
-    get_quiz_and_enrollment,
-)
+from app.api.deps import CurrentStudent, SessionDep
 from app.crud import student_crud
 from app.models.quiz import Course
 from app.schemas.question_submission import QuestionStudentSubmission
@@ -31,7 +26,7 @@ def get_enrolled_courses_endpoint(student: CurrentStudent, db: SessionDep):
 def get_enrolled_course_endpoint(
     course_title: str, student: CurrentStudent, db: SessionDep
 ):
-    course, _ = get_course_and_enrollment(course_title, student.id, db)  # type: ignore
+    course, _ = student_crud.get_course_and_enrollment(course_title, student.id, db)  # type: ignore
     return course  # Return course
 
 
@@ -39,8 +34,8 @@ def get_enrolled_course_endpoint(
 def get_enrolled_quiz_endpoint(
     course_title: str, quiz_id: int, student: CurrentStudent, db: SessionDep
 ):
-    course, _ = get_course_and_enrollment(course_title, student.id, db)  # type: ignore
-    return get_quiz_and_enrollment(course, quiz_id, db)
+    course, _ = student_crud.get_course_and_enrollment(course_title, student.id, db)  # type: ignore
+    return student_crud.get_quiz_and_enrollment(course, quiz_id, db)
 
 
 @router.post('/enrolled_courses/{course_title}')
@@ -61,8 +56,8 @@ def submit_answer_endpoint(
     response_data: QuestionStudentSubmission,
     db: SessionDep,
 ):
-    course, _ = get_course_and_enrollment(course_title, student.id, db)  # type: ignore
-    quiz = get_quiz_and_enrollment(course, quiz_id, db)
+    course, _ = student_crud.get_course_and_enrollment(course_title, student.id, db)  # type: ignore
+    quiz = student_crud.get_quiz_and_enrollment(course, quiz_id, db)
     return student_crud.submit_questions_answer(
         db,
         course.id,  # type: ignore

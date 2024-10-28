@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.quiz import Course, Question, Quiz
@@ -5,6 +6,7 @@ from app.schemas.common import CourseCreate, QuizCreate
 from app.schemas.question import QuestionTeacherView
 
 
+# Refactor-start
 def create_course(db: Session, course_create: CourseCreate, creator_id: int) -> Course:
     db_obj = Course(
         title=course_create.title,
@@ -83,3 +85,23 @@ def get_enrolled_students(db: Session, course_id: int):
 
 def get_student_progress(db: Session, quiz_id: int):
     return 'TODO'
+
+
+def check_course_owner(db: Session, course_title: str, teacher_id: int) -> Course:
+    """Check if the course exists and if the teacher is the owner."""
+    course = get_course_by_title(db, course_title)
+    if course is None:
+        raise HTTPException(status_code=404, detail='Course not found')
+    if bool(course.creator_id != teacher_id):
+        raise HTTPException(
+            status_code=403, detail='You are not authorized to access this course'
+        )
+    return course
+
+
+def check_quiz_owner(db: Session, quiz_id: int, course: Course) -> Quiz:
+    """Check if the quiz exists and belongs to the specified course."""
+    quiz = get_quiz_by_id(db, quiz_id)
+    if quiz is None or bool(quiz.course_id != course.id):
+        raise HTTPException(status_code=404, detail='Quiz not found in this course')
+    return quiz

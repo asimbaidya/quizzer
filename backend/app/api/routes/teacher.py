@@ -1,11 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.api.deps import (
-    CurrentTeacher,
-    SessionDep,
-    check_course_owner,
-    check_quiz_owner,
-)
+from app.api.deps import CurrentTeacher, SessionDep
 from app.crud import teacher_crud
 from app.schemas.common import CourseCreate, QuizCreate
 from app.schemas.question import QuestionTeacherView
@@ -39,7 +34,7 @@ def get_courses(db: SessionDep, teacher: CurrentTeacher):
 # /course/{course_title} -> Get all quizzes of a course
 @router.get('/course/{course_title}')
 def get_quizzes_in_course(course_title: str, db: SessionDep, teacher: CurrentTeacher):
-    course = check_course_owner(db, course_title, teacher.id)  # type: ignore
+    course = teacher_crud.check_course_owner(db, course_title, teacher.id)  # type: ignore
     quizzes = teacher_crud.get_quizzes_by_course_id(db, course_id=course.id)  # type: ignore
     return {'course': course, 'quizzes': quizzes}
 
@@ -47,7 +42,7 @@ def get_quizzes_in_course(course_title: str, db: SessionDep, teacher: CurrentTea
 # /course/students/{course_title} -> List of enrolled students in a course
 @router.get('/course/students/{course_title}')
 def get_enrolled_students(course_title: str, db: SessionDep, teacher: CurrentTeacher):
-    course = check_course_owner(db, course_title, teacher.id)  # type: ignore
+    course = teacher_crud.check_course_owner(db, course_title, teacher.id)  # type: ignore
     return teacher_crud.get_enrolled_students(db, course_id=course.id)  # type: ignore
 
 
@@ -56,8 +51,8 @@ def get_enrolled_students(course_title: str, db: SessionDep, teacher: CurrentTea
 def get_questions_in_quiz(
     course_title: str, quiz_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
-    course = check_course_owner(db, course_title, teacher.id)  # type: ignore
-    _quiz = check_quiz_owner(db, quiz_id, course)
+    course = teacher_crud.check_course_owner(db, course_title, teacher.id)  # type: ignore
+    _quiz = teacher_crud.check_quiz_owner(db, quiz_id, course)
     return teacher_crud.get_questions_by_quiz_id(db, quiz_id=quiz_id)
 
 
@@ -66,8 +61,8 @@ def get_questions_in_quiz(
 def get_student_progress(
     course_title: str, quiz_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
-    course = check_course_owner(db, course_title, teacher.id)  # type: ignore
-    _quiz = check_quiz_owner(db, quiz_id, course)
+    course = teacher_crud.check_course_owner(db, course_title, teacher.id)  # type: ignore
+    _quiz = teacher_crud.check_quiz_owner(db, quiz_id, course)
     return teacher_crud.get_student_progress(db, quiz_id=quiz_id)
 
 
@@ -92,7 +87,7 @@ def create_course(db: SessionDep, course: CourseCreate, teacher: CurrentTeacher)
 def create_quiz(
     course_title: str, quiz: QuizCreate, db: SessionDep, teacher: CurrentTeacher
 ):
-    course = check_course_owner(db, course_title, teacher.id)  # type: ignore
+    course = teacher_crud.check_course_owner(db, course_title, teacher.id)  # type: ignore
     return teacher_crud.create_quiz(db, quiz_create=quiz, course_id=course.id)  # type: ignore
 
 
@@ -105,6 +100,6 @@ def create_question(
     db: SessionDep,
     teacher: CurrentTeacher,
 ):
-    course = check_course_owner(db, course_title, teacher.id)  # type: ignore
-    _quiz = check_quiz_owner(db, quiz_id, course)
+    course = teacher_crud.check_course_owner(db, course_title, teacher.id)  # type: ignore
+    _quiz = teacher_crud.check_quiz_owner(db, quiz_id, course)
     return teacher_crud.create_question(db, question_create=question, quiz_id=quiz_id)

@@ -118,3 +118,33 @@ def submit_questions_answer(
     question_attempt.response_data = response_data.response_data  # type: ignore
     db.commit()
     return question_attempt
+
+
+def get_course_and_enrollment(course_title: str, student_id: int, db: Session):
+    """Get the course and verify student enrollment."""
+    course = db.query(Course).filter(Course.title == course_title).first()
+    if not course:
+        raise HTTPException(status_code=404, detail='Course not found')
+
+    enrollment = (
+        db.query(Enrollment)
+        .filter(Enrollment.course_id == course.id, Enrollment.student_id == student_id)
+        .first()
+    )
+    if not enrollment:
+        raise HTTPException(
+            status_code=403, detail='Student is not enrolled in this course'
+        )
+
+    return course, enrollment
+
+
+def get_quiz_and_enrollment(course: Course, quiz_id: int, db: Session):
+    """Get the quiz for the course."""
+    quiz = (
+        db.query(Quiz).filter(Quiz.id == quiz_id, Quiz.course_id == course.id).first()
+    )
+    if not quiz:
+        raise HTTPException(status_code=404, detail='Quiz not found in this course')
+
+    return quiz
