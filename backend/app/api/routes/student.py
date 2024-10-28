@@ -7,14 +7,8 @@ from app.schemas.question_submission import QuestionStudentSubmission
 
 router = APIRouter()
 
-# Method : get
-# /enrolled_courses -> student_crud.get_enrolled_courses(student_id)
-# /enrolled_courses/{course_title} -> student_crud.get_enrolled_course(course_title, student_id)
-# /enrolled_courses/{course_title}/{quiz_id} -> student_crud.get_enrolled_quiz(course_title, quiz_id, student_id)
 
-# Method: post
-# /enrolled_courses/{course_title}/ -> student_crud.enroll_course(course_title, student_id)
-# /enrolled_courses/submit/{course_title}/{quiz_id}/{question_id} -> student_crud.submit_answer(course_title, quiz_id, question_id, student_id)
+# ---- GET ROUTES ----
 
 
 @router.get('/enrolled_courses')
@@ -36,6 +30,9 @@ def get_enrolled_quiz_endpoint(
 ):
     course, _ = student_crud.get_course_and_enrollment(course_title, student.id, db)  # type: ignore
     return student_crud.get_quiz_and_enrollment(course, quiz_id, db)
+
+
+# ---- POST ROUTES ----
 
 
 @router.post('/enrolled_courses/{course_title}')
