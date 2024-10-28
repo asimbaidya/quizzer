@@ -10,7 +10,8 @@ from sqlalchemy.orm import Session
 from app.core import security
 from app.core.config import settings
 from app.core.db import get_db
-from app.crud import user_crud
+from app.crud import teacher_crud, user_crud
+from app.models.quiz import Course, Enrollment, Quiz
 from app.models.user import User
 from app.schemas.user import UserRole
 from app.schemas.util import TokenPayload
@@ -80,34 +81,51 @@ CurrentTeacher = Annotated[User, Depends(get_current_active_teacher)]
 CurrentStudent = Annotated[User, Depends(get_current_active_student)]
 
 
-#
-def course_exist_or_404(db: SessionDep, course_id: int):
-    pass
+def check_course_owner(db: Session, course_title: str, teacher_id: int) -> Course:
+    """Check if the course exists and if the teacher is the owner."""
+    course = teacher_crud.get_course_by_title(db, course_title)
+    if course is None:
+        raise HTTPException(status_code=404, detail='Course not found')
+    if bool(course.creator_id != teacher_id):
+        raise HTTPException(
+            status_code=403, detail='You are not authorized to access this course'
+        )
+    return course
 
 
-def quiz_exist_or_404(db: SessionDep, quiz_id: int):
-    pass
+def check_quiz_owner(db: Session, quiz_id: int, course: Course) -> Quiz:
+    """Check if the quiz exists and belongs to the specified course."""
+    quiz = teacher_crud.get_quiz_by_id(db, quiz_id)
+    if quiz is None or bool(quiz.course_id != course.id):
+        raise HTTPException(status_code=404, detail='Quiz not found in this course')
+    return quiz
 
 
-def question_exist_or_404(db: SessionDep, question_id: int):
-    pass
+def get_course_and_enrollment(course_title: str, student_id: int, db: SessionDep):
+    """Get the course and verify student enrollment."""
+    course = db.query(Course).filter(Course.title == course_title).first()
+    if not course:
+        raise HTTPException(status_code=404, detail='Course not found')
+
+    enrollment = (
+        db.query(Enrollment)
+        .filter(Enrollment.course_id == course.id, Enrollment.student_id == student_id)
+        .first()
+    )
+    if not enrollment:
+        raise HTTPException(
+            status_code=403, detail='Student is not enrolled in this course'
+        )
+
+    return course, enrollment
 
 
-def answer_exist_or_create(db: SessionDep, answer_id: int):
-    pass
+def get_quiz_and_enrollment(course: Course, quiz_id: int, db: SessionDep):
+    """Get the quiz for the course."""
+    quiz = (
+        db.query(Quiz).filter(Quiz.id == quiz_id, Quiz.course_id == course.id).first()
+    )
+    if not quiz:
+        raise HTTPException(status_code=404, detail='Quiz not found in this course')
 
-
-def get_course_pin(db: SessionDep, course_id: int):
-    pass
-
-
-def get_course_creator(db: SessionDep, course_id: int):
-    pass
-
-
-def get_quiz_creator(db: SessionDep, quiz_id: int):
-    pass
-
-
-def get_enrolled_students(db: SessionDep, course_id: int):
-    pass
+    return quiz
