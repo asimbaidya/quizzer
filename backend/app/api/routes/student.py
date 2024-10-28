@@ -8,7 +8,7 @@ from app.api.deps import (
 )
 from app.crud import student_crud
 from app.models.quiz import Course
-from app.schemas.question_attempt import QuestionAttemptCreate
+from app.schemas.question_submission import QuestionAttemptCreate
 
 router = APIRouter()
 

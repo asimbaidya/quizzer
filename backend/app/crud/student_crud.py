@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.quiz import Course, Enrollment, Question, QuestionAttempt, Quiz
-from app.schemas.question_attempt import QuestionAttemptCreate
+from app.schemas.question_submission import QuestionAttemptCreate
 
 
 def get_enrolled_courses(db: Session, student_id: int):

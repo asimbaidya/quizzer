@@ -1,13 +1,14 @@
 from enum import Enum
-from typing import Any, List
+from typing import Any, List, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, model_validator
 
 
 class QuestionType(str, Enum):
     SINGLE_CHOICE = 'single_choice'
     MULTIPLE_CHOICE = 'multiple_choice'
     USER_INPUT = 'user_input'
+    TRUE_FALSE = 'true_false'
 
 
 class Choice(BaseModel):
@@ -15,104 +16,92 @@ class Choice(BaseModel):
     correct: bool = False
 
 
-class QuestionBase(BaseModel):
+class QuestionTeacherData(BaseModel):
+    question_type: QuestionType
     question_text: str
+    choices: Optional[List[Choice]] = None
+    true_false_answer: Optional[bool] = None
+    correct_answer: Optional[str] = None
 
-    @field_validator('question_text')
+    @model_validator(mode='after')
     @classmethod
-    def validate_question_text(cls, v: str):
-        if not v or v.strip() == '':
-            raise ValueError('Question text cannot be empty')
-        return v
+    def validate_data(cls, values: Any):
+        question_type = values.question_type
+
+        if question_type in {QuestionType.SINGLE_CHOICE, QuestionType.MULTIPLE_CHOICE}:
+            choices = values.choices
+            if choices is None or len(choices) < 4 or len(choices) > 6:
+                raise ValueError('Choices must be provided and must have 4-6 options')
+            if len({choice.text for choice in choices}) != len(choices):
+                raise ValueError('Choices must be unique')
+            correct_choices = [choice for choice in choices if choice.correct]
+            if (
+                question_type == QuestionType.SINGLE_CHOICE
+                and len(correct_choices) != 1
+            ):
+                raise ValueError(
+                    'Single choice question must have exactly one correct answer'
+                )
+            if (
+                question_type == QuestionType.MULTIPLE_CHOICE
+                and len(correct_choices) < 1
+            ):
+                raise ValueError(
+                    'Multiple choice question must have at least one correct answer'
+                )
+
+        # Validate true/false answer
+        if question_type == QuestionType.TRUE_FALSE:
+            if values.true_false_answer is None:
+                raise ValueError(
+                    'True/False answer must be provided for True/False questions'
+                )
+
+        # Validate correct answer for user input
+        if question_type == QuestionType.USER_INPUT:
+            if not values.correct_answer or values.correct_answer.strip() == '':
+                raise ValueError(
+                    'Correct answer cannot be empty for user input questions'
+                )
+
+        return values
 
 
-class SingleChoiceQuestion(QuestionBase):
-    question_type: QuestionType = QuestionType.SINGLE_CHOICE
-    choices: List[Choice]
-
-    @field_validator('choices')
-    @classmethod
-    def validate_single_choice(cls, choices: list[Choice]) -> List[Choice]:
-        if len(choices) < 4 or len(choices) > 6:
-            raise ValueError('Single choice question must have 4-6 choices')
-
-        correct_choices = [choice for choice in choices if choice.correct]
-
-        if len(correct_choices) != 1:
-            raise ValueError(
-                f'Single choice question must have exactly one correct answer but {len(correct_choices)}  found'
-            )
-        return choices
-
-
-class MultipleChoiceQuestion(QuestionBase):
-    question_type: QuestionType = QuestionType.MULTIPLE_CHOICE
-    choices: List[Choice]
-
-    @field_validator('choices')
-    @classmethod
-    def validate_multiple_choice(cls, choices: list[Choice]):
-        if len(choices) < 4 or len(choices) > 6:
-            raise ValueError('Multiple choice question must have 4-6 choices')
-        correct_choices = [choice for choice in choices if choice.correct]
-        if len(correct_choices) < 1:
-            raise ValueError(
-                f'Multiple value Question At least Have one correct choices but {len(correct_choices)} found'
-            )
-        return choices
-
-
-class UserInput(QuestionBase):
-    question_type: QuestionType = QuestionType.USER_INPUT
-    correct_answer: int | str
-
-    @field_validator('correct_answer')
-    @classmethod
-    def validate_correct_answer(cls, value: int | str):
-        if not value or str(value).strip() == '':
-            raise ValueError('Correct answer cannot be empty')
-        return value
-
-
-## -- this one initiliaze the question_data and validate correct way
-class QuestionCreate(BaseModel):
-    question_data: dict[str, Any] = Field(
-        examples=[
-            {
-                'question_text': 'What is the chemical name of Water?',
-                'question_type': QuestionType.SINGLE_CHOICE,
-                'choices': [
-                    {
-                        'text': 'H2O',
-                        'correct': True,
-                    },
-                    {
-                        'text': 'CO2',
-                        'correct': False,
-                    },
-                    {
-                        'text': 'NaCl',
-                        'correct': False,
-                    },
-                    {
-                        'text': 'H2SO4',
-                        'correct': False,
-                    },
-                ],
-            }
-        ]
-    )
+class QuestionTeacherView(BaseModel):
+    question_type: QuestionType
+    question_data: QuestionTeacherData
     tag: str
     total_marks: int
 
-    @field_validator('question_data')
+    @model_validator(mode='after')
     @classmethod
-    def validate_question_data(cls, question_data: dict[str, Any]):
-        question_type = question_data.get('question_type')
-        if question_type == QuestionType.SINGLE_CHOICE:
-            return SingleChoiceQuestion(**question_data)
-        if question_type == QuestionType.MULTIPLE_CHOICE:
-            return MultipleChoiceQuestion(**question_data)
-        if question_type == QuestionType.USER_INPUT:
-            return UserInput(**question_data)
-        raise ValueError('Invalid question type')
+    def validate_question_create(cls, values: Any):
+        question_type = values.question_type
+        question_data = values.question_data
+        question_data.question_type = question_type
+
+        return values
+
+
+class StudentChoice(BaseModel):
+    text: str
+
+
+class QuestionStudentData(BaseModel):
+    question_type: QuestionType
+    question_text: str
+    # Only used for choice questions but answer excluded for students
+    choices: Optional[List[StudentChoice]] = None
+
+
+class QuestionStudentView(BaseModel):
+    question_type: QuestionType
+    question_data: QuestionStudentData
+    tag: str
+    total_marks: int
+
+
+def convert_to_student_view(
+    question_create: QuestionTeacherView,
+) -> QuestionStudentView:
+    return QuestionStudentView(**question_create.model_dump())
