@@ -8,6 +8,7 @@ from app.api.deps import (
 )
 from app.crud import student_crud
 from app.models.quiz import Course
+from app.schemas.question_attempt import QuestionAttemptCreate
 
 router = APIRouter()
 
@@ -48,20 +49,25 @@ def enroll_course_endpoint(course_title: str, student: CurrentStudent, db: Sessi
     if not course:
         raise HTTPException(status_code=404, detail='Course not found')
 
-    return student_crud.enroll_course(db, course.id, student.id)  # type: ignore
+    return student_crud.enroll_course(db, course.id, student.id, course_pin=course_pin)  # type: ignore
 
 
 @router.post('/enrolled_courses/submit/{course_title}/{quiz_id}/{question_id}')
 def submit_answer_endpoint(
     course_title: str,
     quiz_id: int,
-    question_id: int,
+    question_attempt_id: int,
     student: CurrentStudent,
-    answer_data: dict,
+    response_data: QuestionAttemptCreate,
     db: SessionDep,
 ):
     course, _ = get_course_and_enrollment(course_title, student.id, db)  # type: ignore
     quiz = get_quiz_and_enrollment(course, quiz_id, db)
-    return student_crud.submit_answer(
-        db, course.id, quiz.id, question_id, student.id, answer_data
+    return student_crud.submit_questions_answer(
+        db,
+        course.id,  # type: ignore
+        quiz.id,  # type: ignore
+        question_attempt_id,
+        student.id,  # type: ignore
+        response_data=response_data,
     )  # type: ignore
