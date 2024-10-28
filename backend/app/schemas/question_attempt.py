@@ -37,7 +37,7 @@ class QuestionAttemptCreate(BaseModel):
     received_mark: int
 
     response_data: dict[str, Any] = Field(
-        example=[
+        examples=[
             {
                 'question_text': 'What is the chemical name of Water?',
                 'question_type': QuestionType.SINGLE_CHOICE,
