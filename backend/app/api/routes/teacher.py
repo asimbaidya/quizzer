@@ -1,6 +1,11 @@
 from fastapi import APIRouter, HTTPException
 
-from app.api.deps import CurrentTeacher, SessionDep
+from app.api.deps import (
+    CurrentTeacher,
+    SessionDep,
+    check_course_owner,
+    check_quiz_owner,
+)
 from app.crud import teacher_crud
 from app.schemas.course import CourseCreate
 from app.schemas.question import QuestionCreate
@@ -34,48 +39,36 @@ def get_courses(db: SessionDep, teacher: CurrentTeacher):
 
 # /course/{course_title} -> Get all quizzes of a course
 @router.get('/course/{course_title}')
-def get_quizzes_in_course(course_title: str, db: SessionDep, _teacher: CurrentTeacher):  # type: ignore
-    course = teacher_crud.get_course_by_title(db, course_title)
-    if course is None:
-        raise HTTPException(status_code=404, detail='Course not found')
+def get_quizzes_in_course(course_title: str, db: SessionDep, teacher: CurrentTeacher):
+    course = check_course_owner(db, course_title, teacher.id)  # type: ignore
     quizzes = teacher_crud.get_quizzes_by_course_id(db, course_id=course.id)  # type: ignore
-    return {'course': course, 'quizzes': quizzes}  # type: ignore
+    return {'course': course, 'quizzes': quizzes}
 
 
 # /course/students/{course_title} -> List of enrolled students in a course
 @router.get('/course/students/{course_title}')
-def get_enrolled_students(course_title: str, db: SessionDep, _teacher: CurrentTeacher):
-    course = teacher_crud.get_course_by_title(db, course_title)
-    if course is None:
-        raise HTTPException(status_code=404, detail='Course not found')
+def get_enrolled_students(course_title: str, db: SessionDep, teacher: CurrentTeacher):
+    course = check_course_owner(db, course_title, teacher.id)  # type: ignore
     return teacher_crud.get_enrolled_students(db, course_id=course.id)  # type: ignore
 
 
 # /course/{course_title}/{quiz_id} -> Get all questions in a quiz
 @router.get('/course/{course_title}/{quiz_id}')
 def get_questions_in_quiz(
-    course_title: str, quiz_id: int, db: SessionDep, _teacher: CurrentTeacher
+    course_title: str, quiz_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
-    course = teacher_crud.get_course_by_title(db, course_title)
-    if course is None:
-        raise HTTPException(status_code=404, detail='Course not found')
-    quiz = teacher_crud.get_quiz_by_id(db, quiz_id)
-    if quiz is None:
-        raise HTTPException(status_code=404, detail='Quiz not found')
+    course = check_course_owner(db, course_title, teacher.id)  # type: ignore
+    _quiz = check_quiz_owner(db, quiz_id, course)
     return teacher_crud.get_questions_by_quiz_id(db, quiz_id=quiz_id)
 
 
 # /course/{course_title}/{quiz_id}/info -> Student progress or marks in a quiz
 @router.get('/course/students/{course_title}/{quiz_id}')
 def get_student_progress(
-    course_title: str, quiz_id: int, db: SessionDep, _teacher: CurrentTeacher
+    course_title: str, quiz_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
-    course = teacher_crud.get_course_by_title(db, course_title)
-    if course is None:
-        raise HTTPException(status_code=404, detail='Course not found')
-    quiz = teacher_crud.get_quiz_by_id(db, quiz_id)
-    if quiz is None:
-        raise HTTPException(status_code=404, detail='Quiz not found')
+    course = check_course_owner(db, course_title, teacher.id)  # type: ignore
+    _quiz = check_quiz_owner(db, quiz_id, course)
     return teacher_crud.get_student_progress(db, quiz_id=quiz_id)
 
 
@@ -100,13 +93,7 @@ def create_course(db: SessionDep, course: CourseCreate, teacher: CurrentTeacher)
 def create_quiz(
     course_title: str, quiz: QuizCreate, db: SessionDep, teacher: CurrentTeacher
 ):
-    course = teacher_crud.get_course_by_title(db, course_title)
-    if course is None:
-        raise HTTPException(status_code=404, detail='Course not found')
-    if course.creator_id != teacher.id:  # type: ignore
-        raise HTTPException(
-            status_code=403, detail='Only the course creator can create quizzes'
-        )
+    course = check_course_owner(db, course_title, teacher.id)  # type: ignore
     return teacher_crud.create_quiz(db, quiz_create=quiz, course_id=course.id)  # type: ignore
 
 
@@ -119,14 +106,6 @@ def create_question(
     db: SessionDep,
     teacher: CurrentTeacher,
 ):
-    course = teacher_crud.get_course_by_title(db, course_title)
-    if course is None:
-        raise HTTPException(status_code=404, detail='Course not found')
-    if course.creator_id != teacher.id:  # type: ignore
-        raise HTTPException(
-            status_code=403, detail='Only the course creator can add questions'
-        )
-    quiz = teacher_crud.get_quiz_by_id(db, quiz_id)
-    if quiz is None:
-        raise HTTPException(status_code=404, detail='Quiz not found')
+    course = check_course_owner(db, course_title, teacher.id)  # type: ignore
+    _quiz = check_quiz_owner(db, quiz_id, course)
     return teacher_crud.create_question(db, question_create=question, quiz_id=quiz_id)
