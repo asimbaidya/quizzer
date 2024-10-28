@@ -137,8 +137,10 @@ class QuestionAttempt(Base):
     question_id = Column(Integer, ForeignKey('questions.id'), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
+    made_attempt = Column(Boolean, nullable=False)
     response_data = Column(JSONB, nullable=False)  # Store user answer as JSON
     is_correct = Column(Boolean, nullable=False)
+    total_marks = Column(Integer, nullable=False, default=5)
     received_mark = Column(Integer, nullable=True)  # Marked score
 
     # update only when new [todo]
