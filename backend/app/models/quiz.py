@@ -22,12 +22,11 @@ class Course(Base):
     title = Column(String, nullable=False, unique=True, index=True)
     description = Column(Text, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
-
-    # [TODO]
-    is_open = Column(Boolean, default=True)  # Okey
-
     # auto-generate with random numbers(only creator can see)
     course_pin = Column(String, nullable=False)
+
+    # [TODO]
+    is_open = Column(Boolean, default=True)
 
     # Okey
     creator = relationship('User', back_populates='course')
@@ -49,7 +48,6 @@ class Enrollment(Base):
 
     # Okey
     student = relationship('User', back_populates='enrollments')
-
     # okey
     course = relationship('Course', back_populates='enrollments')
 
@@ -59,51 +57,44 @@ class Quiz(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     course_id = Column(Integer, ForeignKey('courses.id'), nullable=False)
-
     title = Column(String, nullable=False, default='Untitled')
-    # [todo]
-    # description = Column(Text, nullable=True, default='No Description')
 
-    # for instructor to see
+    question_set_id = Column(Integer, ForeignKey('question_sets.id'), nullable=False)
+
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     # to show in progreass
     total_mark = Column(Integer, nullable=False)  # Total marks for the quiz
 
-    # Okey
-    question = relationship('Question', back_populates='quiz')
-
+    # relationship
     course = relationship('Course', back_populates='quizzes')
 
-    # [todo]
-    # [1-m] QuizAttempt one quiz can have multiple attempts
-    # attempts = relationship('QuizAttempt', back_populates='quiz')
 
-    # session = relationship("GameSession", back_populates="quiz")
+class Test(Base):
+    __tablename__ = 'tests'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    course_id = Column(Integer, ForeignKey('courses.id'), nullable=False)
+    question_set_id = Column(Integer, ForeignKey('question_sets.id'), nullable=False)
+    title = Column(String, nullable=False, default='Untitled')
+
+    # duration is in minutes
+    duration = Column(Integer, nullable=False)
+
+    #  allowed time
+    time_window_start = Column(TIMESTAMP)
+    time_window_end = Column(TIMESTAMP)
+
+    # relationships
+    course = relationship('Course', back_populates='tests')
 
 
-# class QuizAttempt(Base):
-#     __tablename__ = 'quiz_attempts'
+class QuestionSet(Base):
+    __tablename__ = 'question_sets'
+    id = Column(Integer, primary_key=True, autoincrement=True)
 
-#     id = Column(Integer, primary_key=True, autoincrement=True)
-#     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-#     quiz_id = Column(Integer, ForeignKey('quizzes.id'), nullable=False)
-#     received_mark = Column(Integer, nullable=True)  # Score for the quiz
-
-#     attempt_time = Column(TIMESTAMP, server_default=func.now())  # Time of the attempt
-#     duration = Column(Integer, nullable=True)  # Duration of the attempt
-
-#     received_mark = Column(Integer, nullable=True)  # Marked score
-
-#     # [student: 1-m] QuestionAttempt one student can attempt multiple questions
-#     user = relationship('User', back_populates='quiz_attempts')
-
-#     # Okey
-#     quiz = relationship('Quiz', back_populates='attempts')
-
-#     # Okey
-#     # question_attempts = relationship("QuestionAttempt", back_populates="quiz_attempt")
+    questions = relationship('Question', back_populates='question_set')
 
 
 class Question(Base):
@@ -111,53 +102,36 @@ class Question(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     quiz_id = Column(Integer, ForeignKey('quizzes.id'), nullable=False)
+    question_set_id = Column(Integer, ForeignKey('question_sets.id'), nullable=False)
 
-    # Store question details as JSONB
+    # store question details as jsonb
     question_data = Column(JSONB, nullable=False)  # Store question details as JSONB
+    total_marks = Column(Integer, nullable=False, default=5)
+    tag = Column(String, nullable=True)
 
-    tag = Column(String, nullable=True)  # Single string tag for the question
     # reference_image = Column(String, nullable=True)  # Image URL reference
 
-    # individual question mark to very weight from other question
-    total_marks = Column(Integer, nullable=False, default=5)
-    # Total marks for the question
-
-    # Okey
-    quiz = relationship('Quiz', back_populates='question')
-
-    # Okey
     attempts = relationship('QuestionAttempt', back_populates='question')
 
 
-class QuestionAttempt(Base):
+class QuestionSubmission(Base):
     __tablename__ = 'question_attempts'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    # quiz_attempt_id = Column(Integer, ForeignKey("quiz_attempts.id"), nullable=False)
     question_id = Column(Integer, ForeignKey('questions.id'), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
     made_attempt = Column(Boolean, nullable=False)
-    response_data = Column(JSONB, nullable=False)  # Store user answer as JSON
+
+    question_type = Column(String, nullable=False)
+    user_respons = Column(JSONB, nullable=False)
     is_correct = Column(Boolean, nullable=False)
-    total_marks = Column(Integer, nullable=False, default=5)
-    received_mark = Column(Integer, nullable=True)  # Marked score
+    received_mark = Column(Integer, nullable=True)
 
-    # update only when new [todo]
-    # state = Column(String, default=False)  # learnig, new, mastered
-
-    # user this [todo]
-    # next_attempt_time = Column(TIMESTAMP, server_default=func.now())
-
-    # [todo]
-    # attempt_time = Column(TIMESTAMP, server_default=func.now())  # Time of the attempt
-    # attempt_count = Column(Integer, default=1)
+    attempt_time = Column(TIMESTAMP, server_default=func.now())  # Time of the attempt
 
     # Okey
     user = relationship('User', back_populates='question_attempts')
 
     # Okey
     question = relationship('Question', back_populates='attempts')
-
-    # Okey
-    # quiz_attempt = relationship("QuizAttempt", back_populates="question_attempts")

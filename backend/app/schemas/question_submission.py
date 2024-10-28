@@ -42,6 +42,7 @@ class QuestionStudentResponse(BaseModel):
 
 class QuestionStudentSubmission(BaseModel):
     id: int
+    question_type: QuestionType
     user_id: int
     question_id: int
     user_response: QuestionStudentResponse
