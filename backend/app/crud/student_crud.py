@@ -149,15 +149,22 @@ def mark_submission_by_question_with_course_title_question_set_id_question_id(
     question_create = QuestionTeacherView.model_validate(question)
     marked_user_submission = mark_user_submission(user_submission, question_create)
 
+    print(
+        marked_user_submission.model_dump_json(exclude=['id', 'user_id', 'question_id'])
+    )
+    # raise HTTPException(status_code=400, detail='Not implemented')
     question_submission = QuestionSubmission(
-        question_type=marked_user_submission.question_type,
+        **marked_user_submission.model_dump(exclude=['id', 'user_id', 'question_id']),
         user_id=student_id,
         question_id=question_id,
-        response_data=marked_user_submission,
-        made_attempt=True,
-        score=marked_user_submission.score,
-        feedback=marked_user_submission.feedback,
     )
+    # question_type=marked_user_submission.question_type,
+    # user_id=student_id,
+    # question_id=question_id,
+    # user_response=marked_user_submission,
+    # made_attempt=True,
+    # score=marked_user_submission.score,
+    # feedback=marked_user_submission.feedback,
 
     db.add(question_submission)
     db.commit()

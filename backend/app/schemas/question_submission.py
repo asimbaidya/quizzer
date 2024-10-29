@@ -47,5 +47,6 @@ class QuestionStudentSubmission(BaseModel):
     question_id: int
     user_response: QuestionStudentResponse
     made_attempt: bool = False
+    is_correct: bool = False
     score: int = 0
     feedback: str = ''

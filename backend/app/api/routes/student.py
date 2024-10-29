@@ -77,13 +77,15 @@ def submit_question_with_course_title_question_set_id_question_id(
     db: SessionDep,
     course_title: str,
     question_set_id: int,
+    question_id: int,
     user_submission: QuestionStudentSubmission,
     student: CurrentStudent,
 ):
-    student_crud.mark_submission_by_question_with_course_title_question_set_id_question_id(
+    return student_crud.mark_submission_by_question_with_course_title_question_set_id_question_id(  # noqa: E501
         db,
         course_title,
         question_set_id,
-        student.id,  # type: ignore
+        question_id,
         user_submission,
+        student.id,  # type: ignore
     )

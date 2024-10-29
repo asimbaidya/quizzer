@@ -134,9 +134,10 @@ class QuestionSubmission(Base):
     made_attempt = Column(Boolean, nullable=False)
 
     question_type = Column(String, nullable=False)
-    user_respons = Column(JSONB, nullable=False)
+    user_response = Column(JSONB, nullable=False)
     is_correct = Column(Boolean, nullable=False)
     score = Column(Integer, nullable=True)
+    feedback = Column(String, nullable=True)
 
     attempt_time = Column(TIMESTAMP, server_default=func.now())  # Time of the attempt
 

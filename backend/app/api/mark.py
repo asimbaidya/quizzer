@@ -12,6 +12,7 @@ def mark_user_submission(  # noqa: C901
     # Initialize score and feedback
     score = 0
     feedback = ''
+    is_correct = False
 
     # Determine the correct answer based on the question type
     correct_answer = None
@@ -24,6 +25,7 @@ def mark_user_submission(  # noqa: C901
         )
         if user_response.user_response == correct_answer:
             score = question_create.total_marks
+            is_correct = True
             feedback = 'Correct! Your answer is right.'
         else:
             feedback = f'Incorrect. The correct answer is: {correct_answer}.'
@@ -42,6 +44,7 @@ def mark_user_submission(  # noqa: C901
 
         if user_answers == correct_answers:
             score = question_create.total_marks
+            is_correct = True
             feedback = 'Correct! All your answers are right.'
         elif user_answers.intersection(correct_answers):
             feedback = f'Partially correct. The correct answers are: {correct_answers}.'
@@ -52,6 +55,7 @@ def mark_user_submission(  # noqa: C901
         correct_answer = question_data.true_false_answer
         if user_response.user_response == correct_answer:
             score = question_create.total_marks
+            is_correct = True
             feedback = 'Correct! Your answer is right.'
         else:
             feedback = f'Incorrect. The correct answer is: {correct_answer}.'
@@ -66,6 +70,7 @@ def mark_user_submission(  # noqa: C901
             )
         if user_response.user_response.strip() == correct_answer.strip():
             score = question_create.total_marks
+            is_correct = True
             feedback = 'Correct! Your answer is right.'
         else:
             feedback = f'Incorrect. The correct answer is: {correct_answer}.'
@@ -74,5 +79,6 @@ def mark_user_submission(  # noqa: C901
     user_submission.score = score
     user_submission.feedback = feedback
     user_submission.made_attempt = True
+    user_submission.is_correct = is_correct
 
     return user_submission
