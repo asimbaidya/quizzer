@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 # /courses => Get list of courses created by the teacher
-@router.get('/courses')
+@router.get('/courses', tags=['GET'])
 def get_courses(db: SessionDep, teacher: CurrentTeacher):
     if not isinstance(teacher.id, int):
         return HTTPException(status_code=400, detail='Invalid teacher id')
@@ -21,7 +21,7 @@ def get_courses(db: SessionDep, teacher: CurrentTeacher):
 
 # /course/{course_title} -> Get all quizzes of a course
 # todo: also return tests into the response
-@router.get('/course/{course_title}')
+@router.get('/course/{course_title}', tags=['GET'])
 def get_quizzes_and_tests__in_course(
     course_title: str, db: SessionDep, teacher: CurrentTeacher
 ):
@@ -33,13 +33,13 @@ def get_quizzes_and_tests__in_course(
 
 
 # /course/students/{course_title} -> List of enrolled students in a course
-@router.get('/course/students/{course_title}')
+@router.get('/course/students/{course_title}', tags=['GET'])
 def get_enrolled_students(course_title: str, db: SessionDep, teacher: CurrentTeacher):
     return teacher_crud.get_enrolled_students(db, course_title, teacher.id)
 
 
 # /course/{course_title}/{quiz_id} -> Get all questions in a quiz
-@router.get('/course/quiz/{course_title}/{quiz_id}')
+@router.get('/course/quiz/{course_title}/{quiz_id}', tags=['GET'])
 def get_questions_in_quiz(
     course_title: str, quiz_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
@@ -49,7 +49,7 @@ def get_questions_in_quiz(
 
 
 # /course/{course_title}/{test_id} -> Get all questions in a test
-@router.get('/course/test/{course_title}/{test_id}')
+@router.get('/course/test/{course_title}/{test_id}', tags=['GET'])
 def get_questions_in_test(
     course_title: str, test_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
@@ -59,7 +59,7 @@ def get_questions_in_test(
 
 
 # /course/{course_title}/{quiz_id}/info -> Student progress or marks in a quiz
-@router.get('/course/students/{course_title}/{quiz_id}')
+@router.get('/course/students/{course_title}/{quiz_id}', tags=['GET'])
 def get_student_progress(
     course_title: str, quiz_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
@@ -72,7 +72,7 @@ def get_student_progress(
 
 
 # /course -> Create a new course
-@router.post('/course')
+@router.post('/course', tags=['POST'])
 def create_course(db: SessionDep, course: CourseCreate, teacher: CurrentTeacher):
     try:
         return teacher_crud.create_course_by_teacher_id(db, course, teacher.id)
@@ -81,7 +81,7 @@ def create_course(db: SessionDep, course: CourseCreate, teacher: CurrentTeacher)
 
 
 # /course/quiz/{course_title} -> Create a new quiz within a course
-@router.post('/course/quiz/{course_title}')
+@router.post('/course/quiz/{course_title}', tags=['POST'])
 def create_quiz(
     course_title: str, quiz: QuizCreate, db: SessionDep, teacher: CurrentTeacher
 ):
@@ -94,7 +94,7 @@ def create_quiz(
 
 
 # /course/test/{course_title} -> Create a new test within a course
-@router.post('/course/test/{course_title}')
+@router.post('/course/test/{course_title}', tags=['POST'])
 def create_test(
     course_title: str, test: TestCreate, db: SessionDep, teacher: CurrentTeacher
 ):
@@ -110,7 +110,9 @@ def create_test(
 
 # /course/{course_title}/{quiz_id} -> Create a new question in a quiz
 @router.post(
-    '/course/quiz/{course_title}/{quiz_id}', response_model=QuestionTeacherView
+    '/course/quiz/{course_title}/{quiz_id}',
+    response_model=QuestionTeacherView,
+    tags=['POST'],
 )
 def create_question_in_quiz(
     course_title: str,
@@ -129,7 +131,9 @@ def create_question_in_quiz(
 
 # /course/{course_title}/{quiz_id} -> Create a new question in a test
 @router.post(
-    '/course/test/{course_title}/{test_id}', response_model=QuestionTeacherView
+    '/course/test/{course_title}/{test_id}',
+    response_model=QuestionTeacherView,
+    tags=['POST'],
 )
 def create_question_in_test(
     course_title: str,
