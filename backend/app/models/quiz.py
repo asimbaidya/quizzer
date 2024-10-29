@@ -84,6 +84,9 @@ class Test(Base):
     # duration is in minutes
     duration = Column(Integer, nullable=False)
 
+    # to show in progreass
+    total_mark = Column(Integer, nullable=False)  # Total marks for the quiz
+
     #  allowed time
     time_window_start = Column(TIMESTAMP)
     time_window_end = Column(TIMESTAMP)
