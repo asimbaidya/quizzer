@@ -1,7 +1,7 @@
 # sub
-from typing import List, Union
+from typing import Any, List, Self, Union
 
-from pydantic import BaseModel, ValidationInfo, field_validator
+from pydantic import BaseModel, ValidationInfo, field_validator, model_validator
 
 from app.schemas.question import QuestionType
 
@@ -41,12 +41,17 @@ class QuestionStudentResponse(BaseModel):
 
 
 class QuestionStudentSubmission(BaseModel):
-    id: int
+    # id: int
     question_type: QuestionType
-    user_id: int
-    question_id: int
+    # user_id: int
+    # question_id: int
     user_response: QuestionStudentResponse
     made_attempt: bool = False
     is_correct: bool = False
     score: int = 0
     feedback: str = ''
+
+    @model_validator(mode='before')
+    @classmethod
+    def validate_data_before(cls, value: Any) -> Self:
+        return value

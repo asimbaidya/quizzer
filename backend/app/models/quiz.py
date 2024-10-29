@@ -9,7 +9,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship  # , validates
 
 from app.core.db import Base
 
@@ -146,3 +146,13 @@ class QuestionSubmission(Base):
 
     # Okey
     question = relationship('Question', back_populates='submission')
+
+    # TODO
+    # @validates('question_data')
+    # def validate_question_data(self, key: str, value: str):
+    #     print('Hello world')
+    #     if 'question_type' not in value or value['question_type'] == self.question_type:
+    #         raise ValueError(
+    #             "question_data must contain 'question_type' key with the same value as question_type."  # noqa: E501
+    #         )
+    #     return value
