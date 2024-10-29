@@ -1,8 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 from app.api.deps import CurrentStudent, SessionDep
 from app.crud import student_crud
-from app.models.quiz import Course
 from app.schemas.common import EnrollMetadata
 from app.schemas.question_submission import QuestionStudentSubmission
 
@@ -69,7 +68,7 @@ def enroll_course_with_course_pin_and_course_title(
         db,
         enroll_metadata.course_title,
         enroll_metadata.course_pin,
-        student.id,
+        student.id,  # type: ignore
     )
 
 

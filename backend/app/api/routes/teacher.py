@@ -22,20 +22,20 @@ def get_courses(db: SessionDep, teacher: CurrentTeacher):
 # /course/{course_title} -> Get all quizzes of a course
 # todo: also return tests into the response
 @router.get('/course/{course_title}', tags=['GET'])
-def get_quizzes_and_tests__in_course(
+def get_quizzes_and_tests__in_course(  # type: ignore
     course_title: str, db: SessionDep, teacher: CurrentTeacher
 ):
     return teacher_crud.get_quiz_and_test_by_course_title_creator_id(
         db,
         course_title,
-        teacher.id,
-    )
+        teacher.id,  # type: ignore
+    )  # type: ignore
 
 
 # /course/students/{course_title} -> List of enrolled students in a course
 @router.get('/course/students/{course_title}', tags=['GET'])
 def get_enrolled_students(course_title: str, db: SessionDep, teacher: CurrentTeacher):
-    return teacher_crud.get_enrolled_students(db, course_title, teacher.id)
+    return teacher_crud.get_enrolled_students(db, course_title, teacher.id)  # type: ignore
 
 
 # /course/{course_title}/{quiz_id} -> Get all questions in a quiz
@@ -44,7 +44,10 @@ def get_questions_in_quiz(
     course_title: str, quiz_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
     return teacher_crud.get_questions_by_course_title_quiz_id_teacher_id(
-        db, course_title, quiz_id, teacher.id
+        db,
+        course_title,
+        quiz_id,
+        teacher.id,  # type: ignore
     )
 
 
@@ -54,7 +57,10 @@ def get_questions_in_test(
     course_title: str, test_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
     return teacher_crud.get_questions_by_course_title_test_id_teacher_id(
-        db, course_title, test_id, teacher.id
+        db,
+        course_title,
+        test_id,
+        teacher.id,  # type: ignore
     )
 
 
@@ -64,7 +70,10 @@ def get_student_progress(
     course_title: str, quiz_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
     return teacher_crud.get_student_progress_course_title_quiz_id_teacher_id(
-        db, course_title, quiz_id, teacher.id
+        db,
+        course_title,
+        quiz_id,
+        teacher.id,  # type: ignore
     )
 
 
@@ -75,7 +84,7 @@ def get_student_progress(
 @router.post('/course', tags=['POST'])
 def create_course(db: SessionDep, course: CourseCreate, teacher: CurrentTeacher):
     try:
-        return teacher_crud.create_course_by_teacher_id(db, course, teacher.id)
+        return teacher_crud.create_course_by_teacher_id(db, course, teacher.id)  # type: ignore
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -87,7 +96,10 @@ def create_quiz(
 ):
     try:
         return teacher_crud.create_quiz_by_course_title_teacher_id(
-            db, quiz, course_title, teacher.id
+            db,
+            quiz,
+            course_title,
+            teacher.id,  # type: ignore
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -100,7 +112,10 @@ def create_test(
 ):
     try:
         return teacher_crud.create_test_by_course_title_teacher_id(
-            db, test, course_title, teacher.id
+            db,
+            test,
+            course_title,
+            teacher.id,  # type: ignore
         )
     except Exception as e:
         print(e)
@@ -123,7 +138,11 @@ def create_question_in_quiz(
 ):
     try:
         return teacher_crud.create_question_by_course_title_quiz_id_teacher_id(
-            db, question, course_title, quiz_id, teacher.id
+            db,
+            question,
+            course_title,
+            quiz_id,
+            teacher.id,  # type: ignore
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -144,7 +163,11 @@ def create_question_in_test(
 ):
     try:
         return teacher_crud.create_question_by_course_title_test_id_teacher_id(
-            db, question, course_title, test_id, teacher.id
+            db,
+            question,
+            course_title,
+            test_id,
+            teacher.id,  # type: ignore
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

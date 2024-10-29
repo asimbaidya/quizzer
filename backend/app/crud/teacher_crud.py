@@ -19,7 +19,7 @@ def get_courses_by_creator_id(db: Session, creator_id: int) -> list[Course]:
     return db.query(Course).filter(Course.creator_id == creator_id).all()
 
 
-def get_quiz_and_test_by_course_title_creator_id(
+def get_quiz_and_test_by_course_title_creator_id(  # type: ignore
     db: Session, course_title: str, teacher_id: int
 ):
     quizzes = (
@@ -37,7 +37,7 @@ def get_quiz_and_test_by_course_title_creator_id(
     return {
         'quizzes': quizzes,
         'tests': tests,
-    }
+    }  # type: ignore
 
 
 def get_enrolled_students(db: Session, course_title: str, teacher_id: int):
@@ -45,7 +45,7 @@ def get_enrolled_students(db: Session, course_title: str, teacher_id: int):
         db.query(User)
         .join(Enrollment, User.id == Enrollment.student_id)
         .join(Course, Enrollment.course_id == Course.id)
-        .filter(course_title == course_title, User.id == teacher_id)
+        .filter(course_title == course_title, User.id == teacher_id)  # type: ignore
         .all()
     )
 
@@ -122,7 +122,7 @@ def create_quiz_by_course_title_teacher_id(
     course = get_course_by_title_creator_id(db, course_title, teacher_id)
     if course is None:
         raise HTTPException(status_code=404, detail='Course not found')
-    if int(course.creator_id) != teacher_id:
+    if int(course.creator_id) != teacher_id:  # type: ignore
         raise HTTPException(
             status_code=403,
             detail='You are not authorized to create quiz in this course',
@@ -151,7 +151,7 @@ def create_test_by_course_title_teacher_id(
     course = get_course_by_title_creator_id(db, course_title, teacher_id)
     if course is None:
         raise HTTPException(status_code=404, detail='Course not found')
-    if int(course.creator_id) != teacher_id:
+    if int(course.creator_id) != teacher_id:  # type: ignore
         raise HTTPException(
             status_code=403,
             detail='You are not authorized to create quiz in this course',

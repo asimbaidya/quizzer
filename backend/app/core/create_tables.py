@@ -5,7 +5,7 @@ from app.core.initial_data import users
 from app.models.quiz import Quiz
 from app.models.user import User
 
-__imported_tables = [User, Quiz]
+__imported_tables = [User, Quiz]  # type: ignore
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

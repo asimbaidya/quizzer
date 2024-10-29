@@ -25,7 +25,7 @@ class QuestionTeacherData(BaseModel):
 
     @model_validator(mode='before')
     @classmethod
-    def validate_data_before(cls, value: Any) -> Self:
+    def validate_data_before(cls, value: Any) -> Self:  # noqa: C901
         question_type = value.get('question_type')
         true_false_answer = value.get('true_false_answer')
         correct_answer = value.get('correct_answer')
@@ -36,11 +36,11 @@ class QuestionTeacherData(BaseModel):
         ):
             if true_false_answer is not None:
                 raise ValueError(
-                    'True/False answer is not required for single/multiple choice questions'
+                    'True/False answer is not required for single/multiple choice questions'  # noqa: E501
                 )
             if correct_answer:
                 raise ValueError(
-                    'Correct answer is not required for single/multiple choice questions'
+                    'Correct answer is not required for single/multiple choice questions'  # noqa: E501
                 )
         if question_type == QuestionType.TRUE_FALSE:
             if correct_answer:

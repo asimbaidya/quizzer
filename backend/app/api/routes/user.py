@@ -17,8 +17,7 @@ def register_user(user: UserCreate, db: SessionDep):
                 status_code=400,
                 detail='The user with this email already exists in the system',
             )
-        new_user = user_crud.create_user(db, user_create=user)
-        return new_user
+        return user_crud.create_user(db, user_create=user)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
