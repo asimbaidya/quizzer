@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 from app.api.deps import CurrentStudent, SessionDep
 from app.crud import student_crud
 from app.models.quiz import Course
+from app.schemas.common import EnrollMetadata
 from app.schemas.question_submission import QuestionStudentSubmission
 
 router = APIRouter()
@@ -12,54 +13,78 @@ router = APIRouter()
 
 
 @router.get('/enrolled_courses')
-def get_enrolled_courses_endpoint(student: CurrentStudent, db: SessionDep):
-    return student_crud.get_enrolled_courses(db, student.id)  # type: ignore
+def get_all_enrolled_courses_link(student: CurrentStudent, db: SessionDep):
+    return student_crud.get_all_enrolled_courses_by_student_id(db, student.id)  # type: ignore
 
 
 @router.get('/enrolled_courses/{course_title}')
-def get_enrolled_course_endpoint(
-    course_title: str, student: CurrentStudent, db: SessionDep
+def get_all_quiz_and_test_in_enrolled_course(  # type: ignore
+    db: SessionDep,
+    course_title: str,
+    student: CurrentStudent,
 ):
-    course, _ = student_crud.get_course_and_enrollment(course_title, student.id, db)  # type: ignore
-    return course  # Return course
+    return student_crud.get_all_quizzes_tests_in_enrolled_course_by_course_title_student_id(  # noqa: E501
+        db,
+        course_title,
+        student.id,  # type: ignore
+    )  # type: ignore
 
 
-@router.get('/enrolled_courses/{course_title}/{quiz_id}')
-def get_enrolled_quiz_endpoint(
-    course_title: str, quiz_id: int, student: CurrentStudent, db: SessionDep
+@router.get('/enrolled_courses/quiz/{course_title}/{quiz_id}')
+def get_all_question_in_a_quiz_of_enrolled_course(
+    db: SessionDep,
+    course_title: str,
+    quiz_id: int,
+    student: CurrentStudent,
 ):
-    course, _ = student_crud.get_course_and_enrollment(course_title, student.id, db)  # type: ignore
-    return student_crud.get_quiz_and_enrollment(course, quiz_id, db)
+    return student_crud.get_all_question_in_enrolled_course_by_course_title_quiz_id_student_id(  # noqa: E501
+        db,
+        course_title,
+        quiz_id,
+        student.id,  # type: ignore
+    )
+
+
+@router.get('/enrolled_courses/test/{course_title}/{test_id}')
+def get_all_question_in_a_test_of_enrolled_course(
+    db: SessionDep, course_title: str, test_id: int, student: CurrentStudent
+):
+    return student_crud.get_all_question_in_enrolled_course_by_course_title_test_id_student_id(  # noqa: E501
+        db,
+        course_title,
+        test_id,
+        student.id,  # type: ignore
+    )
 
 
 # ---- POST ROUTES ----
 
 
-@router.post('/enrolled_courses/{course_title}')
-def enroll_course_endpoint(course_title: str, student: CurrentStudent, db: SessionDep):
-    course = db.query(Course).filter(Course.title == course_title).first()
-    if not course:
-        raise HTTPException(status_code=404, detail='Course not found')
-
-    return student_crud.enroll_course(db, course.id, student.id, course_pin=course_pin)  # type: ignore
-
-
-@router.post('/enrolled_courses/submit/{course_title}/{quiz_id}/{question_id}')
-def submit_answer_endpoint(
-    course_title: str,
-    quiz_id: int,
-    question_attempt_id: int,
-    student: CurrentStudent,
-    response_data: QuestionStudentSubmission,
-    db: SessionDep,
+# // done
+@router.post('/enrolled_courses/')
+def enroll_course_with_course_pin_and_course_title(
+    db: SessionDep, enroll_metadata: EnrollMetadata, student: CurrentStudent
 ):
-    course, _ = student_crud.get_course_and_enrollment(course_title, student.id, db)  # type: ignore
-    quiz = student_crud.get_quiz_and_enrollment(course, quiz_id, db)
-    return student_crud.submit_questions_answer(
+    return student_crud.enroll_course_by_course_title_course_pin_student_id(
         db,
-        course.id,  # type: ignore
-        quiz.id,  # type: ignore
-        question_attempt_id,
+        enroll_metadata.course_title,
+        enroll_metadata.course_pin,
+        student.id,
+    )
+
+
+@router.post('/enrolled_courses/submit/{course_title}/{question_set_id}/{question_id}')
+def submit_question_with_course_title_question_set_id_question_id(
+    db: SessionDep,
+    course_title: str,
+    question_set_id: int,
+    user_submission: QuestionStudentSubmission,
+    student: CurrentStudent,
+):
+    student_crud.mark_submission_by_question_with_course_title_question_set_id_question_id(
+        db,
+        course_title,
+        question_set_id,
         student.id,  # type: ignore
-        response_data=response_data,
-    )  # type: ignore
+        user_submission,
+    )

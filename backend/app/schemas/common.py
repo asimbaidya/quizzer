@@ -27,3 +27,8 @@ class TestCreate(BaseModel):
     duration: int = Field(default=30)
     time_window_start: datetime
     time_window_end: datetime
+
+
+class EnrollMetadata(BaseModel):
+    course_title: str
+    course_pin: str

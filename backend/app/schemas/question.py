@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any, List, Optional, Self
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class QuestionType(str, Enum):
@@ -110,6 +110,8 @@ class QuestionTeacherData(BaseModel):
 
 
 class QuestionTeacherView(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     question_type: QuestionType
     question_data: QuestionTeacherData
     tag: str
