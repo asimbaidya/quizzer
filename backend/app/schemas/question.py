@@ -19,7 +19,7 @@ class Choice(BaseModel):
 class QuestionTeacherData(BaseModel):
     question_type: QuestionType
     question_text: str
-    choices: Optional[List[Choice]] = Field(min_length=4, max_length=6)
+    choices: Optional[List[Choice]] = Field(min_length=4, max_length=6, default=None)
     true_false_answer: Optional[bool] = None
     correct_answer: Optional[str] = None
 

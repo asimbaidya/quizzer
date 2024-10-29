@@ -19,22 +19,32 @@ def get_courses_by_creator_id(db: Session, creator_id: int) -> list[Course]:
     return db.query(Course).filter(Course.creator_id == creator_id).all()
 
 
-def get_quiz_by_course_title_creator_id(
+def get_quiz_and_test_by_course_title_creator_id(
     db: Session, course_title: str, teacher_id: int
 ):
-    return (
+    quizzes = (
         db.query(Quiz)
-        .join(Course)
+        .join(Course, Quiz.course_id == Course.id)
         .filter(Course.title == course_title, Course.creator_id == teacher_id)
         .all()
     )
+    tests = (
+        db.query(Test)
+        .join(Course, Test.course_id == Course.id)
+        .filter(Course.title == course_title, Course.creator_id == teacher_id)
+        .all()
+    )
+    return {
+        'quizzes': quizzes,
+        'tests': tests,
+    }
 
 
 def get_enrolled_students(db: Session, course_title: str, teacher_id: int):
     return (
         db.query(User)
-        .join(Enrollment)
-        .join(Course)
+        .join(Enrollment, User.id == Enrollment.student_id)
+        .join(Course, Enrollment.course_id == Course.id)
         .filter(course_title == course_title, User.id == teacher_id)
         .all()
     )
@@ -45,9 +55,9 @@ def get_questions_by_course_title_quiz_id_teacher_id(
 ):
     return (
         db.query(Question)
-        .join(target=Quiz)
-        .join(Course)
-        .join(QuestionSet)
+        .join(Quiz, Question.question_set_id == Quiz.question_set_id)
+        .join(Course, Quiz.course_id == Course.id)
+        .join(QuestionSet, Quiz.question_set_id == Question.question_set_id)
         .filter(
             Course.title == course_title,
             Quiz.id == quiz_id,
@@ -62,9 +72,9 @@ def get_questions_by_course_title_test_id_teacher_id(
 ):
     return (
         db.query(Question)
-        .join(Test)
-        .join(Course)
-        .join(QuestionSet)
+        .join(Test, Question.question_set_id == Test.question_set_id)
+        .join(Course, Test.course_id == Course.id)
+        .join(QuestionSet, Test.question_set_id == Question.question_set_id)
         .filter(
             Course.title == course_title,
             Test.id == test_id,
@@ -77,11 +87,18 @@ def get_questions_by_course_title_test_id_teacher_id(
 def get_student_progress_course_title_quiz_id_teacher_id(
     db: Session, course_title: str, quiz_id: int, teacher_id: int
 ):
-    db.query(QuestionSubmission).join(Question).join(QuestionSet).join(Course).filter(
-        Course.title == course_title,
-        Quiz.id == quiz_id,
-        Course.creator_id == teacher_id,
-    ).all()
+    return (
+        db.query(QuestionSubmission)
+        .join(User, QuestionSubmission.user_id == User.id)
+        .join(Enrollment, User.id == Enrollment.student_id)
+        .join(Course, Enrollment.course_id == Course.id)
+        .filter(
+            Course.title == course_title,
+            Quiz.id == quiz_id,
+            Course.creator_id == teacher_id,
+        )
+        .all()
+    )
 
 
 def create_course_by_teacher_id(
@@ -150,6 +167,9 @@ def create_test_by_course_title_teacher_id(
         title=test_create.title,
         total_mark=test_create.total_mark,
         question_set_id=question_set.id,
+        duration=test_create.duration,
+        time_window_start=test_create.time_window_start,
+        time_window_end=test_create.time_window_end,
     )
     db.add(db_instance)
     db.commit()
@@ -200,8 +220,9 @@ def create_question_by_course_title_test_id_teacher_id(
     test = get_test_by_course_title_creator_id_test_id(
         db, course_title, teacher_id, test_id
     )
+    print(test)
     if test is None:
-        raise HTTPException(status_code=404, detail='Quiz not found in this course')
+        raise HTTPException(status_code=404, detail='Test not found in this course')
 
     question_set = get_question_set_by_test_id(db, test_id)
 

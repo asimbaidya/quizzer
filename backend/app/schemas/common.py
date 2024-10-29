@@ -21,7 +21,7 @@ class QuizCreate(BaseModel):
 
 
 class TestCreate(BaseModel):
-    title: str = Field(default='New Quiz')
+    title: str = Field(default='New Test')
     total_mark: int = Field(default=20)
 
     duration: int = Field(default=30)

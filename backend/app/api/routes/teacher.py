@@ -22,8 +22,10 @@ def get_courses(db: SessionDep, teacher: CurrentTeacher):
 # /course/{course_title} -> Get all quizzes of a course
 # todo: also return tests into the response
 @router.get('/course/{course_title}')
-def get_quizzes_in_course(course_title: str, db: SessionDep, teacher: CurrentTeacher):
-    return teacher_crud.get_quiz_by_course_title_creator_id(
+def get_quizzes_and_tests__in_course(
+    course_title: str, db: SessionDep, teacher: CurrentTeacher
+):
+    return teacher_crud.get_quiz_and_test_by_course_title_creator_id(
         db,
         course_title,
         teacher.id,
@@ -37,7 +39,7 @@ def get_enrolled_students(course_title: str, db: SessionDep, teacher: CurrentTea
 
 
 # /course/{course_title}/{quiz_id} -> Get all questions in a quiz
-@router.get('/course/{course_title}/{quiz_id}')
+@router.get('/course/quiz/{course_title}/{quiz_id}')
 def get_questions_in_quiz(
     course_title: str, quiz_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
@@ -47,7 +49,7 @@ def get_questions_in_quiz(
 
 
 # /course/{course_title}/{test_id} -> Get all questions in a test
-@router.get('/course/{course_title}/{test_id}')
+@router.get('/course/test/{course_title}/{test_id}')
 def get_questions_in_test(
     course_title: str, test_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
@@ -101,11 +103,15 @@ def create_test(
             db, test, course_title, teacher.id
         )
     except Exception as e:
+        print(e)
+        print(str(e))
         raise HTTPException(status_code=400, detail=str(e))
 
 
 # /course/{course_title}/{quiz_id} -> Create a new question in a quiz
-@router.post('/course/{course_title}/{quiz_id}', response_model=QuestionTeacherView)
+@router.post(
+    '/course/quiz/{course_title}/{quiz_id}', response_model=QuestionTeacherView
+)
 def create_question_in_quiz(
     course_title: str,
     quiz_id: int,
@@ -122,7 +128,9 @@ def create_question_in_quiz(
 
 
 # /course/{course_title}/{quiz_id} -> Create a new question in a test
-@router.post('/course/{course_title}/{test_id}', response_model=QuestionTeacherView)
+@router.post(
+    '/course/test/{course_title}/{test_id}', response_model=QuestionTeacherView
+)
 def create_question_in_test(
     course_title: str,
     test_id: int,
