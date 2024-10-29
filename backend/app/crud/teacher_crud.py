@@ -40,6 +40,7 @@ def get_quiz_and_test_by_course_title_creator_id(  # type: ignore
     }  # type: ignore
 
 
+# TODO: NOT SURE JOIN LOGIC
 def get_enrolled_students(db: Session, course_title: str, teacher_id: int):
     return (
         db.query(User)
@@ -101,9 +102,19 @@ def get_student_progress_course_title_quiz_id_teacher_id(
     )
 
 
+# FOR POST REQUESTS
+
+
 def create_course_by_teacher_id(
     db: Session, course_create: CourseCreate, teacher_id: int
 ) -> Course:
+    # Becausee course title is unique(design issue)
+    course = db.query(Course).filter(Course.title == course_create.title).first()
+    if course is not None:
+        raise HTTPException(
+            status_code=400, detail='Course with this title already exists'
+        )
+
     course_instance = Course(
         title=course_create.title,
         description=course_create.description,
@@ -294,3 +305,6 @@ def get_course_by_title_creator_id(db: Session, course_title: str, teacher_id: i
     if course is None:
         raise HTTPException(status_code=404, detail='Course not found')
     return course
+
+
+# get or HTTPEXception
