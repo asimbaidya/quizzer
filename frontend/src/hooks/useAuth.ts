@@ -2,7 +2,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useQuery, useMutation, QueryClient } from '@tanstack/react-query';
 import request, { ApiError } from '../core/request';
 import { useState } from 'react';
-import { User } from '../core/schemas';
+import { fetchUserData } from '../core/services';
 
 interface Token {
   access_token: string;
@@ -11,16 +11,6 @@ interface Token {
 
 export const isLoggedIn = () => {
   return localStorage.getItem('access_token') !== null;
-};
-
-const fetchUserData = async () => {
-  if (!localStorage.getItem('access_token')) {
-    throw new Error('No Token');
-  }
-  return await request<User>({
-    method: 'GET',
-    url: '/API/user/me',
-  });
 };
 
 export default function useAuth() {
@@ -34,8 +24,8 @@ export default function useAuth() {
     isLoading,
   } = useQuery({
     queryKey: ['user'],
-    queryFn: fetchUserData,
-    enabled: isLoggedIn(),
+    queryFn: ({ signal }) => fetchUserData(signal),
+    enabled: localStorage.getItem('access_token') !== null,
   });
 
   const mutation = useMutation({
