@@ -4,6 +4,7 @@ type ApiRequestOptions = {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   url: string;
   formData?: Record<string, unknown>;
+  signal?: AbortSignal;
 };
 
 const apiClient = axios.create({
@@ -35,12 +36,14 @@ export default async function request<T>({
   method,
   url,
   formData,
+  signal,
 }: ApiRequestOptions): Promise<T> {
   const options: AxiosRequestConfig = {
     method,
     url,
     data: formData,
     headers: {},
+    signal: signal,
   };
 
   if (formData) {
