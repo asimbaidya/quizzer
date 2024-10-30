@@ -11,6 +11,7 @@ import {
   FiWifi,
   FiBook,
 } from 'react-icons/fi';
+import useAuth from '../../hooks/useAuth';
 
 const currentUser = { role: 'teacher' };
 
@@ -19,21 +20,7 @@ let items = [
   { icon: FiUser, title: 'Profile', path: '/profile' },
 ];
 
-if (currentUser?.role === 'admin') {
-  items.push({ icon: FiSettings, title: 'Dashboard', path: '/dashboard' });
-  items.push({ icon: FiUsers, title: 'Add User', path: '/addUser' });
-} else if (currentUser?.role === 'teacher') {
-  items.push({ icon: FiBookOpen, title: 'Course', path: '/course' });
-  items.push({ icon: FiWifi, title: 'Host Live', path: '/hostLive' });
-} else if (currentUser?.role === 'student') {
-  items.push({
-    icon: FiBookOpen,
-    title: 'Enrolled Course',
-    path: '/enrolledCourse',
-  });
-  items.push({ icon: FiFileText, title: 'Notes', path: '/notes' });
-  items.push({ icon: FiWifi, title: 'Join Live', path: '/joinLive' });
-}
+type Items = typeof items;
 
 interface SidebarItemsProps {
   onClose?: () => void;
@@ -44,7 +31,35 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
   const textColor = useColorModeValue('ui.main', 'ui.light');
   const bgActive = useColorModeValue('#E2E8F0', '#4A5568');
 
-  const listItems = items.map(({ icon, title, path }) => (
+  const { user } = useAuth();
+
+  let final_items: Items = [];
+  if (user?.role === 'admin') {
+    final_items = [
+      ...items,
+      { icon: FiSettings, title: 'Dashboard', path: '/dashboard' },
+      { icon: FiUsers, title: 'Add User', path: '/addUser' },
+    ];
+  } else if (user?.role === 'teacher') {
+    final_items = [
+      ...items,
+      { icon: FiBookOpen, title: 'Course', path: '/course' },
+      { icon: FiWifi, title: 'Host Live', path: '/hostLive' },
+    ];
+  } else if (user?.role === 'student') {
+    final_items = [
+      ...items,
+      {
+        icon: FiBookOpen,
+        title: 'Enrolled Course',
+        path: '/enrolledCourse',
+      },
+      { icon: FiFileText, title: 'Notes', path: '/note' },
+      { icon: FiWifi, title: 'Join Live', path: '/joinLive' },
+    ];
+  }
+
+  const listItems = final_items?.map(({ icon, title, path }) => (
     <Flex
       as={Link}
       to={path}

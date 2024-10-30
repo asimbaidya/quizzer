@@ -15,6 +15,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { FiLogOut, FiMenu } from 'react-icons/fi';
 
+import Logo from '/assets/logo.png';
 import SidebarItems from '../Sidebar/SideBarItems';
 
 const Sidebar = () => {
@@ -52,7 +53,7 @@ const Sidebar = () => {
           <DrawerBody py={8}>
             <Flex flexDir="column" justify="space-between">
               <Box>
-                <Image src="example.png" alt="Logo 🚀" p={6} />{' '}
+                <Image src={Logo} alt="Logo 🚀" p={6} />{' '}
                 {/* TODO: Replace with custom logo */}
                 <SidebarItems onClose={onClose} />
                 <Flex
@@ -90,7 +91,7 @@ const Sidebar = () => {
           borderRadius={12}
         >
           <Box>
-            <Image src="Logo.png" alt="Logo 🚀" w="180px" maxW="2xs" p={6} />{' '}
+            <Image src={Logo} alt="Logo 🚀" w="180px" maxW="2xs" p={6} />{' '}
             {/* TODO: */}
             <SidebarItems />
           </Box>
