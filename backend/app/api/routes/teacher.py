@@ -4,6 +4,7 @@ from app.api.deps import CurrentTeacher, SessionDep
 from app.crud import teacher_crud
 from app.schemas.common import CourseCreate, QuizCreate, TestCreate
 from app.schemas.question import QuestionTeacherView
+from app.schemas.response_models import Course
 
 router = APIRouter()
 
@@ -16,7 +17,9 @@ router = APIRouter()
 def get_courses(db: SessionDep, teacher: CurrentTeacher):
     if not isinstance(teacher.id, int):
         return HTTPException(status_code=400, detail='Invalid teacher id')
-    return teacher_crud.get_courses_by_creator_id(db, creator_id=teacher.id)
+
+    courses = teacher_crud.get_courses_by_creator_id(db, creator_id=teacher.id)
+    return [Course.model_validate(course) for course in courses]
 
 
 # /course/{course_title} -> Get all quizzes of a course
