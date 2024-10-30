@@ -1,4 +1,4 @@
-import { Flex, Spinner } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router';
 import Sidebar from '../ui/Sidebar/Sidebar';
 import { isLoggedIn } from '../hooks/useAuth';
@@ -17,13 +17,7 @@ export const Route = createFileRoute('/_layout')({
 
 function Layout() {
   return (
-    <Flex
-      maxW="large"
-      minH="100vh"
-      bg="ui.darkSlate"
-      h="auto"
-      position="relative"
-    >
+    <Flex maxW="large" minH="100vh" h="auto" position="relative">
       <Sidebar />
       <Outlet />
       <UserMenu />

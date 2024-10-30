@@ -2,14 +2,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useQuery, useMutation, QueryClient } from '@tanstack/react-query';
 import request, { ApiError } from '../core/request';
 import { useState } from 'react';
-
-export interface User {
-  first_name: string;
-  last_name: string;
-  email: string;
-  role: string;
-  joined_at: string;
-}
+import { User } from '../core/schemas';
 
 interface Token {
   access_token: string;
@@ -20,20 +13,20 @@ export const isLoggedIn = () => {
   return localStorage.getItem('access_token') !== null;
 };
 
+const fetchUserData = async () => {
+  if (!localStorage.getItem('access_token')) {
+    throw new Error('No Token');
+  }
+  return await request<User>({
+    method: 'GET',
+    url: '/API/user/me',
+  });
+};
+
 export default function useAuth() {
   const navigate = useNavigate();
   const [loginError, setLoginError] = useState<string | null>(null);
   const queryClient = new QueryClient();
-
-  const fetchUserData = async () => {
-    if (!localStorage.getItem('access_token')) {
-      throw new Error('No Token');
-    }
-    return await request<User>({
-      method: 'GET',
-      url: '/API/user/me',
-    });
-  };
 
   const {
     data: user,

@@ -60,14 +60,6 @@ const theme = extendTheme({
       },
     },
   },
-  styles: {
-    global: {
-      body: {
-        bg: 'ui.dark',
-        color: 'white',
-      },
-    },
-  },
 });
 
 export default theme;

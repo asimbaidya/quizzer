@@ -15,11 +15,14 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { FiLogOut, FiMenu } from 'react-icons/fi';
 
+// unknown error
 import Logo from '/assets/logo.png';
+
 import SidebarItems from '../Sidebar/SideBarItems';
 
 const Sidebar = () => {
   const queryClient = useQueryClient();
+
   const bgColor = useColorModeValue('ui.light', 'ui.dark');
   const textColor = useColorModeValue('ui.dark', 'ui.light');
   const secBgColor = useColorModeValue('ui.secondary', 'ui.darkSlate');
@@ -28,6 +31,7 @@ const Sidebar = () => {
 
   const logout = () => {
     console.log('logout');
+    alert('logout');
   };
 
   const handleLogout = async () => {
@@ -54,7 +58,6 @@ const Sidebar = () => {
             <Flex flexDir="column" justify="space-between">
               <Box>
                 <Image src={Logo} alt="Logo 🚀" p={6} />{' '}
-                {/* TODO: Replace with custom logo */}
                 <SidebarItems onClose={onClose} />
                 <Flex
                   as="button"
@@ -92,10 +95,20 @@ const Sidebar = () => {
         >
           <Box>
             <Image src={Logo} alt="Logo 🚀" w="180px" maxW="2xs" p={6} />{' '}
-            {/* TODO: */}
             <SidebarItems />
           </Box>
           {/* modified */}
+          <Flex
+            as="button"
+            onClick={handleLogout}
+            p={2}
+            color="ui.danger"
+            fontWeight="bold"
+            alignItems="center"
+          >
+            <FiLogOut />
+            <Text ml={2}>Log out</Text>
+          </Flex>
         </Flex>
       </Box>
     </>
