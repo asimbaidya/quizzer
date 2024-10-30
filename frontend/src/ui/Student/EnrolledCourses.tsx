@@ -1,9 +1,9 @@
-import { useQuery, QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { Course } from '../../core/schemas';
-import { fetchEnrolledCourses } from '../../core/services';
-import { isLoggedIn } from '../../hooks/useAuth';
 import { Box, Text, VStack, HStack, background } from '@chakra-ui/react';
 import { Link } from '@tanstack/react-router';
+import { useEnrolledCourses } from '../../hooks/student';
+import { Container, Heading } from '@chakra-ui/react';
 
 interface CourseProps {
   course: Course;
@@ -14,33 +14,28 @@ interface CourseListProps {
 
 export default function EnrolledCourses() {
   const queryClient = new QueryClient();
-  const {
-    data: courses,
-    error,
-    isLoading,
-  } = useQuery({
-    queryKey: ['courses'],
-    queryFn: fetchEnrolledCourses,
-    enabled: isLoggedIn(),
-  });
+  const { data: courses, error, isLoading } = useEnrolledCourses();
 
   return (
-    <>
-      {courses?.length === 0 || courses === undefined ? (
-        <Box>
-          <Text fontSize="2xl" color="white">
-            No Courses Found
-          </Text>
-        </Box>
-      ) : (
-        <CourseList courses={courses} />
-      )}
-    </>
+    <Container maxW="full">
+      <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
+        Courses
+        {courses?.length === 0 || courses === undefined ? (
+          <Box>
+            <Text fontSize="2xl" color="white">
+              No Courses Found
+            </Text>
+          </Box>
+        ) : (
+          <CourseList courses={courses} />
+        )}
+      </Heading>
+    </Container>
   );
 }
 const CourseList: React.FC<CourseListProps> = ({ courses }) => {
   return (
-    <VStack spacing={8} align="stretch" width="full" minHeight="100vh" mt="5em">
+    <VStack spacing={8} align="stretch" width="full" minHeight="100vh" mt={4}>
       {courses.map((course, index) => (
         <CourseComponent key={index} course={course} />
       ))}

@@ -35,10 +35,10 @@ export default function Profile() {
   // temporary information show up
   useEffect(() => {
     if (!user) {
-      // Redirect to login page
+      console.log('User not found');
     }
-    console.log(user);
-  });
+    console.log('rendering Profile for', user);
+  }, []);
 
   return (
     <Container maxW="full">
