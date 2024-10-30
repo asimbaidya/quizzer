@@ -3,7 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, computed_field
 
 
-class Course(BaseModel):
+class CourseResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     creator_id: int
@@ -20,7 +20,7 @@ class Course(BaseModel):
         return f"/{self.title.replace(' ', '_')}"
 
 
-class Test(BaseModel):
+class TestResponse(BaseModel):
     question_set_id: int
     id: int
     total_mark: int
@@ -33,7 +33,7 @@ class Test(BaseModel):
     # TODO add url
 
 
-class Quiz(BaseModel):
+class QuizResponse(BaseModel):
     title: str
     course_id: int
     created_at: datetime

@@ -34,6 +34,13 @@ def get_quiz_and_test_by_course_title_creator_id(  # type: ignore
         .filter(Course.title == course_title, Course.creator_id == teacher_id)
         .all()
     )
+    for quiz in quizzes:
+        quiz.url = f'teacher/courses/quiz/{course_title}/{quiz.id}'
+
+    # Create URLs for tests
+    for test in tests:
+        test.url = f'teacher/courses/test/{course_title}/{test.id}'
+
     return {
         'quizzes': quizzes,
         'tests': tests,

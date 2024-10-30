@@ -16,12 +16,15 @@ from app.schemas.question_submission import QuestionStudentSubmission
 
 
 def get_all_enrolled_courses_by_student_id(db: Session, student_id: int):
-    return (
+    courses = (
         db.query(Course)
         .join(Enrollment)
         .filter(Enrollment.student_id == student_id)
         .all()
     )
+    for course in courses:
+        course.url = f'/student/enrolled_courses/{course.title}'
+    return courses
 
 
 def get_all_quizzes_tests_in_enrolled_course_by_course_title_student_id(  # type: ignore
@@ -33,6 +36,12 @@ def get_all_quizzes_tests_in_enrolled_course_by_course_title_student_id(  # type
 
     quizzes = db.query(Quiz).filter(Quiz.course_id == course.id).all()
     tests = db.query(Test).filter(Test.course_id == course.id).all()
+
+    for quiz in quizzes:
+        quiz.url = f'/student/enrolled_courses/quiz/{course_title}/{quiz.id}'
+
+    for test in tests:
+        test.url = f'/student/enrolled_courses/test/{course_title}/{test.id}'
 
     # TODO: Retun the quizzes and tests in a better way
     return {
@@ -55,13 +64,16 @@ def get_all_question_in_enrolled_course_by_course_title_quiz_id_student_id(
             status_code=404, detail='Quiz not found in the specified course'
         )
     # sure enrolled so fetch question
-    return (
+    questions = (
         db.query(Question)
         .join(QuestionSet, QuestionSet.id == Question.question_set_id)
         .join(Quiz, Quiz.id == quiz_id)
         .filter(QuestionSet.id == quiz.question_set_id)
         .all()
     )
+    for question in questions:
+        question.url = f'/student/enrolled_courses/submit/{course_title}/{question.question_set_id}/{question.id}'  # noqa: E501
+    return questions
 
 
 def get_all_question_in_enrolled_course_by_course_title_test_id_student_id(
