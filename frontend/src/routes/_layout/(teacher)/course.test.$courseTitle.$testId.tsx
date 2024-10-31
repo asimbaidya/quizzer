@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, notFound } from '@tanstack/react-router';
 import { Container, Heading } from '@chakra-ui/react';
 import { useTestQuestions } from '../../../hooks/teacher';
 import { CustomError } from '../../../core/request';
@@ -13,7 +13,8 @@ export const Route = createFileRoute(
     if (isLoading) return <div>Loading...</div>;
     if (error) {
       const customError = error as CustomError;
-      return <div>Error: {customError?.details}</div>;
+      throw notFound();
+      // return <div>Error: {customError?.details}</div>;
     }
 
     // console.log('data', data);
