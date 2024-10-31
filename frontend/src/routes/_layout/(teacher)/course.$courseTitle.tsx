@@ -1,21 +1,18 @@
+import { Container, Heading } from '@chakra-ui/react';
 import { createFileRoute } from '@tanstack/react-router';
 
-export const Route = createFileRoute(
-  '/_layout/(teacher)/course/students/$courseTitle'
-)({
-  component: () => <CourseStudentsCourseTitle />,
+export const Route = createFileRoute('/_layout/(teacher)/course/$courseTitle')({
+  component: () => <CourseCourseTitle />,
 });
 
-import { Container, Heading } from '@chakra-ui/react';
-
-function CourseStudentsCourseTitle() {
+function CourseCourseTitle() {
   const { courseTitle } = Route.useParams();
   console.log('Route.useParams():', Route.useParams());
   return (
     <Container maxW="full" px={50}>
       <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
-        Course: {courseTitle}
-        All the Enrolled Student off Course {courseTitle}
+        Hello {courseTitle}
+        Create Quz and Test Here
       </Heading>
     </Container>
   );

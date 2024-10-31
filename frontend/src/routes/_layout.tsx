@@ -17,7 +17,7 @@ export const Route = createFileRoute('/_layout')({
 
 function Layout() {
   return (
-    <Flex maxW="large" minH="100vh" h="auto" position="relative">
+    <Flex maxW="large" h="auto" position="relative">
       <Sidebar />
       <Outlet />
       <UserMenu />
