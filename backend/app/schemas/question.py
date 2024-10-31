@@ -116,6 +116,7 @@ class QuestionTeacherView(BaseModel):
     question_data: QuestionTeacherData
     tag: str
     total_marks: int
+    image: Optional[str] = None
 
     @model_validator(mode='after')
     @classmethod

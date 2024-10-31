@@ -4,12 +4,13 @@ import uuid
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from app.api.deps import CurrentTeacher, CurrentUser
+from app.api.deps import CurrentTeacher
 from app.core.config import settings
 
 router = APIRouter()
 
 
+# // but only teacher can upload image in question set
 @router.post('/image_upload/')
 async def upload_image(_current_teacher: CurrentTeacher, file: UploadFile = File(...)):
     if not file.filename:
@@ -24,8 +25,9 @@ async def upload_image(_current_teacher: CurrentTeacher, file: UploadFile = File
     return {'file_id': unique_filename}
 
 
+# // anyone with link can view image
 @router.get('/image_show/{filename}')
-async def show_image(_current_user: CurrentUser, filename: str):
+async def show_image(filename: str):
     file_path = os.path.join(settings.UPLOAD_DIRECTORY, filename)
     if os.path.exists(file_path):
         return FileResponse(file_path)

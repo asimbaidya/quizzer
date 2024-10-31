@@ -84,6 +84,14 @@ def get_questions_by_course_title_quiz_id_teacher_id(
 def get_questions_by_course_title_test_id_teacher_id(
     db: Session, course_title: str, test_id: int, teacher_id: int
 ):
+    course = db.query(Course).filter(Course.title == course_title).first()
+    test = db.query(Test).filter(Test.id == test_id).first()
+    if not test or not course or test.course_id != course.id:  # type: ignore
+        raise HTTPException(
+            status_code=404,
+            detail='Course or Test not found or Test does not belong to this course',
+        )
+
     questions = (
         db.query(Question)
         .join(Test, Question.question_set_id == Test.question_set_id)
@@ -230,6 +238,7 @@ def create_question_by_course_title_quiz_id_teacher_id(
         question_data=question_create.question_data.model_dump(),
         tag=question_create.tag,
         question_set_id=question_set.id,
+        image=question_create.image,
     )
 
     db.add(question_instance)
@@ -261,6 +270,7 @@ def create_question_by_course_title_test_id_teacher_id(
         question_data=question_create.question_data.model_dump(),
         tag=question_create.tag,
         question_set_id=question_set.id,
+        image=question_create.image,
     )
 
     db.add(question_instance)
