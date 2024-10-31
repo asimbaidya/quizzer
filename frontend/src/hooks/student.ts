@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchEnrolledCourses } from '../core/services';
+import { fetchEnrolledCourses } from '../core/services/student';
 
 export const useEnrolledCourses = () => {
   return useQuery({

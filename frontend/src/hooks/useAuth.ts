@@ -2,7 +2,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useQuery, useMutation, QueryClient } from '@tanstack/react-query';
 import request, { ApiError } from '../core/request';
 import { useState } from 'react';
-import { fetchUserData } from '../core/services';
+import { fetchUserData } from '../core/services/user';
 
 interface Token {
   access_token: string;
