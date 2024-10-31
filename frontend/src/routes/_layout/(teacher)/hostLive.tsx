@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+// NOT SURE
 
 export const Route = createFileRoute('/_layout/(teacher)/hostLive')({
   component: () => (

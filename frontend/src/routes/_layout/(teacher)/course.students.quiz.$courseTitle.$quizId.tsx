@@ -1,12 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute(
-  '/_layout/(student)/enrolledCourse/$courseTitle'
+  '/_layout/(teacher)/course/students/quiz/$courseTitle/$quizId'
 )({
   component: () => (
     <div>
-      Here Student will get to View specific courses and link toall quiz under
-      that course
+      Hello /_layout/(teacher)/course/students/test/$courseTitle/quizId!
     </div>
   ),
 });
