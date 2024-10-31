@@ -7,7 +7,7 @@ export const Route = createFileRoute('/_layout/(student)/joinLive')({
 
 function JoinLive() {
   return (
-    <Container maxW="full" px={50}>
+    <Container maxW="full">
       <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
         Wanna Play Game? Join Live but need Secret Sauce for that
       </Heading>

@@ -8,7 +8,7 @@ export const Route = createFileRoute('/_layout/(admin)/dashboard')({
 function DashBoard() {
   console.log('Route.useParams():', Route.useParams());
   return (
-    <Container maxW="full" px={50}>
+    <Container maxW="full">
       <Heading
         size="lg"
         textAlign={{ base: 'center', md: 'left' }}

@@ -12,7 +12,7 @@ export default function EnrolledCourses() {
   const { data: courses, error, isLoading } = useEnrolledCourses();
 
   return (
-    <Container maxW="full" px={50}>
+    <Container maxW="full">
       <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
         Courses
       </Heading>

@@ -7,7 +7,7 @@ export const Route = createFileRoute('/_layout/(admin)/addUser')({
 
 function AdminAddUser() {
   return (
-    <Container maxW="full" px={50}>
+    <Container maxW="full">
       <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
         Place to Do Nepotism
       </Heading>

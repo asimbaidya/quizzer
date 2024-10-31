@@ -11,7 +11,7 @@ function EnrolledCoursesCourseTitle() {
   const { courseTitle } = Route.useParams();
   console.log('Route.useParams():', Route.useParams());
   return (
-    <Container maxW="full" px={50}>
+    <Container maxW="full">
       <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
         Here Student will get to View courses {courseTitle}
         ann the Test and Quiz link in course {courseTitle}

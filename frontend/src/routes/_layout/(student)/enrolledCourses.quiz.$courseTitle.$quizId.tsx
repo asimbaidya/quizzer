@@ -11,7 +11,7 @@ function EnrolledCoursesQuizCourseTitleQuizId() {
   const { courseTitle, quizId } = Route.useParams();
   console.log('Route.useParams():', Route.useParams());
   return (
-    <Container maxW="full" px={50}>
+    <Container maxW="full">
       <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
         Your Get to See Question of Quiz {quizId} of {courseTitle}
       </Heading>

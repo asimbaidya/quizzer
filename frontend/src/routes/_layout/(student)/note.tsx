@@ -8,7 +8,7 @@ export const Route = createFileRoute('/_layout/(student)/note')({
 function Note() {
   console.log('Route.useParams():', Route.useParams());
   return (
-    <Container maxW="full" px={50}>
+    <Container maxW="full">
       <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
         Take Note Make Note Save Note
       </Heading>
