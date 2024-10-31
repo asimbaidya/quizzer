@@ -73,6 +73,10 @@ def get_all_question_in_enrolled_course_by_course_title_quiz_id_student_id(
     )
     for question in questions:
         question.url = f'/student/enrolled_courses/submit/{course_title}/{question.question_set_id}/{question.id}'  # noqa: E501
+        if question.image is not None:
+            question.image_url = (
+                f'http://127.0.0.1:8000/API/image_show/{question.image}'
+            )
     return questions
 
 
@@ -89,14 +93,20 @@ def get_all_question_in_enrolled_course_by_course_title_test_id_student_id(
         raise HTTPException(
             status_code=404, detail='Test not found in the specified course'
         )
-    # sure enrolled so fetch question
-    return (
+    questions = (
         db.query(Question)
         .join(QuestionSet, QuestionSet.id == Question.question_set_id)
         .join(Test, Test.id == test_id)
         .filter(QuestionSet.id == test.question_set_id)
         .all()
     )
+    for question in questions:
+        question.url = f'/student/enrolled_courses/submit/{course_title}/{question.question_set_id}/{question.id}'  # noqa: E501
+        if question.image is not None:
+            question.image_url = (
+                f'http://127.0.0.1:8000/API/image_show/{question.image}'
+            )
+    return questions
 
 
 # ---------- Post ----------

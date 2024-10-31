@@ -116,7 +116,7 @@ class Question(Base):
     total_marks = Column(Integer, nullable=False, default=5)
     tag = Column(String, nullable=True)
 
-    # reference_image = Column(String, nullable=True)  # Image URL reference
+    image = Column(String, nullable=True)  # Image URL reference
 
     submission = relationship(
         'QuestionSubmission', back_populates='question', cascade='all, delete-orphan'

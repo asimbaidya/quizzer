@@ -1,12 +1,19 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api.main import api_router
 from app.core.config import settings
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-)
+app = FastAPI(title=settings.PROJECT_NAME)
+
+# WARN: ensure the directory exists
+os.makedirs(settings.UPLOAD_DIRECTORY, exist_ok=True)
+
+app.mount('/static', StaticFiles(directory='static'), name='static')
+
 
 origins = ['http://127.0.0.1:3000', 'http://localhost:3000', '*']
 

@@ -25,6 +25,7 @@ class Settings(BaseSettings):
 
     # database stuff
     POSTGRES_URI: str = ''
+    UPLOAD_DIRECTORY: str
 
 
 settings = Settings()  # type: ignore

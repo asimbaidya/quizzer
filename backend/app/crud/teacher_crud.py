@@ -61,7 +61,7 @@ def get_enrolled_students(db: Session, course_title: str, teacher_id: int):
 def get_questions_by_course_title_quiz_id_teacher_id(
     db: Session, course_title: str, quiz_id: int, teacher_id: int
 ):
-    return (
+    questions = (
         db.query(Question)
         .join(Quiz, Question.question_set_id == Quiz.question_set_id)
         .join(Course, Quiz.course_id == Course.id)
@@ -73,12 +73,18 @@ def get_questions_by_course_title_quiz_id_teacher_id(
         )
         .all()
     )
+    for question in questions:
+        if question.image is not None:
+            question.image_url = (
+                f'http://127.0.0.1:8000/API/image_show/{question.image}'
+            )
+    return questions
 
 
 def get_questions_by_course_title_test_id_teacher_id(
     db: Session, course_title: str, test_id: int, teacher_id: int
 ):
-    return (
+    questions = (
         db.query(Question)
         .join(Test, Question.question_set_id == Test.question_set_id)
         .join(Course, Test.course_id == Course.id)
@@ -90,6 +96,12 @@ def get_questions_by_course_title_test_id_teacher_id(
         )
         .all()
     )
+    for question in questions:
+        if question.image is not None:
+            question.image_url = (
+                f'http://127.0.0.1:8000/API/image_show/{question.image}'
+            )
+    return questions
 
 
 def get_student_progress_course_title_quiz_id_teacher_id(
