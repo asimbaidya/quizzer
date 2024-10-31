@@ -45,7 +45,6 @@ const Login = () => {
   };
 
   const onSubmit = (data: LoginFormData) => {
-    console.log(data);
     login(data.email, data.password);
   };
 

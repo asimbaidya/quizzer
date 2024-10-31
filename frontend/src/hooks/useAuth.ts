@@ -3,6 +3,7 @@ import { useQuery, useMutation, QueryClient } from '@tanstack/react-query';
 import request, { ApiError } from '../core/request';
 import { useState } from 'react';
 import { fetchUserData } from '../core/services/user';
+import useCustomToast from './useCustomToast';
 
 interface Token {
   access_token: string;
@@ -17,6 +18,7 @@ export default function useAuth() {
   const navigate = useNavigate();
   const [loginError, setLoginError] = useState<string | null>(null);
   const queryClient = new QueryClient();
+  const { showToast } = useCustomToast();
 
   const {
     data: user,
@@ -44,6 +46,12 @@ export default function useAuth() {
     },
     onSuccess: (data) => {
       localStorage.setItem('access_token', data.access_token);
+      showToast({
+        title: 'Login',
+        description: 'You have been successfully logged in.',
+        status: 'success',
+        duration: 2000,
+      });
       setLoginError(null);
       navigate({ to: '/' });
     },
@@ -61,7 +69,13 @@ export default function useAuth() {
   const logout = () => {
     localStorage.removeItem('access_token');
     queryClient.refetchQueries({ queryKey: ['user'] });
-    window.location.reload();
+    // window.location.reload();
+    showToast({
+      title: 'Logout',
+      description: 'Your have been successfully logged out.',
+      status: 'info',
+      duration: 2000,
+    });
     navigate({ to: '/' });
   };
 
