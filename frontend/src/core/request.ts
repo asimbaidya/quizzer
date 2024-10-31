@@ -22,13 +22,14 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-export class ApiError extends Error {
+export class CustomError extends Error {
   public details: any;
 
   constructor(message: string, details: any) {
     super(message);
+    // details is the response from backend API(fastapi)
     this.details = details;
-    this.name = 'ApiError';
+    this.name = 'CustomError';
   }
 }
 
@@ -57,10 +58,20 @@ export default async function request<T>({
     return response.data;
   } catch (error: any) {
     if (axios.isAxiosError(error) && error.response) {
-      const errorMessage = `Error ${error.response.status}: ${error.response.data.message}`;
-      const errorDetails = error.response.data?.detail || null;
-      throw new ApiError(errorMessage, errorDetails);
+      console.log('-------------------------------> request()');
+      console.log('error:', error);
+      console.log('error.cause:', error.cause);
+      console.log('error.message:', error.message);
+      // response means error is  responded from the server
+      // can be string or list or errors objects
+      console.log('error.response.data.detail:', error.response.data.detail);
+      console.log('------------------------------->request()');
+      const errorMessage = error.message || "Something isn't working";
+      const errorDetails =
+        error.response.data?.detail || 'unexpected Server Reponse';
+      throw new CustomError(errorMessage, errorDetails);
     }
-    throw new ApiError('An unexpected error occurred', null);
+
+    throw new CustomError('Check Server is up or not', null);
   }
 }

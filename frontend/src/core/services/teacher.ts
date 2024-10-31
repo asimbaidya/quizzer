@@ -1,6 +1,9 @@
 import request from '../request';
 import { Course } from '../schemas/common';
 
+// okey // okey // final // super final
+// so here the services will take the path as argument to determine the endpoint
+
 // export const fetchEnrolledCourses = async (signal: AbortSignal) => {
 //   if (!localStorage.getItem('access_token')) {
 //     throw new Error('No Token');
