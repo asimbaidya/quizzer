@@ -12,7 +12,7 @@ interface CourseListProps {
   courses: Course[];
 }
 
-export default function EnrolledCourses() {
+function EnrolledCourses() {
   const queryClient = new QueryClient();
   const { data: courses, error, isLoading } = useEnrolledCourses();
 
@@ -33,7 +33,7 @@ export default function EnrolledCourses() {
     </Container>
   );
 }
-const CourseList: React.FC<CourseListProps> = ({ courses }) => {
+export default function CourseList({ courses }: CourseListProps) {
   return (
     <VStack spacing={8} align="stretch" width="full" minHeight="100vh" mt={4}>
       {courses.map((course, index) => (
@@ -41,7 +41,7 @@ const CourseList: React.FC<CourseListProps> = ({ courses }) => {
       ))}
     </VStack>
   );
-};
+}
 
 const CourseComponent: React.FC<CourseProps> = ({ course }) => {
   return (

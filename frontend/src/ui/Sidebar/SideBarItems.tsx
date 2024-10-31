@@ -52,7 +52,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
       {
         icon: FiBookOpen,
         title: 'Enrolled Course',
-        path: '/enrolledCourse',
+        path: '/enrolledCourses',
       },
       { icon: FiFileText, title: 'Notes', path: '/note' },
       { icon: FiWifi, title: 'Join Live', path: '/joinLive' },
