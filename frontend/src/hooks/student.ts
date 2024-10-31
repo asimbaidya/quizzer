@@ -3,7 +3,7 @@ import { fetchEnrolledCourses } from '../core/services/student';
 
 export const useEnrolledCourses = () => {
   return useQuery({
-    queryKey: ['todos'],
+    queryKey: ['enrolledCourses'],
     queryFn: ({ signal }: { signal: AbortSignal }) =>
       fetchEnrolledCourses(signal),
   });

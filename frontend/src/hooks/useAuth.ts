@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useQuery, useMutation, QueryClient } from '@tanstack/react-query';
-import request, { ApiError } from '../core/request';
+import request, { CustomError } from '../core/request';
 import { useState } from 'react';
 import { fetchUserData } from '../core/services/user';
 import useCustomToast from './useCustomToast';
@@ -56,7 +56,7 @@ export default function useAuth() {
       navigate({ to: '/' });
     },
 
-    onError: (error: ApiError) => {
+    onError: (error: CustomError) => {
       console.error('API Error:', error.message, error.details);
       setLoginError(error.details);
     },

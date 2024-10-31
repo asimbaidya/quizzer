@@ -4,7 +4,7 @@ import { fetchTestQuestions } from '../core/services/teacher';
 
 export const useCreatedCourses = () => {
   return useQuery({
-    queryKey: ['todos'],
+    queryKey: ['CreatedCourses'],
     queryFn: ({ signal }: { signal: AbortSignal }) =>
       fetchEnrolledCourses(signal),
   });
