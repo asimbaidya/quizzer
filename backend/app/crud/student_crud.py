@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
@@ -11,8 +13,10 @@ from app.models.quiz import (
     Quiz,
     Test,
 )
+from app.models.user import Note
 from app.schemas.question import QuestionTeacherView
 from app.schemas.question_submission import QuestionStudentSubmission
+from app.schemas.user import NoteCreate
 
 
 def get_all_enrolled_courses_by_student_id(db: Session, student_id: int):
@@ -109,7 +113,55 @@ def get_all_question_in_enrolled_course_by_course_title_test_id_student_id(
     return questions
 
 
+def get_all_notes_by_student_id(db: Session, student_id: int):
+    return db.query(Note).filter(Note.user_id == student_id).all()
+
+
+def get_single_note_by_student_id_note_id(db: Session, student_id: int, note_id: int):
+    return db.query(Note).filter(Note.user_id == student_id, Note.id == note_id).first()
+
+
 # ---------- Post ----------
+
+
+def create_note_by_student_id(db: Session, student_id: int, note: NoteCreate):
+    db_note = Note(
+        **note.model_dump(),
+        user_id=student_id,
+    )
+    db.add(db_note)
+    db.commit()
+    db.refresh(db_note)
+    return db_note
+
+
+def update_note_by_student_id_note_id(
+    db: Session, student_id: int, note_id: int, note: NoteCreate
+):
+    db_note = (
+        db.query(Note).filter(Note.user_id == student_id, Note.id == note_id).first()
+    )
+    if db_note is None:
+        raise HTTPException(status_code=404, detail='Note not found')
+
+    db.query(Note).filter(Note.user_id == student_id, Note.id == note_id).update(
+        {'note_data': note.note_data.model_dump(), 'updated_at': datetime.now()}
+    )
+
+    db.commit()
+    db.refresh(db_note)
+    return db_note
+
+
+def delete_note_by_student_id_note_id(db: Session, student_id: int, note_id: int):
+    db_note = (
+        db.query(Note).filter(Note.user_id == student_id, Note.id == note_id).first()
+    )
+    if db_note is None:
+        raise HTTPException(status_code=404, detail='Note not found')
+    db.delete(db_note)
+    db.commit()
+    return db_note
 
 
 def enroll_course_by_course_title_course_pin_student_id(

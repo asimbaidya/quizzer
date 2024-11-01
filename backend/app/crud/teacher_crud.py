@@ -53,7 +53,7 @@ def get_enrolled_students(db: Session, course_title: str, teacher_id: int):
         db.query(User)
         .join(Enrollment, User.id == Enrollment.student_id)
         .join(Course, Enrollment.course_id == Course.id)
-        .filter(course_title == course_title, User.id == teacher_id)  # type: ignore
+        .filter(Course.title == course_title, User.id == Enrollment.student_id)
         .all()
     )
 
@@ -334,6 +334,3 @@ def get_course_by_title_creator_id(db: Session, course_title: str, teacher_id: i
     if course is None:
         raise HTTPException(status_code=404, detail='Course not found')
     return course
-
-
-# get or HTTPEXception

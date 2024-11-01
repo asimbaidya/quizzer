@@ -30,3 +30,36 @@ class UserInDB(User):
 
 class UserPublic(User):
     id: int
+
+
+class Note(BaseModel):
+    heading: str
+    content: str
+    flag: int
+
+
+class NoteDate(BaseModel):
+    notes: list[Note]
+
+
+class NoteBase(BaseModel):
+    title: str = Field(default='Untitled')
+    note_data: NoteDate
+
+
+class NoteCreate(NoteBase):
+    pass
+
+
+class NoteUpdate(NoteBase):
+    user_id: int
+    pass
+
+
+class NoteInDB(NoteBase):
+    id: int
+    user_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

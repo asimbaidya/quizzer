@@ -145,6 +145,16 @@ class QuestionStudentView(BaseModel):
     tag: str
     total_marks: int
 
+    url: str
+
+    image_url: Optional[str] = None
+    image: Optional[str] = None
+
+    made_attempt: Optional[bool] = False
+    is_correct: bool = False
+    score: int = 0
+    feedback: str = ''
+
 
 def convert_to_student_view(
     question_create: QuestionTeacherView,

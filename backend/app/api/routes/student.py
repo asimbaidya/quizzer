@@ -3,7 +3,9 @@ from fastapi import APIRouter
 from app.api.deps import CurrentStudent, SessionDep
 from app.crud import student_crud
 from app.schemas.common import EnrollMetadata
+from app.schemas.question import QuestionStudentView
 from app.schemas.question_submission import QuestionStudentSubmission
+from app.schemas.user import NoteCreate, NoteUpdate
 
 router = APIRouter()
 
@@ -29,7 +31,10 @@ def get_all_quiz_and_test_in_enrolled_course(  # type: ignore
     )  # type: ignore
 
 
-@router.get('/enrolled_courses/quiz/{course_title}/{quiz_id}')
+@router.get(
+    '/enrolled_courses/quiz/{course_title}/{quiz_id}',
+    response_model=list[QuestionStudentView],
+)
 def get_all_question_in_a_quiz_of_enrolled_course(
     db: SessionDep,
     course_title: str,
@@ -44,7 +49,10 @@ def get_all_question_in_a_quiz_of_enrolled_course(
     )
 
 
-@router.get('/enrolled_courses/test/{course_title}/{test_id}')
+@router.get(
+    '/enrolled_courses/test/{course_title}/{test_id}',
+    response_model=list[QuestionStudentView],
+)
 def get_all_question_in_a_test_of_enrolled_course(
     db: SessionDep, course_title: str, test_id: int, student: CurrentStudent
 ):
@@ -54,6 +62,33 @@ def get_all_question_in_a_test_of_enrolled_course(
         test_id,
         student.id,  # type: ignore
     )
+
+
+@router.get('/notes')
+def get_all_note_of_user(db: SessionDep, student: CurrentStudent):
+    return student_crud.get_all_notes_by_student_id(db, student.id)  # type: ignore
+
+
+@router.get('/notes/{note_id}')
+def get_specific_note_of_user(db: SessionDep, student: CurrentStudent, note_id: int):
+    return student_crud.get_single_note_by_student_id_note_id(db, student.id, note_id)  # type: ignore
+
+
+@router.post('/notes')
+def create_note_for_user(db: SessionDep, student: CurrentStudent, note: NoteCreate):
+    return student_crud.create_note_by_student_id(db, student.id, note)  # type: ignore
+
+
+@router.put('/notes/{note_id}')
+def update_note_for_user(
+    db: SessionDep, student: CurrentStudent, note_id: int, note: NoteUpdate
+):
+    return student_crud.update_note_by_student_id_note_id(db, student.id, note_id, note)  # type: ignore
+
+
+@router.delete('/notes/{note_id}')
+def delete_note_for_user(db: SessionDep, student: CurrentStudent, note_id: int):
+    return student_crud.delete_note_by_student_id_note_id(db, student.id, note_id)
 
 
 # ---- POST ROUTES ----
