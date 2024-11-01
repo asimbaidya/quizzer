@@ -67,7 +67,7 @@ const CourseComponent: React.FC<CourseProps> = ({ course }) => {
       </Text>
       <span color="teal.300">
         <Link
-          to={`/enrolledCourse/${course.title}`}
+          to={`/enrolledCourses/${course.title}`}
           style={{
             color: 'teal',
             fontWeight: 'bold',

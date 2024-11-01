@@ -8,8 +8,6 @@ import {
   FiUsers,
   FiBookOpen,
   FiFileText,
-  FiWifi,
-  FiBook,
 } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 
@@ -44,7 +42,6 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
     final_items = [
       ...items,
       { icon: FiBookOpen, title: 'Course', path: '/course' },
-      { icon: FiWifi, title: 'Host Live', path: '/hostLive' },
     ];
   } else if (user?.role === 'student') {
     final_items = [
@@ -55,7 +52,6 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
         path: '/enrolledCourses',
       },
       { icon: FiFileText, title: 'Notes', path: '/note' },
-      { icon: FiWifi, title: 'Join Live', path: '/joinLive' },
     ];
   }
 

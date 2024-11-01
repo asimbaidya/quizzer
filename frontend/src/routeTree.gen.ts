@@ -17,10 +17,8 @@ import { Route as LayoutIndexImport } from './routes/_layout/index'
 import { Route as LayoutProfileImport } from './routes/_layout/profile'
 import { Route as authSignupImport } from './routes/(auth)/signup'
 import { Route as authLoginImport } from './routes/(auth)/login'
-import { Route as LayoutteacherHostLiveImport } from './routes/_layout/(teacher)/hostLive'
 import { Route as LayoutteacherCourseImport } from './routes/_layout/(teacher)/course'
 import { Route as LayoutstudentNoteImport } from './routes/_layout/(student)/note'
-import { Route as LayoutstudentJoinLiveImport } from './routes/_layout/(student)/joinLive'
 import { Route as LayoutstudentEnrolledCoursesImport } from './routes/_layout/(student)/enrolledCourses'
 import { Route as LayoutadminDashboardImport } from './routes/_layout/(admin)/dashboard'
 import { Route as LayoutadminAddUserImport } from './routes/_layout/(admin)/addUser'
@@ -73,12 +71,6 @@ const authLoginRoute = authLoginImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutteacherHostLiveRoute = LayoutteacherHostLiveImport.update({
-  id: '/(teacher)/hostLive',
-  path: '/hostLive',
-  getParentRoute: () => LayoutRoute,
-} as any)
-
 const LayoutteacherCourseRoute = LayoutteacherCourseImport.update({
   id: '/(teacher)/course',
   path: '/course',
@@ -88,12 +80,6 @@ const LayoutteacherCourseRoute = LayoutteacherCourseImport.update({
 const LayoutstudentNoteRoute = LayoutstudentNoteImport.update({
   id: '/(student)/note',
   path: '/note',
-  getParentRoute: () => LayoutRoute,
-} as any)
-
-const LayoutstudentJoinLiveRoute = LayoutstudentJoinLiveImport.update({
-  id: '/(student)/joinLive',
-  path: '/joinLive',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -259,13 +245,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutstudentEnrolledCoursesImport
       parentRoute: typeof LayoutImport
     }
-    '/_layout/(student)/joinLive': {
-      id: '/_layout/(student)/joinLive'
-      path: '/joinLive'
-      fullPath: '/joinLive'
-      preLoaderRoute: typeof LayoutstudentJoinLiveImport
-      parentRoute: typeof LayoutImport
-    }
     '/_layout/(student)/note': {
       id: '/_layout/(student)/note'
       path: '/note'
@@ -278,13 +257,6 @@ declare module '@tanstack/react-router' {
       path: '/course'
       fullPath: '/course'
       preLoaderRoute: typeof LayoutteacherCourseImport
-      parentRoute: typeof LayoutImport
-    }
-    '/_layout/(teacher)/hostLive': {
-      id: '/_layout/(teacher)/hostLive'
-      path: '/hostLive'
-      fullPath: '/hostLive'
-      preLoaderRoute: typeof LayoutteacherHostLiveImport
       parentRoute: typeof LayoutImport
     }
     '/_layout/(student)/enrolledCourses/$courseTitle': {
@@ -427,10 +399,8 @@ interface LayoutRouteChildren {
   LayoutadminAddUserRoute: typeof LayoutadminAddUserRoute
   LayoutadminDashboardRoute: typeof LayoutadminDashboardRoute
   LayoutstudentEnrolledCoursesRoute: typeof LayoutstudentEnrolledCoursesRouteWithChildren
-  LayoutstudentJoinLiveRoute: typeof LayoutstudentJoinLiveRoute
   LayoutstudentNoteRoute: typeof LayoutstudentNoteRoute
   LayoutteacherCourseRoute: typeof LayoutteacherCourseRouteWithChildren
-  LayoutteacherHostLiveRoute: typeof LayoutteacherHostLiveRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
@@ -440,10 +410,8 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutadminDashboardRoute: LayoutadminDashboardRoute,
   LayoutstudentEnrolledCoursesRoute:
     LayoutstudentEnrolledCoursesRouteWithChildren,
-  LayoutstudentJoinLiveRoute: LayoutstudentJoinLiveRoute,
   LayoutstudentNoteRoute: LayoutstudentNoteRoute,
   LayoutteacherCourseRoute: LayoutteacherCourseRouteWithChildren,
-  LayoutteacherHostLiveRoute: LayoutteacherHostLiveRoute,
 }
 
 const LayoutRouteWithChildren =
@@ -459,10 +427,8 @@ export interface FileRoutesByFullPath {
   '/addUser': typeof LayoutadminAddUserRoute
   '/dashboard': typeof LayoutadminDashboardRoute
   '/enrolledCourses': typeof LayoutstudentEnrolledCoursesRouteWithChildren
-  '/joinLive': typeof LayoutstudentJoinLiveRoute
   '/note': typeof LayoutstudentNoteRoute
   '/course': typeof LayoutteacherCourseRouteWithChildren
-  '/hostLive': typeof LayoutteacherHostLiveRoute
   '/enrolledCourses/$courseTitle': typeof LayoutstudentEnrolledCoursesCourseTitleRoute
   '/course/$courseTitle': typeof LayoutteacherCourseCourseTitleRoute
   '/enrolledCourses/': typeof LayoutstudentEnrolledCoursesIndexRoute
@@ -484,9 +450,7 @@ export interface FileRoutesByTo {
   '/': typeof LayoutIndexRoute
   '/addUser': typeof LayoutadminAddUserRoute
   '/dashboard': typeof LayoutadminDashboardRoute
-  '/joinLive': typeof LayoutstudentJoinLiveRoute
   '/note': typeof LayoutstudentNoteRoute
-  '/hostLive': typeof LayoutteacherHostLiveRoute
   '/enrolledCourses/$courseTitle': typeof LayoutstudentEnrolledCoursesCourseTitleRoute
   '/course/$courseTitle': typeof LayoutteacherCourseCourseTitleRoute
   '/enrolledCourses': typeof LayoutstudentEnrolledCoursesIndexRoute
@@ -511,10 +475,8 @@ export interface FileRoutesById {
   '/_layout/(admin)/addUser': typeof LayoutadminAddUserRoute
   '/_layout/(admin)/dashboard': typeof LayoutadminDashboardRoute
   '/_layout/(student)/enrolledCourses': typeof LayoutstudentEnrolledCoursesRouteWithChildren
-  '/_layout/(student)/joinLive': typeof LayoutstudentJoinLiveRoute
   '/_layout/(student)/note': typeof LayoutstudentNoteRoute
   '/_layout/(teacher)/course': typeof LayoutteacherCourseRouteWithChildren
-  '/_layout/(teacher)/hostLive': typeof LayoutteacherHostLiveRoute
   '/_layout/(student)/enrolledCourses/$courseTitle': typeof LayoutstudentEnrolledCoursesCourseTitleRoute
   '/_layout/(teacher)/course/$courseTitle': typeof LayoutteacherCourseCourseTitleRoute
   '/_layout/(student)/enrolledCourses/': typeof LayoutstudentEnrolledCoursesIndexRoute
@@ -540,10 +502,8 @@ export interface FileRouteTypes {
     | '/addUser'
     | '/dashboard'
     | '/enrolledCourses'
-    | '/joinLive'
     | '/note'
     | '/course'
-    | '/hostLive'
     | '/enrolledCourses/$courseTitle'
     | '/course/$courseTitle'
     | '/enrolledCourses/'
@@ -564,9 +524,7 @@ export interface FileRouteTypes {
     | '/'
     | '/addUser'
     | '/dashboard'
-    | '/joinLive'
     | '/note'
-    | '/hostLive'
     | '/enrolledCourses/$courseTitle'
     | '/course/$courseTitle'
     | '/enrolledCourses'
@@ -589,10 +547,8 @@ export interface FileRouteTypes {
     | '/_layout/(admin)/addUser'
     | '/_layout/(admin)/dashboard'
     | '/_layout/(student)/enrolledCourses'
-    | '/_layout/(student)/joinLive'
     | '/_layout/(student)/note'
     | '/_layout/(teacher)/course'
-    | '/_layout/(teacher)/hostLive'
     | '/_layout/(student)/enrolledCourses/$courseTitle'
     | '/_layout/(teacher)/course/$courseTitle'
     | '/_layout/(student)/enrolledCourses/'
@@ -647,10 +603,8 @@ export const routeTree = rootRoute
         "/_layout/(admin)/addUser",
         "/_layout/(admin)/dashboard",
         "/_layout/(student)/enrolledCourses",
-        "/_layout/(student)/joinLive",
         "/_layout/(student)/note",
-        "/_layout/(teacher)/course",
-        "/_layout/(teacher)/hostLive"
+        "/_layout/(teacher)/course"
       ]
     },
     "/about": {
@@ -688,10 +642,6 @@ export const routeTree = rootRoute
         "/_layout/(student)/enrolledCourses/test/$courseTitle/$testId"
       ]
     },
-    "/_layout/(student)/joinLive": {
-      "filePath": "_layout/(student)/joinLive.tsx",
-      "parent": "/_layout"
-    },
     "/_layout/(student)/note": {
       "filePath": "_layout/(student)/note.tsx",
       "parent": "/_layout"
@@ -708,10 +658,6 @@ export const routeTree = rootRoute
         "/_layout/(teacher)/course/students/quiz/$courseTitle/$quizId",
         "/_layout/(teacher)/course/students/test/$courseTitle/$testId"
       ]
-    },
-    "/_layout/(teacher)/hostLive": {
-      "filePath": "_layout/(teacher)/hostLive.tsx",
-      "parent": "/_layout"
     },
     "/_layout/(student)/enrolledCourses/$courseTitle": {
       "filePath": "_layout/(student)/enrolledCourses.$courseTitle.tsx",
