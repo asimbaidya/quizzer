@@ -12,7 +12,6 @@ router = APIRouter()
 # ---- GET ROUTES ----
 
 
-# /courses => Get list of courses created by the teacher
 @router.get(
     '/courses',
 )
@@ -24,8 +23,6 @@ def get_courses(db: SessionDep, teacher: CurrentTeacher):
     return [CourseResponse.model_validate(course) for course in courses]
 
 
-# /course/{course_title} -> Get all quizzes of a course
-# todo: also return tests into the response
 @router.get(
     '/course/{course_title}',
 )
@@ -39,7 +36,6 @@ def get_quizzes_and_tests__in_course(  # type: ignore
     )  # type: ignore
 
 
-# /course/students/{course_title} -> List of enrolled students in a course
 @router.get(
     '/course/students/{course_title}',
 )
@@ -47,7 +43,6 @@ def get_enrolled_students(course_title: str, db: SessionDep, teacher: CurrentTea
     return teacher_crud.get_enrolled_students(db, course_title, teacher.id)  # type: ignore
 
 
-# /course/{course_title}/{quiz_id} -> Get all questions in a quiz
 @router.get(
     '/course/quiz/{course_title}/{quiz_id}',
 )
@@ -62,7 +57,6 @@ def get_questions_in_quiz(
     )
 
 
-# /course/{course_title}/{test_id} -> Get all questions in a test
 @router.get(
     '/course/test/{course_title}/{test_id}',
 )
@@ -77,17 +71,65 @@ def get_questions_in_test(
     )
 
 
-# /course/{course_title}/{quiz_id}/info -> Student progress or marks in a quiz
-@router.get(
-    '/course/students/{course_title}/{quiz_id}',
-)
-def get_student_progress(
+@router.get('/course/quiz/students/{course_title}/{quiz_id}')
+def get_student_progress_in_quiz(
     course_title: str, quiz_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
-    return teacher_crud.get_student_progress_course_title_quiz_id_teacher_id(
+    student_progress = (
+        teacher_crud.get_student_progress_course_title_quiz_id_teacher_id(
+            db,
+            course_title,
+            quiz_id,
+            teacher.id,  # type: ignore
+        )
+    )
+
+    #  {
+    #     "id": 7,
+    #     "user_response": {
+    #       "question_type": "single_choice",
+    #       "user_response": "def"
+    #     },
+    #     "feedback": "Correct! Your answer is right.",
+    #     "user_id": 3,
+    #     "question_id": 14,
+    #     "made_attempt": true,
+    #     "question_type": "single_choice",
+    #     "is_correct": true,
+    #     "score": 5,
+    #     "attempt_time": "2024-10-30T00:40:09.257321"
+    #   }
+
+    # Group data by student
+    grouped_data = {}
+    for progress in student_progress:
+        student_id = progress.user_id
+
+        if student_id not in grouped_data:
+            grouped_data[student_id] = {
+                'name': progress.id,
+                'email': progress.id,
+                'score': 0,
+                'submissions': [],
+            }
+
+        grouped_data[student_id]['score'] += progress.score
+        grouped_data[student_id]['submissions'].append(progress)
+
+    return grouped_data
+
+    print(student_progress)
+    return student_progress
+
+
+@router.get('/course/test/students/{course_title}/{test_id}')
+def get_student_progress_in_test(
+    course_title: str, test_id: int, db: SessionDep, teacher: CurrentTeacher
+):
+    return teacher_crud.get_student_progress_course_title_test_id_teacher_id(
         db,
         course_title,
-        quiz_id,
+        test_id,
         teacher.id,  # type: ignore
     )
 
@@ -95,7 +137,6 @@ def get_student_progress(
 # ---- POST ROUTES ----
 
 
-# /course -> Create a new course
 @router.post(
     '/course',
 )
@@ -106,7 +147,6 @@ def create_course(db: SessionDep, course: CourseCreate, teacher: CurrentTeacher)
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# /course/quiz/{course_title} -> Create a new quiz within a course
 @router.post(
     '/course/quiz/{course_title}',
 )
@@ -124,7 +164,6 @@ def create_quiz(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# /course/test/{course_title} -> Create a new test within a course
 @router.post(
     '/course/test/{course_title}',
 )
@@ -144,7 +183,6 @@ def create_test(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# /course/{course_title}/{quiz_id} -> Create a new question in a quiz
 @router.post(
     '/course/quiz/{course_title}/{quiz_id}',
     response_model=QuestionTeacherView,
@@ -168,7 +206,6 @@ def create_question_in_quiz(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# /course/{course_title}/{quiz_id} -> Create a new question in a test
 @router.post(
     '/course/test/{course_title}/{test_id}',
     response_model=QuestionTeacherView,

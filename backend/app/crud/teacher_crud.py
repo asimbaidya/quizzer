@@ -129,6 +129,23 @@ def get_student_progress_course_title_quiz_id_teacher_id(
     )
 
 
+def get_student_progress_course_title_test_id_teacher_id(
+    db: Session, course_title: str, test_id: int, teacher_id: int
+):
+    return (
+        db.query(QuestionSubmission)
+        .join(User, QuestionSubmission.user_id == User.id)
+        .join(Enrollment, User.id == Enrollment.student_id)
+        .join(Course, Enrollment.course_id == Course.id)
+        .filter(
+            Course.title == course_title,
+            Test.id == test_id,
+            Course.creator_id == teacher_id,
+        )
+        .all()
+    )
+
+
 # FOR POST REQUESTS
 
 
