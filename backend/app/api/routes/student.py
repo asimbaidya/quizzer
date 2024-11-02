@@ -1,10 +1,11 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from app.api.deps import CurrentStudent, SessionDep
 from app.crud import student_crud
-from app.schemas.common import EnrollMetadata
+from app.models.quiz import QuestionSubmission, Quiz, Test
 from app.schemas.question import QuestionStudentView
 from app.schemas.question_submission import QuestionStudentSubmission
+from app.schemas.request_model import EnrollMetadata
 from app.schemas.user import NoteCreate, NoteUpdate
 
 router = APIRouter()
@@ -123,4 +124,22 @@ def submit_question_with_course_title_question_set_id_question_id(
         question_id,
         user_submission,
         student.id,  # type: ignore
+    )
+
+
+@router.post('/questions/submit/{question_id}')
+def submit_question_answer(
+    db: SessionDep,
+    course_title: str,
+    question_set_id: int,
+    question_id: int,
+    user_submission: QuestionStudentSubmission,
+    current_student: CurrentStudent,
+):
+    return student_crud.submit_question_answer(
+        db,
+        course_title,
+        question_id,
+        user_submission,
+        current_student.id,
     )
