@@ -1,4 +1,4 @@
-from sqlalchemy import TIMESTAMP, Column, ForeignKey, Integer, String, func
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -12,8 +12,8 @@ class Note(Base):
     note_data = Column(JSONB, nullable=False)  # Store question details as JSONB
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
-    created_at = Column(TIMESTAMP, server_default=func.now())
-    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     creator = relationship('User', back_populates='notes')
 
@@ -26,7 +26,7 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     hashed_password = Column(String, nullable=False)
     role = Column(String, nullable=False)  # Enum of 'admin', 'teacher', 'student'
-    joined_at = Column(TIMESTAMP, server_default=func.now())
+    joined_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # [teacher: 1-m] Course one user can create multiple courses
     course = relationship(
@@ -44,11 +44,5 @@ class User(Base):
     # [student: 1-m] Note one student can create multiple notes
     notes = relationship('Note', back_populates='creator', cascade='all, delete-orphan')
 
-    def to_dict(self) -> dict[str, str]:
-        return {
-            'id': str(self.id),
-            'full_name': str(self.full_name),
-            'email': str(self.email),
-            'role': str(self.role),
-            'joined_at': str(self.joined_at),
-        }
+    # [student: 1-m] UserTestSession one student can attempt multiple tests
+    user_test_sessions = relationship('UserTestSession', back_populates='user')

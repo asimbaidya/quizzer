@@ -1,17 +1,21 @@
 from sqlalchemy import (
-    TIMESTAMP,
     Boolean,
     Column,
+    DateTime,
     ForeignKey,
     Integer,
     String,
     Text,
     func,
 )
+from sqlalchemy import (
+    Enum as EnumType,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship  # , validates
 
 from app.core.db import Base
+from app.schemas.enums import QuestionType, SubmissionStatus
 
 
 class Course(Base):
@@ -21,22 +25,15 @@ class Course(Base):
     creator_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     title = Column(String, nullable=False, unique=True, index=True)
     description = Column(Text, nullable=True)
-    created_at = Column(TIMESTAMP, server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
     # auto-generate with random numbers(only creator can see)
     course_pin = Column(String, nullable=False)
 
-    # [TODO]
     is_open = Column(Boolean, default=True)
 
-    # Okey
     creator = relationship('User', back_populates='course')
-
-    # Okey
     quizzes = relationship('Quiz', back_populates='course')
-
     tests = relationship('Test', back_populates='course')
-
-    # Okey
     enrollments = relationship('Enrollment', back_populates='course')
 
 
@@ -46,11 +43,9 @@ class Enrollment(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     student_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     course_id = Column(Integer, ForeignKey('courses.id'), nullable=False)
-    enrolled_at = Column(TIMESTAMP, server_default=func.now())
+    enrolled_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # Okey
     student = relationship('User', back_populates='enrollments')
-    # okey
     course = relationship('Course', back_populates='enrollments')
 
 
@@ -63,11 +58,15 @@ class Quiz(Base):
 
     question_set_id = Column(Integer, ForeignKey('question_sets.id'), nullable=False)
 
-    created_at = Column(TIMESTAMP, server_default=func.now())
-    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # to show in progreass
     total_mark = Column(Integer, nullable=False)  # Total marks for the quiz
+
+    # use this to validate
+    is_unlimited_attempt = Column(Boolean, default=False)
+    allowed_attempt = Column(Integer, default=1)
 
     # relationship
     course = relationship('Course', back_populates='quizzes')
@@ -81,18 +80,14 @@ class Test(Base):
     question_set_id = Column(Integer, ForeignKey('question_sets.id'), nullable=False)
     title = Column(String, nullable=False, default='Untitled')
 
-    # duration is in minutes
     duration = Column(Integer, nullable=False)
-
-    # to show in progreass
     total_mark = Column(Integer, nullable=False)  # Total marks for the quiz
 
-    #  allowed time
-    time_window_start = Column(TIMESTAMP)
-    time_window_end = Column(TIMESTAMP)
+    window_start = Column(DateTime(timezone=True), nullable=False)
+    window_end = Column(DateTime(timezone=True), nullable=False)
 
-    # relationships
-    course = relationship('Course', back_populates='tests')
+    course = relationship(argument='Course', back_populates='tests')
+    user_test_sessions = relationship('UserTestSession', back_populates='test')
 
 
 class QuestionSet(Base):
@@ -111,7 +106,7 @@ class Question(Base):
     question_set_id = Column(Integer, ForeignKey('question_sets.id'), nullable=False)
 
     # store question details as jsonb
-    question_type = Column(String, nullable=False)
+    question_type = Column(EnumType(QuestionType), nullable=False)
     question_data = Column(JSONB, nullable=False)  # Store question details as JSONB
     total_marks = Column(Integer, nullable=False, default=5)
     tag = Column(String, nullable=True)
@@ -133,26 +128,27 @@ class QuestionSubmission(Base):
 
     made_attempt = Column(Boolean, nullable=False)
 
-    question_type = Column(String, nullable=False)
-    user_response = Column(JSONB, nullable=False)
-    is_correct = Column(Boolean, nullable=False)
+    question_type = Column(EnumType(QuestionType), nullable=False)
+    user_response = Column(JSONB, nullable=True)
+    is_correct = Column(Boolean, nullable=True)
     score = Column(Integer, nullable=True)
     feedback = Column(String, nullable=True)
 
-    attempt_time = Column(TIMESTAMP, server_default=func.now())  # Time of the attempt
+    attempt_time = Column(DateTime(timezone=True), server_default=func.now())
+    attempt_count = Column(Integer, default=0)
+    status = Column(EnumType(SubmissionStatus), default=SubmissionStatus.VIEWED)
 
-    # Okey
     user = relationship('User', back_populates='question_submssions')
-
-    # Okey
     question = relationship('Question', back_populates='submission')
 
-    # TODO
-    # @validates('question_data')
-    # def validate_question_data(self, key: str, value: str):
-    #     print('Hello world')
-    #     if 'question_type' not in value or value['question_type'] == self.question_type:
-    #         raise ValueError(
-    #             "question_data must contain 'question_type' key with the same value as question_type."  # noqa: E501
-    #         )
-    #     return value
+
+class UserTestSession(Base):
+    __tablename__ = 'user_test_sessions'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    test_id = Column(Integer, ForeignKey('tests.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    start_time = Column(DateTime(timezone=True), server_default=func.now())
+
+    test = relationship('Test', back_populates='user_test_sessions')
+    user = relationship('User', back_populates='user_test_sessions')
