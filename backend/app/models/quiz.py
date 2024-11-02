@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import (
     Boolean,
@@ -32,8 +33,10 @@ class Course(Base):
     creator_id: Mapped[int] = mapped_column(
         Integer, ForeignKey('users.id'), nullable=False
     )
-    title: Mapped[str] = mapped_column(String, nullable=False, unique=True, index=True)
-    description: Mapped[str] = mapped_column(Text, nullable=True)
+    title: Mapped[Optional[str]] = mapped_column(
+        String, nullable=False, unique=True, index=True
+    )
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -78,7 +81,7 @@ class Quiz(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    updated_at: Mapped[datetime] = mapped_column(
+    updated_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), onupdate=func.now()
     )
     total_mark: Mapped[int] = mapped_column(
@@ -137,8 +140,8 @@ class Question(Base):
     )
     question_data: Mapped[QuestionTeacherData] = mapped_column(JSONB, nullable=False)
     total_marks: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
-    tag: Mapped[str] = mapped_column(String, nullable=True)
-    image: Mapped[str] = mapped_column(String, nullable=True)
+    tag: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    image: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     submission = relationship(
         'QuestionSubmission', back_populates='question', cascade='all, delete-orphan'
@@ -160,10 +163,12 @@ class QuestionSubmission(Base):
     question_type: Mapped[QuestionType] = mapped_column(
         EnumType(QuestionType), nullable=False
     )
-    user_response: Mapped[QuestionStudentResponse] = mapped_column(JSONB, nullable=True)
-    is_correct: Mapped[bool] = mapped_column(Boolean, nullable=True)
-    score: Mapped[int] = mapped_column(Integer, nullable=True)
-    feedback: Mapped[str] = mapped_column(String, nullable=True)
+    user_response: Mapped[Optional[QuestionStudentResponse]] = mapped_column(
+        JSONB, nullable=True
+    )
+    is_correct: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    feedback: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     attempt_time: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

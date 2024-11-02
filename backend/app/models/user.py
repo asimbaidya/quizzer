@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, func
 from sqlalchemy import (
@@ -28,7 +29,7 @@ class Note(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    updated_at: Mapped[datetime] = mapped_column(
+    updated_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), onupdate=func.now()
     )
 
@@ -47,21 +48,16 @@ class User(Base):
         DateTime(timezone=True), server_default=func.now()
     )
 
-    # [teacher: 1-m] Course one user can create multiple courses
     course = relationship(
         'Course', back_populates='creator', cascade='all, delete-orphan'
     )
 
-    # [student: m-m] Enrollment one student can enroll in multiple courses
     enrollments = relationship('Enrollment', back_populates='student')
 
-    # [student: 1-m] QuestionSubmission one student can attempt multiple questions
     question_submssions = relationship(
         'QuestionSubmission', back_populates='user', cascade='all, delete-orphan'
     )
 
-    # [student: 1-m] Note one student can create multiple notes
     notes = relationship('Note', back_populates='creator', cascade='all, delete-orphan')
 
-    # [student: 1-m] UserTestSession one student can attempt multiple tests
     user_test_sessions = relationship('UserTestSession', back_populates='user')
