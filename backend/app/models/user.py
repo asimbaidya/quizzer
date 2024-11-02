@@ -1,19 +1,36 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, func
+from datetime import datetime
+
+from sqlalchemy import DateTime, ForeignKey, Integer, String, func
+from sqlalchemy import (
+    Enum as EnumType,
+)
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    relationship,
+)
 
 from app.core.db import Base
+from app.schemas.enums import UserRole
+from app.schemas.user import NoteDate
 
 
 class Note(Base):
     __tablename__ = 'note'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    title = Column(String, nullable=False, default='Untitled')
-    note_data = Column(JSONB, nullable=False)  # Store question details as JSONB
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    title: Mapped[str] = mapped_column(String, nullable=False, default='Untitled')
+    note_data: Mapped[NoteDate] = mapped_column(JSONB, nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey('users.id'), nullable=False
+    )
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), onupdate=func.now()
+    )
 
     creator = relationship('User', back_populates='notes')
 
@@ -21,12 +38,14 @@ class Note(Base):
 class User(Base):
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    full_name = Column(String, nullable=False)
-    email = Column(String, nullable=False, unique=True)
-    hashed_password = Column(String, nullable=False)
-    role = Column(String, nullable=False)  # Enum of 'admin', 'teacher', 'student'
-    joined_at = Column(DateTime(timezone=True), server_default=func.now())
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    full_name: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
+    role: Mapped[UserRole] = mapped_column(EnumType(UserRole), nullable=False)
+    joined_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
 
     # [teacher: 1-m] Course one user can create multiple courses
     course = relationship(
