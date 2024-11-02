@@ -11,8 +11,8 @@ from app.models.quiz import (
     Test,
 )
 from app.models.user import User
-from app.schemas.request_model import CourseCreate, QuizCreate, TestCreate
 from app.schemas.question import QuestionTeacherView
+from app.schemas.request_model import CourseCreate, QuizCreate, TestCreate
 
 
 def get_courses_by_creator_id(db: Session, creator_id: int) -> list[Course]:

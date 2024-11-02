@@ -28,8 +28,8 @@ class TestCreate(BaseModel):
     total_mark: int = Field(default=20)
 
     duration: int = Field(default=30)
-    window_start: datetime
-    window_end: datetime
+    window_start: datetime = Field(default_factory=lambda: datetime.now())
+    window_end: datetime = Field(default_factory=lambda: datetime.now())
 
 
 class EnrollMetadata(BaseModel):

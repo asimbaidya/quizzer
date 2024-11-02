@@ -139,6 +139,7 @@ def submit_question_answer(
     return student_crud.submit_question_answer(
         db,
         course_title,
+        question_set_id,
         question_id,
         user_submission,
         current_student.id,

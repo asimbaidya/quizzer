@@ -108,8 +108,8 @@ class QuestionTeacherView(BaseModel):
 
     question_type: QuestionType
     question_data: QuestionTeacherData
-    tag: str
-    total_marks: int
+    tag: str = Field(default='untagged')
+    total_marks: int = Field(default=5)
     image: Optional[str] = None
 
     @model_validator(mode='after')
