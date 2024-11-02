@@ -18,7 +18,7 @@ from app.models.quiz import (
 from app.models.user import Note
 from app.schemas.question import QuestionTeacherView
 from app.schemas.question_submission import QuestionStudentSubmission
-from app.schemas.user import NoteCreate
+from app.schemas.user import NoteCreate, NoteUpdate
 
 
 def get_all_enrolled_courses_by_student_id(db: Session, student_id: int):
@@ -138,7 +138,7 @@ def create_note_by_student_id(db: Session, student_id: int, note: NoteCreate):
 
 
 def update_note_by_student_id_note_id(
-    db: Session, student_id: int, note_id: int, note: NoteCreate
+    db: Session, student_id: int, note_id: int, note: NoteUpdate
 ):
     db_note = (
         db.query(Note).filter(Note.user_id == student_id, Note.id == note_id).first()
@@ -197,75 +197,7 @@ def enroll_course_by_course_title_course_pin_student_id(
     return enrollment
 
 
-def mark_submission_by_question_with_course_title_question_set_id_question_id(
-    db: Session,
-    course_title: str,
-    question_set_id: int,
-    question_id: int,
-    user_submission: QuestionStudentSubmission,
-    student_id: int,
-):
-    _course, _enrollment = get_course_and_enrollment_by_course_title_student_id_or_404(
-        db, course_title, student_id
-    )
-    question_submission = (
-        db.query(QuestionSubmission)
-        .filter(
-            QuestionSubmission.question_id == question_id,
-            QuestionSubmission.user_id == student_id,
-        )
-        .first()
-    )
-
-    if question_submission is not None:
-        raise HTTPException(
-            # already submitted
-            status_code=400,
-            detail='Question already submitted by the student',
-        )
-
-    question = (
-        db.query(Question)
-        .filter(Question.id == question_id, Question.question_set_id == question_set_id)
-        .first()
-    )
-    if question is None:
-        raise HTTPException(status_code=404, detail='Question not found')
-
-    question_create = QuestionTeacherView.model_validate(question)
-    try:
-        marked_user_submission = mark_user_submission(user_submission, question_create)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-    question_submission = QuestionSubmission(
-        **marked_user_submission.model_dump(
-            exclude=[
-                'id',
-                'user_id',
-                'question_id',
-                'score',
-                'feedback',
-                'user_response',
-            ]  # type: ignore
-        ),
-        user_id=student_id,
-        question_id=question_id,
-        attempt_count=1,  # Initial attempt
-        status=SubmissionStatus.SUBMITTED,
-        score=marked_user_submission.score,
-        feedback=marked_user_submission.feedback,
-        user_response=marked_user_submission.model_dump(
-            exclude=['id', 'user_id', 'question_id']  # type: ignore
-        ),
-    )
-
-    db.add(question_submission)
-    db.commit()
-    db.refresh(question_submission)
-    return question_submission
-
-
+# post
 def submit_question_answer(
     db: Session,
     course_title: str,
@@ -305,6 +237,9 @@ def submit_question_answer(
         user_submission,
         student_id,
     )
+
+
+# Validation functions
 
 
 def validate_test_window(db: Session, test_id: int, student_id: int) -> None:

@@ -1,8 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 from app.api.deps import CurrentStudent, SessionDep
 from app.crud import student_crud
-from app.models.quiz import QuestionSubmission, Quiz, Test
 from app.schemas.question import QuestionStudentView
 from app.schemas.question_submission import QuestionStudentSubmission
 from app.schemas.request_model import EnrollMetadata
@@ -16,7 +15,7 @@ router = APIRouter()
 
 @router.get('/enrolled_courses')
 def get_all_enrolled_courses_link(student: CurrentStudent, db: SessionDep):
-    return student_crud.get_all_enrolled_courses_by_student_id(db, student.id)  # type: ignore
+    return student_crud.get_all_enrolled_courses_by_student_id(db, student.id)
 
 
 @router.get('/enrolled_courses/{course_title}')
@@ -28,7 +27,7 @@ def get_all_quiz_and_test_in_enrolled_course(  # type: ignore
     return student_crud.get_all_quizzes_tests_in_enrolled_course_by_course_title_student_id(  # noqa: E501
         db,
         course_title,
-        student.id,  # type: ignore
+        student.id,
     )  # type: ignore
 
 
@@ -46,7 +45,7 @@ def get_all_question_in_a_quiz_of_enrolled_course(
         db,
         course_title,
         quiz_id,
-        student.id,  # type: ignore
+        student.id,
     )
 
 
@@ -61,30 +60,30 @@ def get_all_question_in_a_test_of_enrolled_course(
         db,
         course_title,
         test_id,
-        student.id,  # type: ignore
+        student.id,
     )
 
 
 @router.get('/notes')
 def get_all_note_of_user(db: SessionDep, student: CurrentStudent):
-    return student_crud.get_all_notes_by_student_id(db, student.id)  # type: ignore
+    return student_crud.get_all_notes_by_student_id(db, student.id)
 
 
 @router.get('/notes/{note_id}')
 def get_specific_note_of_user(db: SessionDep, student: CurrentStudent, note_id: int):
-    return student_crud.get_single_note_by_student_id_note_id(db, student.id, note_id)  # type: ignore
+    return student_crud.get_single_note_by_student_id_note_id(db, student.id, note_id)
 
 
 @router.post('/notes')
 def create_note_for_user(db: SessionDep, student: CurrentStudent, note: NoteCreate):
-    return student_crud.create_note_by_student_id(db, student.id, note)  # type: ignore
+    return student_crud.create_note_by_student_id(db, student.id, note)
 
 
 @router.put('/notes/{note_id}')
 def update_note_for_user(
     db: SessionDep, student: CurrentStudent, note_id: int, note: NoteUpdate
 ):
-    return student_crud.update_note_by_student_id_note_id(db, student.id, note_id, note)  # type: ignore
+    return student_crud.update_note_by_student_id_note_id(db, student.id, note_id, note)
 
 
 @router.delete('/notes/{note_id}')
@@ -95,7 +94,6 @@ def delete_note_for_user(db: SessionDep, student: CurrentStudent, note_id: int):
 # ---- POST ROUTES ----
 
 
-# // done
 @router.post('/enrolled_courses/')
 def enroll_course_with_course_pin_and_course_title(
     db: SessionDep, enroll_metadata: EnrollMetadata, student: CurrentStudent
@@ -104,26 +102,7 @@ def enroll_course_with_course_pin_and_course_title(
         db,
         enroll_metadata.course_title,
         enroll_metadata.course_pin,
-        student.id,  # type: ignore
-    )
-
-
-@router.post('/enrolled_courses/submit/{course_title}/{question_set_id}/{question_id}')
-def submit_question_with_course_title_question_set_id_question_id(
-    db: SessionDep,
-    course_title: str,
-    question_set_id: int,
-    question_id: int,
-    user_submission: QuestionStudentSubmission,
-    student: CurrentStudent,
-):
-    return student_crud.mark_submission_by_question_with_course_title_question_set_id_question_id(  # noqa: E501
-        db,
-        course_title,
-        question_set_id,
-        question_id,
-        user_submission,
-        student.id,  # type: ignore
+        student.id,
     )
 
 
