@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.api.deps import CurrentTeacher, SessionDep
 from app.crud import teacher_crud
-from app.schemas.common import CourseCreate, QuizCreate, TestCreate
+from app.schemas.request_model import CourseCreate, QuizCreate, TestCreate
 from app.schemas.question import QuestionTeacherView
 from app.schemas.response_models import CourseResponse
 

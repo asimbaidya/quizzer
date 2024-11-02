@@ -11,7 +11,7 @@ from app.models.quiz import (
     Test,
 )
 from app.models.user import User
-from app.schemas.common import CourseCreate, QuizCreate, TestCreate
+from app.schemas.request_model import CourseCreate, QuizCreate, TestCreate
 from app.schemas.question import QuestionTeacherView
 
 
@@ -223,8 +223,8 @@ def create_test_by_course_title_teacher_id(
         total_mark=test_create.total_mark,
         question_set_id=question_set.id,
         duration=test_create.duration,
-        time_window_start=test_create.time_window_start,
-        time_window_end=test_create.time_window_end,
+        window_start=test_create.window_start,
+        window_end=test_create.window_end,
     )
     db.add(db_instance)
     db.commit()

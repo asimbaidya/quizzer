@@ -1,13 +1,8 @@
 from datetime import datetime
-from enum import Enum
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-
-class UserRole(str, Enum):
-    ADMIN = 'admin'
-    TEACHER = 'teacher'
-    STUDENT = 'student'
+from app.schemas.enums import UserRole
 
 
 class User(BaseModel):
@@ -52,7 +47,6 @@ class NoteCreate(NoteBase):
 
 
 class NoteUpdate(NoteBase):
-    user_id: int
     pass
 
 

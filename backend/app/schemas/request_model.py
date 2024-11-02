@@ -19,14 +19,17 @@ class QuizCreate(BaseModel):
     title: str = Field(default='New Quiz')
     total_mark: int = Field(default=20)
 
+    allowed_attempt: Optional[int] = 1
+    is_unlimited_attempt: Optional[bool] = False
+
 
 class TestCreate(BaseModel):
     title: str = Field(default='New Test')
     total_mark: int = Field(default=20)
 
     duration: int = Field(default=30)
-    time_window_start: datetime
-    time_window_end: datetime
+    window_start: datetime
+    window_end: datetime
 
 
 class EnrollMetadata(BaseModel):

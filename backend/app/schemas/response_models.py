@@ -24,13 +24,11 @@ class TestResponse(BaseModel):
     question_set_id: int
     id: int
     total_mark: int
-    time_window_start: datetime
-    time_window_end: datetime
+    window_start: datetime
+    window_end: datetime
     title: str
     course_id: int
     duration: int
-
-    # TODO add url
 
 
 class QuizResponse(BaseModel):
@@ -42,4 +40,5 @@ class QuizResponse(BaseModel):
     question_set_id: int
     total_mark: int
 
-    # TODO add url
+    is_unlimited_attempt: bool
+    allowed_attempt: int

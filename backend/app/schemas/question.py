@@ -1,14 +1,8 @@
-from enum import Enum
 from typing import Any, List, Optional, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-
-class QuestionType(str, Enum):
-    SINGLE_CHOICE = 'single_choice'
-    MULTIPLE_CHOICE = 'multiple_choice'
-    USER_INPUT = 'user_input'
-    TRUE_FALSE = 'true_false'
+from app.schemas.enums import QuestionType
 
 
 class Choice(BaseModel):
