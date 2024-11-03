@@ -2,8 +2,11 @@ from fastapi import APIRouter
 
 from app.api.deps import CurrentStudent, SessionDep
 from app.crud import student_crud
-from app.schemas.question import QuestionStudentView
-from app.schemas.question_submission import QuestionStudentSubmission
+from app.schemas.question_submission import (
+    QuestionStudentSubmission,
+    QuizQuestionWithSubmission,
+    TestQuestionWithSubmission,
+)
 from app.schemas.request_model import EnrollMetadata
 from app.schemas.user import NoteCreate, NoteUpdate
 
@@ -33,7 +36,7 @@ def get_all_quiz_and_test_in_enrolled_course(  # type: ignore
 
 @router.get(
     '/enrolled_courses/quiz/{course_title}/{quiz_id}',
-    response_model=list[QuestionStudentView],
+    response_model=QuizQuestionWithSubmission,
 )
 def get_all_question_in_a_quiz_of_enrolled_course(
     db: SessionDep,
@@ -66,7 +69,7 @@ def start_test(
 
 @router.get(
     '/enrolled_courses/test/{course_title}/{test_id}',
-    response_model=list[QuestionStudentView],
+    response_model=TestQuestionWithSubmission,
 )
 def get_all_question_in_a_test_of_enrolled_course(
     db: SessionDep, course_title: str, test_id: int, student: CurrentStudent

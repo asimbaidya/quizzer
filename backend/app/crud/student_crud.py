@@ -96,7 +96,7 @@ def get_all_quizzes_tests_in_enrolled_course_by_course_title_student_id(  # type
     }  # type: ignore
 
 
-def get_all_question_in_enrolled_course_by_course_title_quiz_id_student_id(
+def get_all_question_in_enrolled_course_by_course_title_quiz_id_student_id__(
     db: Session, course_title: str, quiz_id: int, student_id: int
 ):
     """Get the quiz for the course."""
@@ -124,6 +124,53 @@ def get_all_question_in_enrolled_course_by_course_title_quiz_id_student_id(
                 f'http://127.0.0.1:8000/API/image_show/{question.image}'
             )
     return questions
+
+
+def get_all_question_in_enrolled_course_by_course_title_quiz_id_student_id(  # type: ignore
+    db: Session, course_title: str, quiz_id: int, student_id: int
+):
+    """Get the quiz for the course."""
+    course, _enrollment = get_course_and_enrollment_by_course_title_student_id_or_404(
+        db, course_title, student_id
+    )
+
+    quiz = get_quiz_by_quiz_id_or_404(db, quiz_id)
+    if quiz.course_id != course.id:
+        raise HTTPException(
+            status_code=404, detail='Quiz not found in the specified course'
+        )
+
+    # Ensure question submissions
+    ensure_question_submissions(db, quiz.question_set_id, student_id)
+
+    # Fetch questions and their submissions
+    all_question_submission = (
+        db.query(Question, QuestionSubmission)
+        .join(QuestionSet, QuestionSet.id == Question.question_set_id)
+        .join(Quiz, Quiz.id == quiz_id)
+        .outerjoin(
+            QuestionSubmission,
+            (QuestionSubmission.question_id == Question.id)
+            & (QuestionSubmission.user_id == student_id),
+        )
+        .filter(QuestionSet.id == quiz.question_set_id)
+        .all()
+    )
+
+    question_submissions = []
+    for question, submission in all_question_submission:
+        question_submission = {
+            'question': question,
+            'submission': submission,
+        }
+        question_submissions.append(question_submission)  # type: ignore
+
+    return {
+        'question_submissions': question_submissions,  # type: ignore
+        'allowed_attempt': quiz.allowed_attempt,
+        'is_unlimited_attempt': quiz.is_unlimited_attempt,
+        'total_marks': quiz.total_marks,
+    }
 
 
 def start_test_by_course_title_test_id_student_id(

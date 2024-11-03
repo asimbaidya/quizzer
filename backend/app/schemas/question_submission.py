@@ -1,8 +1,9 @@
-# sub
-from typing import Any, List, Self, Union
+from datetime import datetime
+from typing import Any, List, Optional, Self, Union
 
 from pydantic import BaseModel, ValidationInfo, field_validator, model_validator
 
+from app.schemas.enums import SubmissionStatus, TestStatus
 from app.schemas.question import QuestionType
 
 
@@ -55,3 +56,63 @@ class QuestionStudentSubmission(BaseModel):
     @classmethod
     def validate_data_before(cls, value: Any) -> Self:
         return value
+
+
+# --------------------------
+class StudentChoice(BaseModel):
+    text: str
+
+
+class QuestionStudentData(BaseModel):
+    question_type: QuestionType
+    question_text: str
+    choices: Optional[List[StudentChoice]] = None
+
+
+class QuestionStudentView(BaseModel):
+    question_type: QuestionType
+    question_data: QuestionStudentData
+    tag: str
+    total_marks: int
+
+    url: Optional[str] = ''
+
+    image_url: Optional[str] = None
+    image: Optional[str] = None
+
+    made_attempt: Optional[bool] = False
+    is_correct: bool = False
+    score: int = 0
+    feedback: str = ''
+
+
+class QuestionSubmissionStudentView(BaseModel):
+    question_type: QuestionType
+    user_response: Optional[QuestionStudentResponse] = None
+    made_attempt: bool = False
+    is_correct: Optional[bool] = False
+    score: Optional[int] = 0
+    feedback: Optional[str] = ''
+
+    attempt_time: Optional[datetime]
+    attempt_count: Optional[int]
+    status: SubmissionStatus
+
+
+class QuestionSubmission(BaseModel):
+    question: QuestionStudentView
+    submission: QuestionSubmissionStudentView
+
+
+class QuizQuestionWithSubmission(BaseModel):
+    question_submissions: List[QuestionSubmission]
+    total_marks: int
+    allowed_attempt: int
+    is_unlimited_attempt: bool
+
+
+class TestQuestionWithSubmission(BaseModel):
+    question_submissions: List[QuestionSubmission]
+    total_marks: int
+    start_time: Optional[datetime]
+    status: TestStatus

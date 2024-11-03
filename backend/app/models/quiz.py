@@ -21,7 +21,7 @@ from sqlalchemy.orm import (
 )
 
 from app.core.db import Base
-from app.schemas.enums import QuestionType, SubmissionStatus, TestStatus
+from app.schemas.enums import QuestionType, SubmissionStatus
 from app.schemas.question import QuestionTeacherData
 from app.schemas.question_submission import QuestionStudentResponse
 
