@@ -23,7 +23,7 @@ from app.schemas.question_submission import QuestionStudentSubmission
 from app.schemas.user import NoteCreate, NoteUpdate
 
 
-def get_all_enrolled_courses_by_student_id(db: Session, student_id: int):
+def get_all_enrolled_courses(db: Session, student_id: int):
     courses = (
         db.query(Course)
         .join(Enrollment)
@@ -35,12 +35,10 @@ def get_all_enrolled_courses_by_student_id(db: Session, student_id: int):
     return courses
 
 
-def get_all_quizzes_tests_in_enrolled_course_by_course_title_student_id(  # type: ignore
+def get_all_quizzes_tests(  # type: ignore
     db: Session, course_title: str, student_id: int
 ):
-    course, _enrollment = get_course_and_enrollment_by_course_title_student_id_or_404(
-        db, course_title, student_id
-    )
+    course, _enrollment = get_course_and_enrollment_or_404(db, course_title, student_id)
 
     quizzes = db.query(Quiz).filter(Quiz.course_id == course.id).all()
     tests = db.query(Test).filter(Test.course_id == course.id).all()
@@ -96,13 +94,11 @@ def get_all_quizzes_tests_in_enrolled_course_by_course_title_student_id(  # type
     }  # type: ignore
 
 
-def get_all_question_in_enrolled_course_by_course_title_quiz_id_student_id(  # type: ignore
+def get_all_question_in_quiz(  # type: ignore
     db: Session, course_title: str, quiz_id: int, student_id: int
 ):
     """Get the quiz for the course."""
-    course, _enrollment = get_course_and_enrollment_by_course_title_student_id_or_404(
-        db, course_title, student_id
-    )
+    course, _enrollment = get_course_and_enrollment_or_404(db, course_title, student_id)
 
     quiz = get_quiz_by_quiz_id_or_404(db, quiz_id)
     if quiz.course_id != course.id:
@@ -149,12 +145,8 @@ def get_all_question_in_enrolled_course_by_course_title_quiz_id_student_id(  # t
     }
 
 
-def start_test_by_course_title_test_id_student_id(
-    db: Session, course_title: str, test_id: int, student_id: int
-):
-    course, _enrollment = get_course_and_enrollment_by_course_title_student_id_or_404(
-        db, course_title, student_id
-    )
+def start_test(db: Session, course_title: str, test_id: int, student_id: int):
+    course, _enrollment = get_course_and_enrollment_or_404(db, course_title, student_id)
 
     test = get_test_by_test_id_or_404(db, test_id)
     if test.course_id is not course.id:
@@ -189,13 +181,11 @@ def start_test_by_course_title_test_id_student_id(
     return user_test_session
 
 
-def get_all_question_in_enrolled_course_by_course_title_test_id_student_id(
+def get_all_question_in_test(
     db: Session, course_title: str, test_id: int, student_id: int
 ):
     """Get the quiz for the course."""
-    course, _enrollment = get_course_and_enrollment_by_course_title_student_id_or_404(
-        db, course_title, student_id
-    )
+    course, _enrollment = get_course_and_enrollment_or_404(db, course_title, student_id)
 
     test = get_test_by_test_id_or_404(db, test_id)
     if test.course_id is not course.id:
@@ -323,12 +313,8 @@ def delete_note_by_student_id_note_id(db: Session, student_id: int, note_id: int
     return db_note
 
 
-def enroll_course_by_course_title_course_pin_student_id(
-    db: Session, course_title: str, course_pin: str, student_id: int
-):
-    course, enrollment = get_course_and_enrollment_by_course_title_student_id(
-        db, course_title, student_id
-    )
+def enroll_course(db: Session, course_title: str, course_pin: str, student_id: int):
+    course, enrollment = get_course_and_enrollment(db, course_title, student_id)
     if enrollment is not None:
         raise HTTPException(
             status_code=400, detail='Student already enrolled in the course'
@@ -393,9 +379,7 @@ def get_courses_by_course_title__or_404(db: Session, course_title: str):
     return course
 
 
-def get_course_and_enrollment_by_course_title_student_id(
-    db: Session, course_title: str, student_id: int
-):
+def get_course_and_enrollment(db: Session, course_title: str, student_id: int):
     course = get_courses_by_course_title__or_404(db, course_title)
     enrollment = (
         db.query(Enrollment)
@@ -405,9 +389,7 @@ def get_course_and_enrollment_by_course_title_student_id(
     return course, enrollment
 
 
-def get_course_and_enrollment_by_course_title_student_id_or_404(
-    db: Session, course_title: str, student_id: int
-):
+def get_course_and_enrollment_or_404(db: Session, course_title: str, student_id: int):
     course = get_courses_by_course_title__or_404(db, course_title)
     enrollment = (
         db.query(Enrollment)

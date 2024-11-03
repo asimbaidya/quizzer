@@ -18,7 +18,7 @@ router = APIRouter()
 
 @router.get('/enrolled_courses')
 def get_all_enrolled_courses_link(student: CurrentStudent, db: SessionDep):
-    return student_crud.get_all_enrolled_courses_by_student_id(db, student.id)
+    return student_crud.get_all_enrolled_courses(db, student.id)
 
 
 @router.get('/enrolled_courses/{course_title}')
@@ -27,7 +27,7 @@ def get_all_quiz_and_test_in_enrolled_course(  # type: ignore
     course_title: str,
     student: CurrentStudent,
 ):
-    return student_crud.get_all_quizzes_tests_in_enrolled_course_by_course_title_student_id(  # noqa: E501
+    return student_crud.get_all_quizzes_tests(
         db,
         course_title,
         student.id,
@@ -38,18 +38,18 @@ def get_all_quiz_and_test_in_enrolled_course(  # type: ignore
     '/enrolled_courses/quiz/{course_title}/{quiz_id}',
     response_model=QuizQuestionWithSubmission,
 )
-def get_all_question_in_a_quiz_of_enrolled_course(
+def get_all_question_in_a_quiz_of_enrolled_course(  # type: ignore
     db: SessionDep,
     course_title: str,
     quiz_id: int,
     student: CurrentStudent,
 ):
-    return student_crud.get_all_question_in_enrolled_course_by_course_title_quiz_id_student_id(  # noqa: E501
+    return student_crud.get_all_question_in_quiz(
         db,
         course_title,
         quiz_id,
         student.id,
-    )
+    )  # type: ignore
 
 
 @router.post('/enrolled_courses/test/{course_title}/{test_id}')
@@ -59,7 +59,7 @@ def start_test(
     test_id: int,
     student: CurrentStudent,
 ):
-    return student_crud.start_test_by_course_title_test_id_student_id(
+    return student_crud.start_test(
         db,
         course_title,
         test_id,
@@ -71,15 +71,15 @@ def start_test(
     '/enrolled_courses/test/{course_title}/{test_id}',
     response_model=TestQuestionWithSubmission,
 )
-def get_all_question_in_a_test_of_enrolled_course(
+def get_all_question_in_a_test_of_enrolled_course(  # type: ignore
     db: SessionDep, course_title: str, test_id: int, student: CurrentStudent
 ):
-    return student_crud.get_all_question_in_enrolled_course_by_course_title_test_id_student_id(  # noqa: E501
+    return student_crud.get_all_question_in_test(
         db,
         course_title,
         test_id,
         student.id,
-    )
+    )  # type: ignore
 
 
 # Notes
@@ -119,7 +119,7 @@ def delete_note_for_user(db: SessionDep, student: CurrentStudent, note_id: int):
 def enroll_course_with_course_pin_and_course_title(
     db: SessionDep, enroll_metadata: EnrollMetadata, student: CurrentStudent
 ):
-    return student_crud.enroll_course_by_course_title_course_pin_student_id(
+    return student_crud.enroll_course(
         db,
         enroll_metadata.course_title,
         enroll_metadata.course_pin,

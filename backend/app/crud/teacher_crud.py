@@ -18,11 +18,11 @@ from app.schemas.question import QuestionTeacherView
 from app.schemas.request_model import CourseCreate, QuizCreate, TestCreate
 
 
-def get_courses_by_creator_id(db: Session, creator_id: int) -> list[Course]:
+def get_courses(db: Session, creator_id: int) -> list[Course]:
     return db.query(Course).filter(Course.creator_id == creator_id).all()
 
 
-def get_quiz_and_test_by_course_title_creator_id(  # type: ignore
+def get_quiz_and_test(  # type: ignore
     db: Session, course_title: str, teacher_id: int
 ):
     quizzes = (
@@ -64,7 +64,7 @@ def get_enrolled_students(db: Session, course_title: str, teacher_id: int):
     )
 
 
-def get_questions_by_course_title_quiz_id_teacher_id(
+def get_questions_in_quiz(
     db: Session, course_title: str, quiz_id: int, teacher_id: int
 ):
     questions = (
@@ -87,7 +87,7 @@ def get_questions_by_course_title_quiz_id_teacher_id(
     return questions
 
 
-def get_questions_by_course_title_test_id_teacher_id(
+def get_questions_in_test(
     db: Session, course_title: str, test_id: int, teacher_id: int
 ):
     course = db.query(Course).filter(Course.title == course_title).first()
@@ -118,7 +118,7 @@ def get_questions_by_course_title_test_id_teacher_id(
     return questions
 
 
-def get_student_progress_course_title_quiz_id_teacher_id(
+def get_student_progress_in_quiz(
     db: Session, course_title: str, quiz_id: int, teacher_id: int
 ):
     # Fetch the quiz
@@ -228,7 +228,7 @@ def get_student_progress_course_title_quiz_id_teacher_id(
     return results
 
 
-def get_student_progress_course_title_test_id_teacher_id(
+def get_student_progress_in_test(
     db: Session, course_title: str, test_id: int, teacher_id: int
 ):
     # Fetch the test
@@ -357,7 +357,7 @@ def create_course_by_teacher_id(
     return course_instance
 
 
-def create_quiz_by_course_title_teacher_id(
+def create_quiz(
     db: Session, quiz_create: QuizCreate, course_title: str, teacher_id: int
 ) -> Quiz:
     course = get_course_by_title_creator_id(db, course_title, teacher_id)
@@ -386,7 +386,7 @@ def create_quiz_by_course_title_teacher_id(
     return db_instance
 
 
-def create_test_by_course_title_teacher_id(
+def create_test(
     db: Session, test_create: TestCreate, course_title: str, teacher_id: int
 ) -> Quiz:
     course = get_course_by_title_creator_id(db, course_title, teacher_id)
@@ -418,7 +418,7 @@ def create_test_by_course_title_teacher_id(
     return db_instance
 
 
-def create_question_by_course_title_quiz_id_teacher_id(
+def create_question_in_quiz(
     db: Session,
     question_create: QuestionTeacherView,
     course_title: str,
@@ -428,9 +428,7 @@ def create_question_by_course_title_quiz_id_teacher_id(
     course = get_course_by_title_creator_id(db, course_title, teacher_id)
     if course is None:
         raise HTTPException(status_code=404, detail='Course not found')
-    quiz = get_quiz_by_course_title_creator_id_quiz_id(
-        db, course_title, teacher_id, quiz_id
-    )
+    quiz = get_quiz(db, course_title, teacher_id, quiz_id)
     if quiz is None:
         raise HTTPException(status_code=404, detail='Quiz not found in this course')
 
@@ -449,7 +447,7 @@ def create_question_by_course_title_quiz_id_teacher_id(
     return question_instance
 
 
-def create_question_by_course_title_test_id_teacher_id(
+def create_question_in_test(
     db: Session,
     question_create: QuestionTeacherView,
     course_title: str,
@@ -459,9 +457,7 @@ def create_question_by_course_title_test_id_teacher_id(
     course = get_course_by_title_creator_id(db, course_title, teacher_id)
     if course is None:
         raise HTTPException(status_code=404, detail='Course not found')
-    test = get_test_by_course_title_creator_id_test_id(
-        db, course_title, teacher_id, test_id
-    )
+    test = get_test(db, course_title, teacher_id, test_id)
     print(test)
     if test is None:
         raise HTTPException(status_code=404, detail='Test not found in this course')
@@ -484,9 +480,7 @@ def create_question_by_course_title_test_id_teacher_id(
 # helper functions
 
 
-def get_quiz_by_course_title_creator_id_quiz_id(
-    db: Session, course_title: str, teacher_id: int, quiz_id: int
-):
+def get_quiz(db: Session, course_title: str, teacher_id: int, quiz_id: int):
     return (
         db.query(Quiz)
         .join(Course)
@@ -499,9 +493,7 @@ def get_quiz_by_course_title_creator_id_quiz_id(
     )
 
 
-def get_test_by_course_title_creator_id_test_id(
-    db: Session, course_title: str, teacher_id: int, test_id: int
-):
+def get_test(db: Session, course_title: str, teacher_id: int, test_id: int):
     return (
         db.query(Test)
         .join(Course)

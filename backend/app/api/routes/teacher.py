@@ -16,7 +16,7 @@ router = APIRouter()
     '/courses',
 )
 def get_courses(db: SessionDep, teacher: CurrentTeacher):
-    courses = teacher_crud.get_courses_by_creator_id(db, creator_id=teacher.id)
+    courses = teacher_crud.get_courses(db, creator_id=teacher.id)
     return [CourseResponse.model_validate(course) for course in courses]
 
 
@@ -26,7 +26,7 @@ def get_courses(db: SessionDep, teacher: CurrentTeacher):
 def get_quizzes_and_tests__in_course(  # type: ignore
     course_title: str, db: SessionDep, teacher: CurrentTeacher
 ):
-    return teacher_crud.get_quiz_and_test_by_course_title_creator_id(
+    return teacher_crud.get_quiz_and_test(
         db,
         course_title,
         teacher.id,
@@ -46,7 +46,7 @@ def get_enrolled_students(course_title: str, db: SessionDep, teacher: CurrentTea
 def get_questions_in_quiz(
     course_title: str, quiz_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
-    return teacher_crud.get_questions_by_course_title_quiz_id_teacher_id(
+    return teacher_crud.get_questions_in_quiz(
         db,
         course_title,
         quiz_id,
@@ -60,7 +60,7 @@ def get_questions_in_quiz(
 def get_questions_in_test(
     course_title: str, test_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
-    return teacher_crud.get_questions_by_course_title_test_id_teacher_id(
+    return teacher_crud.get_questions_in_test(
         db,
         course_title,
         test_id,
@@ -72,7 +72,7 @@ def get_questions_in_test(
 def get_student_progress_in_quiz(
     course_title: str, quiz_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
-    return teacher_crud.get_student_progress_course_title_quiz_id_teacher_id(
+    return teacher_crud.get_student_progress_in_quiz(
         db,
         course_title,
         quiz_id,
@@ -84,7 +84,7 @@ def get_student_progress_in_quiz(
 def get_student_progress_in_test(
     course_title: str, test_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
-    return teacher_crud.get_student_progress_course_title_test_id_teacher_id(
+    return teacher_crud.get_student_progress_in_test(
         db,
         course_title,
         test_id,
@@ -112,7 +112,7 @@ def create_quiz(
     course_title: str, quiz: QuizCreate, db: SessionDep, teacher: CurrentTeacher
 ):
     try:
-        return teacher_crud.create_quiz_by_course_title_teacher_id(
+        return teacher_crud.create_quiz(
             db,
             quiz,
             course_title,
@@ -129,7 +129,7 @@ def create_test(
     course_title: str, test: TestCreate, db: SessionDep, teacher: CurrentTeacher
 ):
     try:
-        return teacher_crud.create_test_by_course_title_teacher_id(
+        return teacher_crud.create_test(
             db,
             test,
             course_title,
@@ -153,7 +153,7 @@ def create_question_in_quiz(
     teacher: CurrentTeacher,
 ):
     try:
-        return teacher_crud.create_question_by_course_title_quiz_id_teacher_id(
+        return teacher_crud.create_question_in_quiz(
             db,
             question,
             course_title,
@@ -176,7 +176,7 @@ def create_question_in_test(
     teacher: CurrentTeacher,
 ):
     try:
-        return teacher_crud.create_question_by_course_title_test_id_teacher_id(
+        return teacher_crud.create_question_in_test(
             db,
             question,
             course_title,
