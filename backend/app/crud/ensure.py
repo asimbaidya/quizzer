@@ -29,6 +29,7 @@ def ensure_question_submissions(db: Session, question_set_id: int, student_id: i
                 feedback=None,
                 is_correct=None,
                 question_type=question.question_type,
+                made_attempt=False,
             )
             db.add(user_question_submission)
 

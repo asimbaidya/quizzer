@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
 
 from app.crud.ensure import ensure_question_submissions
 from app.models.quiz import (
@@ -12,6 +13,7 @@ from app.models.quiz import (
     Test,
 )
 from app.models.user import User
+from app.schemas.progress import StudentQuizProgress, StudentTestProgress
 from app.schemas.question import QuestionTeacherView
 from app.schemas.request_model import CourseCreate, QuizCreate, TestCreate
 
@@ -119,9 +121,11 @@ def get_questions_by_course_title_test_id_teacher_id(
 def get_student_progress_course_title_quiz_id_teacher_id(
     db: Session, course_title: str, quiz_id: int, teacher_id: int
 ):
-    quiz = db.query(Test).filter(Quiz.id == quiz_id).first()
+    # Fetch the quiz
+    quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
     if not quiz:
-        raise HTTPException(status_code=404, detail='Test not found')
+        raise HTTPException(status_code=404, detail='Quiz not found')
+
     question_set = (
         db.query(QuestionSet).filter(QuestionSet.id == quiz.question_set_id).first()
     )
@@ -136,29 +140,102 @@ def get_student_progress_course_title_quiz_id_teacher_id(
         .all()
     )
     for student in enrolled_students:
+        print(student)
         ensure_question_submissions(db, question_set.id, student.id)
-    return (
-        db.query(QuestionSubmission)
-        .join(User, QuestionSubmission.user_id == User.id)
+
+    # Fetch the total possible marks for the quiz
+    total_possible_marks = (
+        db.query(func.sum(Question.total_marks))
+        .join(QuestionSet, QuestionSet.id == Question.question_set_id)
+        .filter(QuestionSet.id == quiz.question_set_id)
+        .scalar()
+    )
+
+    # Fetch the total number of questions in the quiz
+    total_questions = (
+        db.query(func.count(Question.id))
+        .join(QuestionSet, QuestionSet.id == Question.question_set_id)
+        .filter(QuestionSet.id == quiz.question_set_id)
+        .scalar()
+    )
+
+    # Query to get student progress
+    student_progress = (
+        db.query(
+            User.id.label('student_id'),
+            User.email.label('email'),
+            func.sum(QuestionSubmission.score)
+            .filter(QuestionSubmission.score != None)
+            .label('received_marks'),
+            func.count(QuestionSubmission.id)
+            .filter(QuestionSubmission.made_attempt == True)
+            .label('total_attempts'),
+            func.sum(QuestionSubmission.attempt_count)
+            .filter(QuestionSubmission.made_attempt == True)
+            .label('total_questions_attempted'),
+        )
+        .join(QuestionSubmission, QuestionSubmission.user_id == User.id)
         .join(Enrollment, User.id == Enrollment.student_id)
         .join(Course, Enrollment.course_id == Course.id)
+        .join(Question, Question.id == QuestionSubmission.question_id)
+        .join(QuestionSet, QuestionSet.id == Question.question_set_id)
+        .join(Quiz, Quiz.question_set_id == QuestionSet.id)
         .filter(
             Course.title == course_title,
             Quiz.id == quiz_id,
             Course.creator_id == teacher_id,
         )
+        .group_by(User.id, User.email)
         .all()
     )
 
-    # TODO: Group by student_id and calculate the progress
+    results: list[StudentQuizProgress] = []
+    for sp in student_progress:
+        result = {  # type: ignore
+            'quiz_total_mark': quiz.total_mark,
+            'student_id': sp.student_id,
+            'email': sp.email,
+            'received_marks': sp.received_marks if sp.received_marks else 0,
+            'total_attempts': sp.total_attempts,
+            'total_questions_attempted': sp.total_questions_attempted
+            if sp.total_questions_attempted
+            else 0,
+            'total_possible_marks': total_possible_marks,
+            'total_questions': total_questions,
+            'weighted_marks': (sp.received_marks / total_possible_marks)
+            * quiz.total_mark
+            if sp.received_marks
+            else 0,
+            'is_unlimited_attempt': quiz.is_unlimited_attempt,
+            'total_allowed_attempt': quiz.allowed_attempt,
+        }
+
+        progress = StudentQuizProgress(
+            quiz_total_mark=result['quiz_total_mark'],  # type: ignore
+            student_id=result['student_id'],  # type: ignore
+            email=result['email'],  # type: ignore
+            received_marks=result['received_marks'],  # type: ignore
+            total_attempts=result['total_attempts'],  # type: ignore
+            total_questions_attempted=result['total_questions_attempted'],  # type: ignore
+            total_possible_marks=result['total_possible_marks'],  # type: ignore
+            total_questions=result['total_questions'],  # type: ignore
+            weighted_marks=result['weighted_marks'],  # type: ignore
+            is_unlimited_attempt=result['is_unlimited_attempt'],  # type: ignore
+            total_allowed_attempt=result['total_allowed_attempt'],  # type: ignore
+        )
+        results.append(progress)
+
+    return results
 
 
 def get_student_progress_course_title_test_id_teacher_id(
     db: Session, course_title: str, test_id: int, teacher_id: int
 ):
+    # Fetch the test
     test = db.query(Test).filter(Test.id == test_id).first()
     if not test:
         raise HTTPException(status_code=404, detail='Test not found')
+
     question_set = (
         db.query(QuestionSet).filter(QuestionSet.id == test.question_set_id).first()
     )
@@ -173,26 +250,89 @@ def get_student_progress_course_title_test_id_teacher_id(
         .all()
     )
     for student in enrolled_students:
+        print(student)
         ensure_question_submissions(db, question_set.id, student.id)
 
-    # ensure_question_submissions(db,question_set.id,student_id=)
-    # ensure_question_submissions()
-    return (
-        db.query(QuestionSubmission)
-        .join(User, QuestionSubmission.user_id == User.id)
+    # fetch the total possible marks for the test
+    total_possible_marks = (
+        db.query(func.sum(Question.total_marks))
+        .join(QuestionSet, QuestionSet.id == Question.question_set_id)
+        .filter(QuestionSet.id == test.question_set_id)
+        .scalar()
+    )
+
+    # fetch the total number of questions in the test
+    total_questions = (
+        db.query(func.count(Question.id))
+        .join(QuestionSet, QuestionSet.id == Question.question_set_id)
+        .filter(QuestionSet.id == test.question_set_id)
+        .scalar()
+    )
+
+    # Query to get student progress
+    student_progress = (
+        db.query(
+            User.id.label('student_id'),
+            User.email.label('email'),
+            func.sum(QuestionSubmission.score)
+            .filter(QuestionSubmission.score != None)
+            .label('received_marks'),
+            func.count(QuestionSubmission.id)
+            .filter(QuestionSubmission.made_attempt == True)
+            .label('total_attempts'),
+            func.sum(QuestionSubmission.attempt_count)
+            .filter(QuestionSubmission.made_attempt == True)
+            .label('total_questions_attempted'),
+        )
+        .join(QuestionSubmission, QuestionSubmission.user_id == User.id)
         .join(Enrollment, User.id == Enrollment.student_id)
         .join(Course, Enrollment.course_id == Course.id)
+        .join(Question, Question.id == QuestionSubmission.question_id)
+        .join(QuestionSet, QuestionSet.id == Question.question_set_id)
+        .join(Test, Test.question_set_id == QuestionSet.id)
         .filter(
             Course.title == course_title,
             Test.id == test_id,
             Course.creator_id == teacher_id,
         )
+        .group_by(User.id, User.email)
         .all()
     )
-    # TODO: Group by student_id and calculate the progress
 
+    # Format the result into a list of dictionaries
+    results: list[StudentTestProgress] = []
+    for sp in student_progress:
+        result = {  # type: ignore
+            'Test_mark': test.total_mark,
+            'student_id': sp.student_id,
+            'email': sp.email,
+            'received_marks': sp.received_marks if sp.received_marks else 0,
+            'total_attempts': sp.total_attempts,
+            'total_questions_attempted': sp.total_questions_attempted
+            if sp.total_questions_attempted
+            else 0,
+            'total_possible_marks': total_possible_marks,
+            'total_questions': total_questions,
+            'weighted_marks': (sp.received_marks / total_possible_marks)
+            * test.total_mark
+            if sp.received_marks
+            else 0,
+        }
 
-# FOR POST REQUESTS
+        progress = StudentTestProgress(
+            test_total_mark=result['Test_mark'],  # type: ignore
+            student_id=result['student_id'],  # type: ignore
+            email=result['email'],  # type: ignore
+            received_marks=result['received_marks'],  # type: ignore
+            total_attempts=result['total_attempts'],  # type: ignore
+            total_questions_attempted=result['total_questions_attempted'],  # type: ignore
+            total_possible_marks=result['total_possible_marks'],  # type: ignore
+            total_questions=result['total_questions'],  # type: ignore
+            weighted_marks=result['weighted_marks'],  # type: ignore
+        )  # type: ignore
+        results.append(progress)
+
+    return results
 
 
 def create_course_by_teacher_id(

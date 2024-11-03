@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -17,6 +17,7 @@ from app.models.quiz import (
     UserTestSession,
 )
 from app.models.user import Note
+from app.schemas.enums import TestStatus
 from app.schemas.question import QuestionTeacherView
 from app.schemas.question_submission import QuestionStudentSubmission
 from app.schemas.user import NoteCreate, NoteUpdate
@@ -50,9 +51,44 @@ def get_all_quizzes_tests_in_enrolled_course_by_course_title_student_id(  # type
     for test in tests:
         test.url = f'/student/enrolled_courses/test/{course_title}/{test.id}'
 
-    # TODO: Retun the quizzes and tests in a better way
-    # FOR Test also fetch if test started
-    # and send data according
+    for test in tests:
+        now = datetime.now(timezone.utc)
+        window_start = test.window_start.astimezone(timezone.utc)
+        window_end = test.window_end.astimezone(timezone.utc)
+
+        if now < window_start:
+            # Test has not opened yet
+            test.status = TestStatus.NOT_OPENED
+        elif now > window_end:
+            # Test window has ended
+            test.status = TestStatus.COMPLETED
+        else:
+            # Test is within the window
+            test_submission = (
+                db.query(UserTestSession)
+                .filter(
+                    UserTestSession.test_id == test.id,
+                    UserTestSession.user_id == student_id,
+                )
+                .first()
+            )
+            if not test_submission:
+                test.status = TestStatus.NOT_STARTED
+            else:
+                time_elapsed = now - test_submission.start_time
+                if time_elapsed.total_seconds() > test.duration * 60:
+                    # Test duration has been exceeded
+                    test.status = TestStatus.COMPLETED
+                else:
+                    # Test is in progress
+                    test.status = TestStatus.IN_PROGRESS
+                    print(f'Time elapsed: {time_elapsed}')
+    # add start url
+    for test in tests:
+        if test.status == TestStatus.NOT_STARTED:
+            test.start_url = (
+                f'/API/student/enrolled_courses/test/e{course_title}/{test.id}'
+            )
 
     return {
         'quizzes': quizzes,
@@ -144,18 +180,101 @@ def get_all_question_in_enrolled_course_by_course_title_test_id_student_id(
             status_code=404, detail='Test not found in the specified course'
         )
     # check if started
-    user_test_session = db.query(UserTestSession).filter(
-        UserTestSession.test_id == test_id, UserTestSession.user_id == student_id
+    user_test_session = (
+        db.query(UserTestSession)
+        .filter(
+            UserTestSession.test_id == test_id, UserTestSession.user_id == student_id
+        )
+        .first()
     )
+
     if not user_test_session:
         raise HTTPException(status_code=400, detail='Test not started by the student')
 
-    # TODO: filter questions based on the test window
-    # sure enrolled so fetch questio
-    # only send test question if test stared and during the test
-    # check: if duration is over
-    # 1: return result after window_end is ended
-    # 2: else just  message that result will show after window over
+    # for test in tests:
+    #     now = datetime.now(timezone.utc)
+    #     window_start = test.window_start.astimezone(timezone.utc)
+    #     window_end = test.window_end.astimezone(timezone.utc)
+
+    #     if now < window_start:
+    #         # Test has not opened yet
+    #         test.status = TestStatus.NOT_OPENED
+    #     elif now > window_end:
+    #         # Test window has ended
+    #         test.status = TestStatus.COMPLETED
+    #     else:
+    #         # Test is within the window
+    #         test_submission = (
+    #             db.query(UserTestSession)
+    #             .filter(
+    #                 UserTestSession.test_id == test.id,
+    #                 UserTestSession.user_id == student_id,
+    #             )
+    #             .first()
+    #         )
+    #         if not test_submission:
+    #             test.status = TestStatus.NOT_STARTED
+    #         else:
+    #             time_elapsed = now - test_submission.start_time
+    #             if time_elapsed.total_seconds() > test.duration * 60:
+    #                 # Test duration has been exceeded
+    #                 test.status = TestStatus.COMPLETED
+    #             else:
+    #                 # Test is in progress
+    #                 test.status = TestStatus.IN_PROGRESS
+    #                 print(f'Time elapsed: {time_elapsed}')
+
+    if (
+        user_test_session.start_time + timedelta(minutes=test.duration) < datetime.now()
+        and datetime.now() < test.window_end
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail='Test duration exceeded, Visit result after test window end',
+        )
+
+    if (
+        user_test_session.start_time + timedelta(minutes=test.duration) < datetime.now()
+        and datetime.now() < test.window_end
+    ):
+        pass
+
+    # test = db.query(Test).filter(Test.id == test_id).first()
+    # if not test:
+    #     raise HTTPException(status_code=404, detail='Test not found')
+    # now = datetime.now(timezone.utc)
+
+    # # Ensure test.window_start and test.window_end are timezone-aware
+    # if test.window_start.tzinfo is None:
+    #     window_start = test.window_start.replace(tzinfo=timezone.utc)
+    # else:
+    #     window_start = test.window_start.astimezone(timezone.utc)
+
+    # if test.window_end.tzinfo is None:
+    #     window_end = test.window_end.replace(tzinfo=timezone.utc)
+    # else:
+    #     window_end = test.window_end.astimezone(timezone.utc)
+
+    # if now < window_start:
+    #     raise HTTPException(status_code=400, detail='Test has not started yet')
+    # if now > window_end:
+    #     raise HTTPException(status_code=400, detail='Test window has expired')
+
+    # session = (
+    #     db.query(UserTestSession)
+    #     .filter(
+    #         UserTestSession.test_id == test_id, UserTestSession.user_id == student_id
+    #     )
+    #     .first()
+    # )
+    # if not session:
+    #     session = UserTestSession(test_id=test_id, user_id=student_id, start_time=now)
+    #     db.add(session)
+    #     db.commit()
+    # time_elapsed = now - session.start_time
+    # if time_elapsed.total_seconds() > test.duration * 60:
+    #     raise HTTPException(status_code=400, detail='Test duration exceeded')
+
     questions = (
         db.query(Question)
         .join(QuestionSet, QuestionSet.id == Question.question_set_id)

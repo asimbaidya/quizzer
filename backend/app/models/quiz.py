@@ -21,7 +21,7 @@ from sqlalchemy.orm import (
 )
 
 from app.core.db import Base
-from app.schemas.enums import QuestionType, SubmissionStatus
+from app.schemas.enums import QuestionType, SubmissionStatus, TestStatus
 from app.schemas.question import QuestionTeacherData
 from app.schemas.question_submission import QuestionStudentResponse
 
@@ -105,16 +105,13 @@ class Test(Base):
     )
     title: Mapped[str] = mapped_column(String, nullable=False, default='Untitled')
     duration: Mapped[int] = mapped_column(Integer, nullable=False)
-    total_mark: Mapped[int] = mapped_column(
-        Integer, nullable=False
-    )  # Total marks for the quiz
+    total_mark: Mapped[int] = mapped_column(Integer, nullable=False)
     window_start: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
     window_end: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
-
     course = relationship('Course', back_populates='tests')
     user_test_sessions = relationship('UserTestSession', back_populates='test')
 
