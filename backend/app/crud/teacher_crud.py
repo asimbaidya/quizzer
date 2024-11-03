@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.crud.ensure import ensure_question_submissions
 from app.models.quiz import (
     Course,
     Enrollment,
@@ -47,13 +48,16 @@ def get_quiz_and_test_by_course_title_creator_id(  # type: ignore
     }  # type: ignore
 
 
-# TODO: NOT SURE JOIN LOGIC
 def get_enrolled_students(db: Session, course_title: str, teacher_id: int):
     return (
         db.query(User)
         .join(Enrollment, User.id == Enrollment.student_id)
         .join(Course, Enrollment.course_id == Course.id)
-        .filter(Course.title == course_title, User.id == Enrollment.student_id)
+        .filter(
+            Course.title == course_title,
+            User.id == Enrollment.student_id,
+            Course.creator_id == teacher_id,
+        )
         .all()
     )
 
@@ -115,6 +119,24 @@ def get_questions_by_course_title_test_id_teacher_id(
 def get_student_progress_course_title_quiz_id_teacher_id(
     db: Session, course_title: str, quiz_id: int, teacher_id: int
 ):
+    quiz = db.query(Test).filter(Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail='Test not found')
+    question_set = (
+        db.query(QuestionSet).filter(QuestionSet.id == quiz.question_set_id).first()
+    )
+    if question_set is None:
+        raise HTTPException(status_code=404, detail='Question set not found')
+
+    enrolled_students = (
+        db.query(User)
+        .join(Enrollment, Enrollment.student_id == User.id)
+        .join(Course, Enrollment.course_id == Course.id)
+        .filter(Course.title == course_title, Course.creator_id == teacher_id)
+        .all()
+    )
+    for student in enrolled_students:
+        ensure_question_submissions(db, question_set.id, student.id)
     return (
         db.query(QuestionSubmission)
         .join(User, QuestionSubmission.user_id == User.id)
@@ -128,10 +150,33 @@ def get_student_progress_course_title_quiz_id_teacher_id(
         .all()
     )
 
+    # TODO: Group by student_id and calculate the progress
+
 
 def get_student_progress_course_title_test_id_teacher_id(
     db: Session, course_title: str, test_id: int, teacher_id: int
 ):
+    test = db.query(Test).filter(Test.id == test_id).first()
+    if not test:
+        raise HTTPException(status_code=404, detail='Test not found')
+    question_set = (
+        db.query(QuestionSet).filter(QuestionSet.id == test.question_set_id).first()
+    )
+    if question_set is None:
+        raise HTTPException(status_code=404, detail='Question set not found')
+
+    enrolled_students = (
+        db.query(User)
+        .join(Enrollment, Enrollment.student_id == User.id)
+        .join(Course, Enrollment.course_id == Course.id)
+        .filter(Course.title == course_title, Course.creator_id == teacher_id)
+        .all()
+    )
+    for student in enrolled_students:
+        ensure_question_submissions(db, question_set.id, student.id)
+
+    # ensure_question_submissions(db,question_set.id,student_id=)
+    # ensure_question_submissions()
     return (
         db.query(QuestionSubmission)
         .join(User, QuestionSubmission.user_id == User.id)
@@ -144,6 +189,7 @@ def get_student_progress_course_title_test_id_teacher_id(
         )
         .all()
     )
+    # TODO: Group by student_id and calculate the progress
 
 
 # FOR POST REQUESTS

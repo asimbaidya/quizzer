@@ -49,6 +49,21 @@ def get_all_question_in_a_quiz_of_enrolled_course(
     )
 
 
+@router.post('/enrolled_courses/test/{course_title}/{test_id}')
+def start_test(
+    db: SessionDep,
+    course_title: str,
+    test_id: int,
+    student: CurrentStudent,
+):
+    return student_crud.start_test_by_course_title_test_id_student_id(
+        db,
+        course_title,
+        test_id,
+        student.id,
+    )
+
+
 @router.get(
     '/enrolled_courses/test/{course_title}/{test_id}',
     response_model=list[QuestionStudentView],
@@ -62,6 +77,9 @@ def get_all_question_in_a_test_of_enrolled_course(
         test_id,
         student.id,
     )
+
+
+# Notes
 
 
 @router.get('/notes')
