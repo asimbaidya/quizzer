@@ -1,5 +1,5 @@
 import request from '../request';
-import { Course } from '../types';
+import { Course } from '../types/common';
 
 export const deleteUnusedImages = async (signal: AbortSignal): Promise<any> => {
   if (!localStorage.getItem('access_token')) {

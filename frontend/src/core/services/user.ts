@@ -1,5 +1,5 @@
 import request from '../request';
-import { User } from '../types';
+import { User } from '../types/common';
 
 export const fetchUserData = async (signal: AbortSignal) => {
   if (!localStorage.getItem('access_token')) {

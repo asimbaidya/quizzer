@@ -1,5 +1,5 @@
 import request from '../request';
-import { Course } from '../types';
+import { Course } from '../types/common';
 
 export const fetchCourses = async (signal: AbortSignal): Promise<Course[]> => {
   if (!localStorage.getItem('access_token')) {
