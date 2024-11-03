@@ -31,7 +31,7 @@ def get_all_enrolled_courses(db: Session, student_id: int):
         .all()
     )
     for course in courses:
-        course.url = f'/student/enrolled_courses/{course.title}'
+        course.url = f'/enrolled_courses/{course.title}'
     return courses
 
 
@@ -44,10 +44,10 @@ def get_all_quizzes_tests(  # type: ignore
     tests = db.query(Test).filter(Test.course_id == course.id).all()
 
     for quiz in quizzes:
-        quiz.url = f'/student/enrolled_courses/quiz/{course_title}/{quiz.id}'
+        quiz.url = f'/enrolled_courses/quiz/{course_title}/{quiz.id}'
 
     for test in tests:
-        test.url = f'/student/enrolled_courses/test/{course_title}/{test.id}'
+        test.url = f'/enrolled_courses/test/{course_title}/{test.id}'
 
     for test in tests:
         now = datetime.now(timezone.utc)
@@ -84,9 +84,7 @@ def get_all_quizzes_tests(  # type: ignore
     # add start url
     for test in tests:
         if test.status == TestStatus.NOT_STARTED:
-            test.start_url = (
-                f'/API/student/enrolled_courses/test/e{course_title}/{test.id}'
-            )
+            test.start_url = f'/enrolled_courses/test/e{course_title}/{test.id}'
 
     return {
         'quizzes': quizzes,
@@ -204,35 +202,49 @@ def get_all_question_in_test(
         .first()
     )
 
-    if not test_submission:
-        raise HTTPException(status_code=400, detail='Test not started by the student')
-
     # start test status
     now = datetime.now(timezone.utc)
     window_start = test.window_start.astimezone(timezone.utc)
     window_end = test.window_end.astimezone(timezone.utc)
+    test_start_time = 'NOT ATTEMPTED'
 
-    time_elapsed = now - test_submission.start_time
-    if time_elapsed.total_seconds() > test.duration * 60 and now < test.window_end:
-        raise HTTPException(
-            status_code=400,
-            detail='Test duration exceeded, Visit result after test window end',
-        )
-
-    if now < window_start and time_elapsed.total_seconds() < test.duration * 60:
-        return HTTPException(status_code=400, detail='Test has not started yet')
-
-    if now < window_end and time_elapsed.total_seconds() < test.duration * 60:
-        test.status = TestStatus.IN_PROGRESS
-
-    if now > window_end:
+    if now > window_end and not test_submission:
+        # todo
         test.status = TestStatus.COMPLETED
+
+        # also create a test submission to let see questions
+        # user_test_session = UserTestSession(
+        #     test_id=test_id, user_id=student_id, start_time=datetime.now()
+        # )
+        # db.add(user_test_session)
+        # db.commit()
+        # db.refresh(user_test_session)
+
+    elif not test_submission:
+        raise HTTPException(status_code=400, detail='Test not started by the student')
+    else:
+        time_elapsed = now - test_submission.start_time
+        test_start_time = test_submission.start_time
+        if time_elapsed.total_seconds() > test.duration * 60 and now < test.window_end:
+            raise HTTPException(
+                status_code=400,
+                detail='Test duration exceeded, Visit result after test window end',
+            )
+
+        if now < window_start and time_elapsed.total_seconds() < test.duration * 60:
+            return HTTPException(status_code=400, detail='Test has not started yet')
+
+        if now < window_end and time_elapsed.total_seconds() < test.duration * 60:
+            test.status = TestStatus.IN_PROGRESS
+
+        if now > window_end:
+            test.status = TestStatus.COMPLETED
 
     # Fetch questions and their submissions
     all_question_submission = (
         db.query(Question, QuestionSubmission)
         .join(QuestionSet, QuestionSet.id == Question.question_set_id)
-        .join(Quiz, Test.id == test_id)
+        .join(Test, Test.id == test_id)
         .outerjoin(
             QuestionSubmission,
             (QuestionSubmission.question_id == Question.id)
@@ -259,6 +271,7 @@ def get_all_question_in_test(
         'question_submissions': question_submissions,
         'total_mark': test.total_mark,
         'status': test.status,
+        'start_time': test_start_time,
     }  # type: ignore
 
 
