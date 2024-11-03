@@ -1,5 +1,5 @@
 import request from '../request';
-import { Course } from '../schemas/common';
+import { Course } from '../types';
 
 export const fetchEnrolledCourses = async (
   signal: AbortSignal

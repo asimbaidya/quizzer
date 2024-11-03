@@ -1,5 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
-import { Course } from '../../core/schemas/common';
+import { Course } from '../../core/types';
 import { Box, Text, VStack, HStack, background } from '@chakra-ui/react';
 import { Link } from '@tanstack/react-router';
 import { useEnrolledCourses } from '../../hooks/student';
