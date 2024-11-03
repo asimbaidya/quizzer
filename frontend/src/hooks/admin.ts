@@ -10,6 +10,7 @@ export const mutationDeleteUnusedImages = () => {
 
 export const mutationAddUser = () => {
   return useMutation({
-    mutationFn: ({ signal }: { signal: AbortSignal }) => addUser(signal),
+    mutationFn: ({ signal, data }: { signal: AbortSignal; data: any }) =>
+      addUser(signal, data),
   });
 };

@@ -1,5 +1,8 @@
 import request from '../request';
-import { Course } from '../types/common';
+import { User, Course, Quiz, Test, TeacherQuizAndTest } from '../types/common';
+import { Question } from '../types/question';
+
+//TODO: apply missing type annotations
 
 export const fetchCourses = async (signal: AbortSignal): Promise<Course[]> => {
   if (!localStorage.getItem('access_token')) {
@@ -12,14 +15,10 @@ export const fetchCourses = async (signal: AbortSignal): Promise<Course[]> => {
   });
 };
 
-// GET
-// /API/teacher/courses
-// Get Courses
-
 export const fetchCourseDetails = async (
   courseTitle: string,
   signal: AbortSignal
-): Promise<any> => {
+): Promise<TeacherQuizAndTest> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -30,14 +29,10 @@ export const fetchCourseDetails = async (
   });
 };
 
-// GET
-// /API/teacher/course/{course_title}
-// Get Quizzes And Tests In Course
-
 export const fetchEnrolledStudents = async (
   courseTitle: string,
   signal: AbortSignal
-): Promise<any> => {
+): Promise<User[]> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -48,15 +43,11 @@ export const fetchEnrolledStudents = async (
   });
 };
 
-// GET
-// /API/teacher/course/students/{course_title}
-// Get Enrolled Students
-
 export const fetchQuizQuestions = async (
   courseTitle: string,
   quizId: number,
   signal: AbortSignal
-): Promise<any> => {
+): Promise<Question[]> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -66,10 +57,6 @@ export const fetchQuizQuestions = async (
     signal,
   });
 };
-
-// GET
-// /API/teacher/course/quiz/{course_title}/{quiz_id}
-// Get Questions In Quiz
 
 export const createQuizQuestion = async (
   courseTitle: string,
@@ -84,19 +71,15 @@ export const createQuizQuestion = async (
     method: 'POST',
     url: `/API/teacher/course/quiz/${courseTitle}/${quizId}`,
     signal,
-    data: questionData,
+    formData: questionData,
   });
 };
-
-// POST
-// /API/teacher/course/quiz/{course_title}/{quiz_id}
-// Create Question In Quiz
 
 export const fetchTestQuestions = async (
   courseTitle: string,
   testId: number,
   signal: AbortSignal
-): Promise<any> => {
+): Promise<Question[]> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -106,10 +89,6 @@ export const fetchTestQuestions = async (
     signal,
   });
 };
-
-// GET
-// /API/teacher/course/test/{course_title}/{test_id}
-// Get Questions In Test
 
 export const createTestQuestion = async (
   courseTitle: string,
@@ -124,13 +103,9 @@ export const createTestQuestion = async (
     method: 'POST',
     url: `/API/teacher/course/test/${courseTitle}/${testId}`,
     signal,
-    data: questionData,
+    formData: questionData,
   });
 };
-
-// POST
-// /API/teacher/course/test/{course_title}/{test_id}
-// Create Question In Test
 
 export const fetchQuizStudentProgress = async (
   courseTitle: string,
@@ -147,10 +122,6 @@ export const fetchQuizStudentProgress = async (
   });
 };
 
-// GET
-// /API/teacher/course/quiz/students/{course_title}/{quiz_id}
-// Get Student Progress In Quiz
-
 export const fetchTestStudentProgress = async (
   courseTitle: string,
   testId: number,
@@ -166,10 +137,6 @@ export const fetchTestStudentProgress = async (
   });
 };
 
-// GET
-// /API/teacher/course/test/students/{course_title}/{test_id}
-// Get Student Progress In Test
-
 export const createCourse = async (
   courseData: any,
   signal: AbortSignal
@@ -181,13 +148,9 @@ export const createCourse = async (
     method: 'POST',
     url: '/API/teacher/course',
     signal,
-    data: courseData,
+    formData: courseData,
   });
 };
-
-// POST
-// /API/teacher/course
-// Create Course
 
 export const createQuiz = async (
   courseTitle: string,
@@ -201,13 +164,9 @@ export const createQuiz = async (
     method: 'POST',
     url: `/API/teacher/course/quiz/${courseTitle}`,
     signal,
-    data: quizData,
+    formData: quizData,
   });
 };
-
-// POST
-// /API/teacher/course/quiz/{course_title}
-// Create Quiz
 
 export const createTest = async (
   courseTitle: string,
@@ -221,10 +180,6 @@ export const createTest = async (
     method: 'POST',
     url: `/API/teacher/course/test/${courseTitle}`,
     signal,
-    data: testData,
+    formData: testData,
   });
 };
-
-// POST
-// /API/teacher/course/test/{course_title}
-// Create Test

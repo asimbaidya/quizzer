@@ -1,6 +1,7 @@
 import request from '../request';
-import { Course } from '../types/common';
+import { User } from '../types/common';
 
+// TODO: Add type for data
 export const deleteUnusedImages = async (signal: AbortSignal): Promise<any> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
@@ -12,11 +13,11 @@ export const deleteUnusedImages = async (signal: AbortSignal): Promise<any> => {
   });
 };
 
-// GET
-// /API/admin/delete_unused_images
-// Delete Unused Images
-
-export const addUser = async (signal: AbortSignal): Promise<any> => {
+// TODO: Add type for data
+export const addUser = async (
+  signal: AbortSignal,
+  data: User
+): Promise<any> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -24,9 +25,6 @@ export const addUser = async (signal: AbortSignal): Promise<any> => {
     method: 'POST',
     url: '/API/admin/users',
     signal,
+    formData: data,
   });
 };
-
-// POST
-// /API/admin/users
-// Add User

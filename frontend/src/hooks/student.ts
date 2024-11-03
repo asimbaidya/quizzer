@@ -13,6 +13,7 @@ import {
   enrollCourse,
   submitQuestionAnswer,
 } from '../core/services/student';
+import { EnrollMetadata } from '../core/types/common';
 
 export const useEnrolledCourses = () => {
   return useQuery({
@@ -110,14 +111,12 @@ export const mutationDeleteNote = () => {
 export const mutationEnrollCourse = () => {
   return useMutation({
     mutationFn: ({
-      coursePin,
-      courseTitle,
+      data,
       signal,
     }: {
-      coursePin: string;
-      courseTitle: string;
       signal: AbortSignal;
-    }) => enrollCourse(coursePin, courseTitle, signal),
+      data: EnrollMetadata;
+    }) => enrollCourse(signal, data),
   });
 };
 

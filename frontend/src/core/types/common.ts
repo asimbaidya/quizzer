@@ -51,7 +51,7 @@ export interface Course {
   course_pin: string;
 }
 
-interface EnrollMetadata {
+export interface EnrollMetadata {
   course_title: string;
   course_pin: string;
 }
@@ -77,6 +77,11 @@ export interface Test {
   total_mark: number;
   window_start: Date;
   window_end: Date;
+}
+
+export interface TeacherQuizAndTest {
+  quizzes: Quiz[];
+  tests: Test[];
 }
 // export interface Quiz {
 //   id: number;

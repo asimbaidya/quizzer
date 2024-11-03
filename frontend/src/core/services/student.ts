@@ -1,5 +1,9 @@
 import request from '../request';
-import { Course } from '../types/common';
+import { Course, AllQuizzesTests, Note, EnrollMetadata } from '../types/common';
+import {
+  QuizQuestionWithSubmission,
+  TestQuestionWithSubmission,
+} from '../types/question';
 
 export const fetchEnrolledCourses = async (
   signal: AbortSignal
@@ -14,14 +18,10 @@ export const fetchEnrolledCourses = async (
   });
 };
 
-// GET
-// /API/student/enrolled_courses
-// Get All Enrolled Courses Link
-
 export const fetchCourseQuizzesAndTests = async (
   courseTitle: string,
   signal: AbortSignal
-): Promise<any> => {
+): Promise<AllQuizzesTests> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -32,15 +32,11 @@ export const fetchCourseQuizzesAndTests = async (
   });
 };
 
-// GET
-// /API/student/enrolled_courses/{course_title}
-// Get All Quiz And Test In Enrolled Course
-
 export const fetchQuizQuestions = async (
   courseTitle: string,
   quizId: number,
   signal: AbortSignal
-): Promise<any> => {
+): Promise<QuizQuestionWithSubmission> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -51,10 +47,7 @@ export const fetchQuizQuestions = async (
   });
 };
 
-// GET
-// /API/student/enrolled_courses/quiz/{course_title}/{quiz_id}
-// Get All Question In A Quiz Of Enrolled Course
-
+// TODO: fix the return type from any
 export const startTest = async (
   courseTitle: string,
   testId: number,
@@ -70,15 +63,11 @@ export const startTest = async (
   });
 };
 
-// POST
-// /API/student/enrolled_courses/test/{course_title}/{test_id}
-// Start Test
-
 export const fetchTestQuestions = async (
   courseTitle: string,
   testId: number,
   signal: AbortSignal
-): Promise<any> => {
+): Promise<TestQuestionWithSubmission> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -89,11 +78,7 @@ export const fetchTestQuestions = async (
   });
 };
 
-// GET
-// /API/student/enrolled_courses/test/{course_title}/{test_id}
-// Get All Question In A Test Of Enrolled Course
-
-export const fetchNotes = async (signal: AbortSignal): Promise<any> => {
+export const fetchNotes = async (signal: AbortSignal): Promise<Note[]> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -104,12 +89,9 @@ export const fetchNotes = async (signal: AbortSignal): Promise<any> => {
   });
 };
 
-// GET
-// /API/student/notes
-// Get All Note Of User
-
+// TODO: fix the return type from any
 export const createNote = async (
-  noteData: any,
+  noteData: Note,
   signal: AbortSignal
 ): Promise<any> => {
   if (!localStorage.getItem('access_token')) {
@@ -119,18 +101,14 @@ export const createNote = async (
     method: 'POST',
     url: '/API/student/notes',
     signal,
-    data: noteData,
+    formData: noteData,
   });
 };
-
-// POST
-// /API/student/notes
-// Create Note For User
 
 export const fetchNote = async (
   noteId: number,
   signal: AbortSignal
-): Promise<any> => {
+): Promise<Note> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -141,15 +119,11 @@ export const fetchNote = async (
   });
 };
 
-// GET
-// /API/student/notes/{note_id}
-// Get Specific Note Of User
-
 export const updateNote = async (
   noteId: number,
-  noteData: any,
+  noteData: Note,
   signal: AbortSignal
-): Promise<any> => {
+): Promise<Note> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -157,13 +131,9 @@ export const updateNote = async (
     method: 'PUT',
     url: `/API/student/notes/${noteId}`,
     signal,
-    data: noteData,
+    formData: noteData,
   });
 };
-
-// PUT
-// /API/student/notes/{note_id}
-// Update Note For User
 
 export const deleteNote = async (
   noteId: number,
@@ -179,14 +149,10 @@ export const deleteNote = async (
   });
 };
 
-// DELETE
-// /API/student/notes/{note_id}
-// Delete Note For User
-
+// TODO: Fix the return type from any
 export const enrollCourse = async (
-  coursePin: string,
-  courseTitle: string,
-  signal: AbortSignal
+  signal: AbortSignal,
+  data: EnrollMetadata
 ): Promise<any> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
@@ -195,14 +161,11 @@ export const enrollCourse = async (
     method: 'POST',
     url: '/API/student/enrolled_courses/',
     signal,
-    data: { coursePin, courseTitle },
+    formData: data,
   });
 };
 
-// POST
-// /API/student/enrolled_courses/
-// Enroll Course With Course Pin And Course Title
-
+// TODO: Fix the return type from any
 export const submitQuestionAnswer = async (
   questionId: number,
   answerData: any,
@@ -215,10 +178,6 @@ export const submitQuestionAnswer = async (
     method: 'POST',
     url: `/API/student/questions/submit/${questionId}`,
     signal,
-    data: answerData,
+    formData: answerData,
   });
 };
-
-// POST
-// /API/student/questions/submit/{question_id}
-// Submit Question Answer
