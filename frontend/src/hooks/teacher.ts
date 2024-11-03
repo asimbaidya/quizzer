@@ -1,19 +1,142 @@
-import { useQuery } from '@tanstack/react-query';
-import { fetchEnrolledCourses } from '../core/services/student';
-import { fetchTestQuestions } from '../core/services/teacher';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import {
+  fetchCourses,
+  fetchCourseDetails,
+  fetchEnrolledStudents,
+  fetchQuizQuestions,
+  createQuizQuestion,
+  fetchTestQuestions,
+  createTestQuestion,
+  fetchQuizStudentProgress,
+  fetchTestStudentProgress,
+  createCourse,
+  createQuiz,
+  createTest,
+} from '../core/services/teacher';
 
 export const useCreatedCourses = () => {
   return useQuery({
     queryKey: ['CreatedCourses'],
-    queryFn: ({ signal }: { signal: AbortSignal }) =>
-      fetchEnrolledCourses(signal),
+    queryFn: ({ signal }: { signal: AbortSignal }) => fetchCourses(signal),
   });
 };
 
-export const useTestQuestions = (courseTitle: string, testId: string) => {
+export const useCourseDetails = (courseTitle: string) => {
+  return useQuery({
+    queryKey: ['courseDetails', courseTitle],
+    queryFn: ({ signal }: { signal: AbortSignal }) =>
+      fetchCourseDetails(courseTitle, signal),
+  });
+};
+
+export const useEnrolledStudents = (courseTitle: string) => {
+  return useQuery({
+    queryKey: ['enrolledStudents', courseTitle],
+    queryFn: ({ signal }: { signal: AbortSignal }) =>
+      fetchEnrolledStudents(courseTitle, signal),
+  });
+};
+
+export const useQuizQuestions = (courseTitle: string, quizId: number) => {
+  return useQuery({
+    queryKey: ['quizQuestions', courseTitle, quizId],
+    queryFn: ({ signal }: { signal: AbortSignal }) =>
+      fetchQuizQuestions(courseTitle, quizId, signal),
+  });
+};
+
+export const mutationCreateQuizQuestion = () => {
+  return useMutation({
+    mutationFn: ({
+      courseTitle,
+      quizId,
+      questionData,
+      signal,
+    }: {
+      courseTitle: string;
+      quizId: number;
+      questionData: any;
+      signal: AbortSignal;
+    }) => createQuizQuestion(courseTitle, quizId, questionData, signal),
+  });
+};
+
+export const useTestQuestions = (courseTitle: string, testId: number) => {
   return useQuery({
     queryKey: ['testQuestions', courseTitle, testId],
     queryFn: ({ signal }: { signal: AbortSignal }) =>
       fetchTestQuestions(courseTitle, testId, signal),
+  });
+};
+
+export const mutationCreateTestQuestion = () => {
+  return useMutation({
+    mutationFn: ({
+      courseTitle,
+      testId,
+      questionData,
+      signal,
+    }: {
+      courseTitle: string;
+      testId: number;
+      questionData: any;
+      signal: AbortSignal;
+    }) => createTestQuestion(courseTitle, testId, questionData, signal),
+  });
+};
+
+export const useQuizStudentProgress = (courseTitle: string, quizId: number) => {
+  return useQuery({
+    queryKey: ['quizStudentProgress', courseTitle, quizId],
+    queryFn: ({ signal }: { signal: AbortSignal }) =>
+      fetchQuizStudentProgress(courseTitle, quizId, signal),
+  });
+};
+
+export const useTestStudentProgress = (courseTitle: string, testId: number) => {
+  return useQuery({
+    queryKey: ['testStudentProgress', courseTitle, testId],
+    queryFn: ({ signal }: { signal: AbortSignal }) =>
+      fetchTestStudentProgress(courseTitle, testId, signal),
+  });
+};
+
+export const mutationCreateCourse = () => {
+  return useMutation({
+    mutationFn: ({
+      courseData,
+      signal,
+    }: {
+      courseData: any;
+      signal: AbortSignal;
+    }) => createCourse(courseData, signal),
+  });
+};
+
+export const mutationCreateQuiz = () => {
+  return useMutation({
+    mutationFn: ({
+      courseTitle,
+      quizData,
+      signal,
+    }: {
+      courseTitle: string;
+      quizData: any;
+      signal: AbortSignal;
+    }) => createQuiz(courseTitle, quizData, signal),
+  });
+};
+
+export const mutationCreateTest = () => {
+  return useMutation({
+    mutationFn: ({
+      courseTitle,
+      testData,
+      signal,
+    }: {
+      courseTitle: string;
+      testData: any;
+      signal: AbortSignal;
+    }) => createTest(courseTitle, testData, signal),
   });
 };
