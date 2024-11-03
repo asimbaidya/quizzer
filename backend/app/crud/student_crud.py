@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -96,36 +96,6 @@ def get_all_quizzes_tests_in_enrolled_course_by_course_title_student_id(  # type
     }  # type: ignore
 
 
-def get_all_question_in_enrolled_course_by_course_title_quiz_id_student_id__(
-    db: Session, course_title: str, quiz_id: int, student_id: int
-):
-    """Get the quiz for the course."""
-    course, _enrollment = get_course_and_enrollment_by_course_title_student_id_or_404(
-        db, course_title, student_id
-    )
-
-    quiz = get_quiz_by_quiz_id_or_404(db, quiz_id)
-    if quiz.course_id is not course.id:
-        raise HTTPException(
-            status_code=404, detail='Quiz not found in the specified course'
-        )
-    # sure enrolled so fetch question
-    questions = (
-        db.query(Question)
-        .join(QuestionSet, QuestionSet.id == Question.question_set_id)
-        .join(Quiz, Quiz.id == quiz_id)
-        .filter(QuestionSet.id == quiz.question_set_id)
-        .all()
-    )
-    for question in questions:
-        question.url = f'/student/enrolled_courses/submit/{course_title}/{question.question_set_id}/{question.id}'  # noqa: E501
-        if question.image is not None:
-            question.image_url = (
-                f'http://127.0.0.1:8000/API/image_show/{question.image}'
-            )
-    return questions
-
-
 def get_all_question_in_enrolled_course_by_course_title_quiz_id_student_id(  # type: ignore
     db: Session, course_title: str, quiz_id: int, student_id: int
 ):
@@ -159,6 +129,12 @@ def get_all_question_in_enrolled_course_by_course_title_quiz_id_student_id(  # t
 
     question_submissions = []
     for question, submission in all_question_submission:
+        question.url = f'/API/student/questions/submit/{question.id}?course_title={course_title}&question_set_id={question.question_set_id}&question_id={question.id}'  # noqa: E501
+        if question.image:
+            question.image_url = (
+                f'http://127.0.0.1:8000/API/image_show/{question.image}'
+            )
+
         question_submission = {
             'question': question,
             'submission': submission,
@@ -169,7 +145,7 @@ def get_all_question_in_enrolled_course_by_course_title_quiz_id_student_id(  # t
         'question_submissions': question_submissions,  # type: ignore
         'allowed_attempt': quiz.allowed_attempt,
         'is_unlimited_attempt': quiz.is_unlimited_attempt,
-        'total_marks': quiz.total_marks,
+        'total_mark': quiz.total_mark,
     }
 
 
@@ -226,8 +202,11 @@ def get_all_question_in_enrolled_course_by_course_title_test_id_student_id(
         raise HTTPException(
             status_code=404, detail='Test not found in the specified course'
         )
+    # Ensure question submissions
+    ensure_question_submissions(db, test.question_set_id, student_id)
+
     # check if started
-    user_test_session = (
+    test_submission = (
         db.query(UserTestSession)
         .filter(
             UserTestSession.test_id == test_id, UserTestSession.user_id == student_id
@@ -235,107 +214,62 @@ def get_all_question_in_enrolled_course_by_course_title_test_id_student_id(
         .first()
     )
 
-    if not user_test_session:
+    if not test_submission:
         raise HTTPException(status_code=400, detail='Test not started by the student')
 
-    # for test in tests:
-    #     now = datetime.now(timezone.utc)
-    #     window_start = test.window_start.astimezone(timezone.utc)
-    #     window_end = test.window_end.astimezone(timezone.utc)
+    # start test status
+    now = datetime.now(timezone.utc)
+    window_start = test.window_start.astimezone(timezone.utc)
+    window_end = test.window_end.astimezone(timezone.utc)
 
-    #     if now < window_start:
-    #         # Test has not opened yet
-    #         test.status = TestStatus.NOT_OPENED
-    #     elif now > window_end:
-    #         # Test window has ended
-    #         test.status = TestStatus.COMPLETED
-    #     else:
-    #         # Test is within the window
-    #         test_submission = (
-    #             db.query(UserTestSession)
-    #             .filter(
-    #                 UserTestSession.test_id == test.id,
-    #                 UserTestSession.user_id == student_id,
-    #             )
-    #             .first()
-    #         )
-    #         if not test_submission:
-    #             test.status = TestStatus.NOT_STARTED
-    #         else:
-    #             time_elapsed = now - test_submission.start_time
-    #             if time_elapsed.total_seconds() > test.duration * 60:
-    #                 # Test duration has been exceeded
-    #                 test.status = TestStatus.COMPLETED
-    #             else:
-    #                 # Test is in progress
-    #                 test.status = TestStatus.IN_PROGRESS
-    #                 print(f'Time elapsed: {time_elapsed}')
-
-    if (
-        user_test_session.start_time + timedelta(minutes=test.duration) < datetime.now()
-        and datetime.now() < test.window_end
-    ):
+    time_elapsed = now - test_submission.start_time
+    if time_elapsed.total_seconds() > test.duration * 60 and now < test.window_end:
         raise HTTPException(
             status_code=400,
             detail='Test duration exceeded, Visit result after test window end',
         )
 
-    if (
-        user_test_session.start_time + timedelta(minutes=test.duration) < datetime.now()
-        and datetime.now() < test.window_end
-    ):
-        pass
+    if now < window_start and time_elapsed.total_seconds() < test.duration * 60:
+        return HTTPException(status_code=400, detail='Test has not started yet')
 
-    # test = db.query(Test).filter(Test.id == test_id).first()
-    # if not test:
-    #     raise HTTPException(status_code=404, detail='Test not found')
-    # now = datetime.now(timezone.utc)
+    if now < window_end and time_elapsed.total_seconds() < test.duration * 60:
+        test.status = TestStatus.IN_PROGRESS
 
-    # # Ensure test.window_start and test.window_end are timezone-aware
-    # if test.window_start.tzinfo is None:
-    #     window_start = test.window_start.replace(tzinfo=timezone.utc)
-    # else:
-    #     window_start = test.window_start.astimezone(timezone.utc)
+    if now > window_end:
+        test.status = TestStatus.COMPLETED
 
-    # if test.window_end.tzinfo is None:
-    #     window_end = test.window_end.replace(tzinfo=timezone.utc)
-    # else:
-    #     window_end = test.window_end.astimezone(timezone.utc)
-
-    # if now < window_start:
-    #     raise HTTPException(status_code=400, detail='Test has not started yet')
-    # if now > window_end:
-    #     raise HTTPException(status_code=400, detail='Test window has expired')
-
-    # session = (
-    #     db.query(UserTestSession)
-    #     .filter(
-    #         UserTestSession.test_id == test_id, UserTestSession.user_id == student_id
-    #     )
-    #     .first()
-    # )
-    # if not session:
-    #     session = UserTestSession(test_id=test_id, user_id=student_id, start_time=now)
-    #     db.add(session)
-    #     db.commit()
-    # time_elapsed = now - session.start_time
-    # if time_elapsed.total_seconds() > test.duration * 60:
-    #     raise HTTPException(status_code=400, detail='Test duration exceeded')
-
-    questions = (
-        db.query(Question)
+    # Fetch questions and their submissions
+    all_question_submission = (
+        db.query(Question, QuestionSubmission)
         .join(QuestionSet, QuestionSet.id == Question.question_set_id)
-        .join(Test, Test.id == test_id)
+        .join(Quiz, Test.id == test_id)
+        .outerjoin(
+            QuestionSubmission,
+            (QuestionSubmission.question_id == Question.id)
+            & (QuestionSubmission.user_id == student_id),
+        )
         .filter(QuestionSet.id == test.question_set_id)
         .all()
     )
-    for question in questions:
-        question.url = f'/student/enrolled_courses/submit/{course_title}/{question.question_set_id}/{question.id}'  # noqa: E501
-        if question.image is not None:
+
+    question_submissions = []
+    for question, submission in all_question_submission:
+        question.url = f'/API/student/questions/submit/{question.id}?course_title={course_title}&question_set_id={question.question_set_id}&question_id={question.id}'  # noqa: E501
+        if question.image:
             question.image_url = (
                 f'http://127.0.0.1:8000/API/image_show/{question.image}'
             )
-    return questions
+        question_submission = {
+            'question': question,
+            'submission': submission,
+        }
+        question_submissions.append(question_submission)  # type: ignore
+
+    return {
+        'question_submissions': question_submissions,
+        'total_mark': test.total_mark,
+        'status': test.status,
+    }  # type: ignore
 
 
 def get_all_notes_by_student_id(db: Session, student_id: int):
