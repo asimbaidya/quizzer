@@ -49,6 +49,7 @@ export interface Course {
   id: number;
   description: string;
   course_pin: string;
+  url: string;
 }
 
 export interface EnrollMetadata {

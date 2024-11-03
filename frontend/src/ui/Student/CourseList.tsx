@@ -1,9 +1,6 @@
-import { QueryClient } from '@tanstack/react-query';
 import { Course } from '../../core/types/common';
-import { Box, Text, VStack, HStack, background } from '@chakra-ui/react';
+import { Text, VStack, HStack } from '@chakra-ui/react';
 import { Link } from '@tanstack/react-router';
-import { useEnrolledCourses } from '../../hooks/student';
-import { Container, Heading } from '@chakra-ui/react';
 
 interface CourseProps {
   course: Course;
@@ -12,27 +9,6 @@ interface CourseListProps {
   courses: Course[];
 }
 
-function EnrolledCourses() {
-  const queryClient = new QueryClient();
-  const { data: courses, error, isLoading } = useEnrolledCourses();
-
-  return (
-    <Container maxW="full">
-      <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
-        Courses
-        {courses?.length === 0 || courses === undefined ? (
-          <Box>
-            <Text fontSize="2xl" color="white">
-              No Courses Found
-            </Text>
-          </Box>
-        ) : (
-          <CourseList courses={courses} />
-        )}
-      </Heading>
-    </Container>
-  );
-}
 export default function CourseList({ courses }: CourseListProps) {
   return (
     <VStack spacing={8} align="stretch" width="full" minHeight="100vh" mt={4}>
@@ -67,7 +43,7 @@ const CourseComponent: React.FC<CourseProps> = ({ course }) => {
       </Text>
       <span color="teal.300">
         <Link
-          to={`/enrolledCourses/${course.title}`}
+          to={course.url}
           style={{
             color: 'teal',
             fontWeight: 'bold',

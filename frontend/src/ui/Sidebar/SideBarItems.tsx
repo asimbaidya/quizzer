@@ -49,7 +49,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
       {
         icon: FiBookOpen,
         title: 'Enrolled Course',
-        path: '/enrolledCourses',
+        path: '/enrolled_courses',
       },
       { icon: FiFileText, title: 'Notes', path: '/note' },
     ];

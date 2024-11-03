@@ -4,7 +4,7 @@ import { Container, Heading } from '@chakra-ui/react';
 import { createFileRoute } from '@tanstack/react-router';
 import CourseList from '../../../ui/Student/CourseList';
 
-export const Route = createFileRoute('/_layout/(student)/enrolledCourses/')({
+export const Route = createFileRoute('/_layout/(student)/enrolled_courses/')({
   component: () => <EnrolledCourses />,
 });
 

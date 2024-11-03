@@ -81,7 +81,9 @@ const Login = () => {
               {errors.password && errors.password.message}
             </FormErrorMessage>
           </FormControl>
-          {loginError && <Box color="red.500">{loginError}</Box>}
+          {loginError && (
+            <Box color="red.500">{JSON.stringify(loginError)}</Box>
+          )}
           <Button type="submit" colorScheme="blue" width="full">
             Login
           </Button>

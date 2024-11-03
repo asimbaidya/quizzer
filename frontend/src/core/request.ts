@@ -50,8 +50,8 @@ export default async function request<T>({
 
   if (formData) {
     options.headers = options.headers || {};
-    // options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-    // options.data = new URLSearchParams(formData as any).toString();
+    options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    options.data = new URLSearchParams(formData as any).toString();
   }
 
   try {
