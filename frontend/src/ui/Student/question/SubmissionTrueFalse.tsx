@@ -37,10 +37,12 @@ const SubmissionTrueFalse: React.FC<QuestionSubmission> = ({
 
   return (
     <Box p={5} borderWidth={1} borderRadius="md" mt={5}>
-      <Text fontSize="xl" mb={4}>
+      <Text fontSize="4xl" mb={4}>
         {question_text}
       </Text>
-      {image_url && <Image src={image_url} alt="Question Image" mb={4} />}
+      {image_url && (
+        <Image src={image_url} alt="Question Image" mb={4} mx={'auto'} />
+      )}
       {!is_submitted ? (
         <>
           <Flex mb={4}>
@@ -48,12 +50,16 @@ const SubmissionTrueFalse: React.FC<QuestionSubmission> = ({
               mr={2}
               colorScheme={userResponse === true ? 'green' : 'gray'}
               onClick={() => handleSelect(true)}
+              width={'50%'}
+              fontSize={'xl'}
             >
               True
             </Button>
             <Button
               colorScheme={userResponse === false ? 'green' : 'gray'}
               onClick={() => handleSelect(false)}
+              width={'50%'}
+              fontSize={'xl'}
             >
               False
             </Button>

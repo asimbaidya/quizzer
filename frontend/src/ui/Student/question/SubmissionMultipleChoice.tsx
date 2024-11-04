@@ -41,10 +41,12 @@ const SubmissionMultipleChoice: React.FC<QuestionSubmission> = ({
 
   return (
     <Box p={5} borderWidth={1} borderRadius="md" mt={5}>
-      <Text fontSize="xl" mb={4}>
+      <Text fontSize="4xl" mb={4}>
         {question_text}
       </Text>
-      {image_url && <Image src={image_url} alt="Question Image" mb={4} />}
+      {image_url && (
+        <Image src={image_url} alt="Question Image" mb={4} mx={'auto'} />
+      )}
       {choices?.map((choice) => (
         <Flex
           key={choice.text}
@@ -67,6 +69,7 @@ const SubmissionMultipleChoice: React.FC<QuestionSubmission> = ({
             fontWeight={
               selectedOptions.includes(choice.text) ? 'bold' : 'normal'
             }
+            fontSize={'xl'}
           >
             {choice.text}
           </Text>
