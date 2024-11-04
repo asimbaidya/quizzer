@@ -1,4 +1,6 @@
 import { extendTheme } from '@chakra-ui/react';
+import '@fontsource/open-sans';
+import '@fontsource/raleway';
 
 const disabledStyles = {
   _disabled: {
@@ -7,6 +9,10 @@ const disabledStyles = {
 };
 
 const theme = extendTheme({
+  fonts: {
+    heading: `'Open Sans', sans-serif`,
+    body: `'Raleway', sans-serif`,
+  },
   config: {
     initialColorMode: 'dark',
     useSystemColorMode: false,

@@ -67,6 +67,7 @@ export interface Quiz {
   total_mark: number;
   is_unlimited_attempt: boolean;
   allowed_attempt: number;
+  url: string;
 }
 
 export interface Test {
@@ -78,6 +79,7 @@ export interface Test {
   total_mark: number;
   window_start: Date;
   window_end: Date;
+  url: string;
 }
 
 export interface TeacherQuizAndTest {
