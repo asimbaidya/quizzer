@@ -3,16 +3,19 @@ import { Container, Heading } from '@chakra-ui/react';
 import { useTestQuestions } from '../../../hooks/teacher';
 import { CustomError } from '../../../core/request';
 import Test from '../../../ui/Teacher/Test';
+import { Question } from '../../../core/types/question';
 
 export const Route = createFileRoute(
   '/_layout/(teacher)/course/test/$courseTitle/$testId'
 )({
   component: () => {
     const { courseTitle, testId } = Route.useParams();
-    const { data, isLoading, error } = useTestQuestions(
-      courseTitle,
-      Number(testId)
-    );
+
+    const {
+      data: testQustions,
+      isLoading,
+      error,
+    } = useTestQuestions(courseTitle, Number(testId));
 
     if (isLoading) return <div>Loading...</div>;
     if (error) {
@@ -21,11 +24,15 @@ export const Route = createFileRoute(
       throw notFound();
     }
 
-    return <CourseTestCourseTitleTestId questions={data} />;
+    return <CourseTestCourseTitleTestId questions={testQustions} />;
   },
 });
 
-function CourseTestCourseTitleTestId({ questions }) {
+function CourseTestCourseTitleTestId({
+  questions,
+}: {
+  questions: Question[] | undefined;
+}) {
   console.log('Route.useParams():', Route.useParams());
   const { courseTitle, testId } = Route.useParams();
   return (
@@ -33,7 +40,7 @@ function CourseTestCourseTitleTestId({ questions }) {
       <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
         Course: {courseTitle}
       </Heading>
-      <Test />
+      <Test questions={questions} />
     </Container>
   );
 }

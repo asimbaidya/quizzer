@@ -2,54 +2,51 @@ import { useState } from 'react';
 import {
   Box,
   Button,
-  Checkbox,
-  Switch,
-  Flex,
   FormControl,
   FormLabel,
   Input,
   Textarea,
   Badge,
   HStack,
+  Flex,
 } from '@chakra-ui/react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { SingleChoiceQuestionSchema } from '../../../core/schemas/question_create';
+import { z } from 'zod';
+import { useMutation } from '@tanstack/react-query';
+import { createQuestionOnAPIEndPoint } from '../../../core/services/teacher';
+
+import { UserInputQuestionSchema } from '../../../core/schemas/question_create';
+import useCustomToast from '../../../hooks/useCustomToast';
+import { useQueryClient } from '@tanstack/react-query';
+
 import OptionalImageUpload from './OptionalImageUpload';
 
-import { useMutation } from '@tanstack/react-query';
-import { createQuizQuestion } from '../../../core/services/teacher';
-import { useParams } from '@tanstack/react-router';
+type UserInputQuestionFormData = z.infer<typeof UserInputQuestionSchema>;
 
-import useCustomToast from '../../../hooks/useCustomToast';
-import { z } from 'zod';
-
-type SingleChoiceQuestionFormData = z.infer<typeof SingleChoiceQuestionSchema>;
-
-const AddSingleChoiceQuestion = () => {
-  const { courseTitle, quizId } = useParams({
-    from: '/_layout/(teacher)/course/quiz/$courseTitle/$quizId',
-  });
-
+const AddUserInputQuestion = ({ apiEndPoint }: { apiEndPoint: string }) => {
   const [image, setImage] = useState<string | null>(null);
   const { showToast } = useCustomToast();
+  const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: ({
-      courseTitle,
-      quizId,
+      apiEndPoint,
       questionData,
       signal,
     }: {
-      courseTitle: string;
-      quizId: number;
+      apiEndPoint: string;
       questionData: any;
       signal: AbortSignal;
-    }) => createQuizQuestion(courseTitle, quizId, questionData, signal),
+    }) => createQuestionOnAPIEndPoint(apiEndPoint, questionData, signal),
     onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['Questions'],
+      });
       // reset the form
       reset();
       setImage(null);
+
       showToast({
         title: 'Question Submitted',
         status: 'success',
@@ -70,24 +67,15 @@ const AddSingleChoiceQuestion = () => {
 
   const {
     register,
-    control,
     handleSubmit,
     reset,
     watch,
-    setValue,
     formState: { errors },
-  } = useForm<SingleChoiceQuestionFormData>({
-    resolver: zodResolver(SingleChoiceQuestionSchema),
+  } = useForm<UserInputQuestionFormData>({
+    resolver: zodResolver(UserInputQuestionSchema),
     defaultValues: {
       question_data: {
-        question_type: 'single_choice',
         question_text: '',
-        choices: [
-          { text: '', correct: false },
-          { text: '', correct: false },
-          { text: '', correct: false },
-          { text: '', correct: false },
-        ],
       },
       tag: 'untagged',
       total_marks: 5,
@@ -95,26 +83,25 @@ const AddSingleChoiceQuestion = () => {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'question_data.choices',
-  });
-
+  // watch the question_text and correct_answer fields for character count
   const questionText = watch('question_data.question_text', '');
-  const choices = watch('question_data.choices');
+  const correctAnswer = watch('question_data.correct_answer', '');
 
-  const onSubmit = (data: SingleChoiceQuestionFormData) => {
+  const onSubmit = (data: UserInputQuestionFormData) => {
+    // include the image in the data
+    console.log(data);
     const formData = { ...data, image };
+    console.log(formData);
 
     const signal = new AbortController().signal;
     mutation.mutate({
-      courseTitle: courseTitle,
-      quizId: Number(quizId),
+      apiEndPoint: apiEndPoint,
       questionData: formData,
       signal,
     });
 
     // alert(`Submitted Data:\n${JSON.stringify(formData, null, 2)}`);
+    // console.log(`${JSON.stringify(formData, null, 2)}`);
   };
 
   return (
@@ -126,6 +113,7 @@ const AddSingleChoiceQuestion = () => {
       p={4}
       mb={4}
     >
+      {/* Question Text */}
       <FormControl isInvalid={!!errors.question_data?.question_text} isRequired>
         <FormLabel>Question Text</FormLabel>
         <Textarea
@@ -146,87 +134,35 @@ const AddSingleChoiceQuestion = () => {
         </Flex>
       </FormControl>
 
+      {/* Image Upload */}
       <FormControl mt={4}>
         <FormLabel>Upload Image (Optional)</FormLabel>
         <OptionalImageUpload setFile={setImage} />
       </FormControl>
 
-      {/* {fields.map((field, index) => (
-        <Flex key={field.id} alignItems="center" mt={4}>
-          <Checkbox
-            mr={2}
-            isChecked={choices[index]?.correct}
-            onChange={(e) => {
-              // set all choices to false first
-              fields.forEach((_, i) => {
-                setValue(`question_data.choices.${i}.correct`, false);
-              });
-              // then set the selected one to true
-              setValue(
-                `question_data.choices.${index}.correct`,
-                e.target.checked
-              );
-            }}
-          />
-          <Input
-            placeholder={`Option ${index + 1}`}
-            borderColor={choices[index]?.correct ? 'green.500' : undefined}
-            focusBorderColor={choices[index]?.correct ? 'green.500' : undefined}
-            {...register(`question_data.choices.${index}.text`)}
-          />
-          {index > 3 && (
-            <Button ml={2} size="sm" onClick={() => remove(index)}>
-              Remove
-            </Button>
-          )}
-        </Flex>
-      ))} */}
-
-      {fields.map((field, index) => (
-        <Flex key={field.id} alignItems="center" mt={4}>
-          <Switch
-            mr={2}
-            size={'lg'}
-            isChecked={choices[index]?.correct}
-            onChange={(e) => {
-              // Set all choices to false
-              fields.forEach((_, i) => {
-                setValue(`question_data.choices.${i}.correct`, false);
-              });
-              // Set the selected one to true
-              setValue(
-                `question_data.choices.${index}.correct`,
-                e.target.checked
-              );
-            }}
-          />
-          <Input
-            placeholder={`Option ${index + 1}`}
-            borderColor={choices[index]?.correct ? 'green.500' : undefined}
-            focusBorderColor={choices[index]?.correct ? 'green.500' : undefined}
-            {...register(`question_data.choices.${index}.text`)}
-          />
-          {index > 3 && (
-            <Button ml={2} size="sm" onClick={() => remove(index)}>
-              Remove
-            </Button>
-          )}
-        </Flex>
-      ))}
-
-      {errors.question_data?.choices?.root && (
-        <p style={{ color: 'red' }}>
-          {errors.question_data.choices.root.message}
-        </p>
-      )}
-
-      <Button
+      {/* Correct Answer */}
+      <FormControl
+        isInvalid={!!errors.question_data?.correct_answer}
+        isRequired
         mt={4}
-        onClick={() => append({ text: '', correct: false })}
-        isDisabled={fields.length >= 6}
       >
-        Add Option
-      </Button>
+        <FormLabel>Correct Answer</FormLabel>
+        <Input
+          placeholder="Enter the correct answer"
+          maxLength={60}
+          {...register('question_data.correct_answer')}
+        />
+        <Flex justifyContent="space-between">
+          {errors.question_data?.correct_answer && (
+            <p style={{ color: 'red' }}>
+              {errors.question_data.correct_answer.message}
+            </p>
+          )}
+          <Box alignSelf="flex-end" color="gray.500">
+            {correctAnswer.length}/60
+          </Box>
+        </Flex>
+      </FormControl>
 
       <HStack spacing={4} mt={4} justify="space-between">
         <FormControl isInvalid={!!errors.tag} isRequired flex={1}>
@@ -276,4 +212,4 @@ const AddSingleChoiceQuestion = () => {
   );
 };
 
-export default AddSingleChoiceQuestion;
+export default AddUserInputQuestion;

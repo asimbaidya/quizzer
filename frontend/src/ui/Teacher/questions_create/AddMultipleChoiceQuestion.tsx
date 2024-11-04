@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useParams } from '@tanstack/react-router';
 import {
   FormErrorMessage,
   Switch,
@@ -13,6 +12,7 @@ import {
   Badge,
   HStack,
   Card,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,7 +21,8 @@ import OptionalImageUpload from './OptionalImageUpload';
 import { MultipleChoiceQuestionSchema } from '../../../core/schemas/question_create';
 import useCustomToast from '../../../hooks/useCustomToast';
 import { useMutation } from '@tanstack/react-query';
-import { createQuizQuestion } from '../../../core/services/teacher';
+import { createQuestionOnAPIEndPoint } from '../../../core/services/teacher';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { z } from 'zod';
 
@@ -29,30 +30,33 @@ type MultipleChoiceQuestionFormData = z.infer<
   typeof MultipleChoiceQuestionSchema
 >;
 
-const AddMultipleChoiceQuestion = () => {
+const AddMultipleChoiceQuestion = ({
+  apiEndPoint,
+}: {
+  apiEndPoint: string;
+}) => {
   const [image, setImage] = useState<string | null>(null);
   const { showToast } = useCustomToast();
-
-  const { courseTitle, quizId } = useParams({
-    from: '/_layout/(teacher)/course/quiz/$courseTitle/$quizId',
-  });
+  const queryClient = useQueryClient();
+  const colorScheme = useColorModeValue('purple.50', 'purple.800');
 
   const mutation = useMutation({
     mutationFn: ({
-      courseTitle,
-      quizId,
+      apiEndPoint,
       questionData,
       signal,
     }: {
-      courseTitle: string;
-      quizId: number;
+      apiEndPoint: string;
       questionData: any;
       signal: AbortSignal;
-    }) => createQuizQuestion(courseTitle, quizId, questionData, signal),
+    }) => createQuestionOnAPIEndPoint(apiEndPoint, questionData, signal),
     onSuccess: () => {
       // reset the form
       reset();
       setImage(null);
+      queryClient.invalidateQueries({
+        queryKey: ['Questions'],
+      });
       showToast({
         title: 'Question Submitted',
         status: 'success',
@@ -110,8 +114,7 @@ const AddMultipleChoiceQuestion = () => {
 
     const signal = new AbortController().signal;
     mutation.mutate({
-      courseTitle: courseTitle,
-      quizId: Number(quizId),
+      apiEndPoint: apiEndPoint,
       questionData: formData,
       signal,
     });
@@ -120,7 +123,7 @@ const AddMultipleChoiceQuestion = () => {
   };
 
   return (
-    <Card bg={'purple.50'}>
+    <Card bg={colorScheme}>
       <Box
         as="form"
         onSubmit={handleSubmit(onSubmit)}
@@ -188,48 +191,6 @@ const AddMultipleChoiceQuestion = () => {
             )}
           </Flex>
         ))}
-
-        {/* {fields.map((field, index) => (
-        <Flex key={field.id} alignItems="center" mt={4}>
-          <Switch
-            mr={2}
-            size={'lg'}
-            isChecked={choices[index]?.correct}
-            {...register(`question_data.choices.${index}.correct`)}
-          />
-          <Input
-            placeholder={`Option ${index + 1}`}
-            borderColor={choices[index]?.correct ? 'green.500' : undefined}
-            focusBorderColor={choices[index]?.correct ? 'green.500' : undefined}
-            {...register(`question_data.choices.${index}.text`)}
-          />
-          {index > 3 && (
-            <Button ml={2} size="sm" onClick={() => remove(index)}>
-              Remove
-            </Button>
-          )}
-        </Flex>
-      ))} */}
-
-        {/* {fields.map((field, index) => (
-        <Flex key={field.id} alignItems="center" mt={4}>
-          <Checkbox
-            mr={2}
-            {...register(`question_data.choices.${index}.correct`)}
-          />
-          <Input
-            placeholder={`Option ${index + 1}`}
-            borderColor={choices[index]?.correct ? 'green.500' : undefined}
-            focusBorderColor={choices[index]?.correct ? 'green.500' : undefined}
-            {...register(`question_data.choices.${index}.text`)}
-          />
-          {index > 3 && (
-            <Button ml={2} size="sm" onClick={() => remove(index)}>
-              Remove
-            </Button>
-          )}
-        </Flex>
-      ))} */}
         {errors.question_data?.choices?.root && (
           <p style={{ color: 'red' }}>
             {errors.question_data.choices.root.message}

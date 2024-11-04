@@ -1,35 +1,65 @@
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
-import AddMultipleChoiceQuestion from './questions/AddMultipleChoiceQuestion';
-import AddSingleChoiceQuestion from './questions/AddSingleChoiceQuestion';
-import AddUserInputQuestion from './questions/AddUserInputQuestion';
-import AddTrueFalseQuestion from './questions/AddTrueFalseQuestion';
+import {
+  Heading,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+} from '@chakra-ui/react';
+import { useParams } from '@tanstack/react-router';
+import AddMultipleChoiceQuestion from './questions_create/AddMultipleChoiceQuestion';
+import AddSingleChoiceQuestion from './questions_create/AddSingleChoiceQuestion';
+import AddUserInputQuestion from './questions_create/AddUserInputQuestion';
+import AddTrueFalseQuestion from './questions_create/AddTrueFalseQuestion';
+import ViewQuizQuestions from './question_view/ViewQuizQuestions';
+import { Question } from '../../core/types/question';
 
-const ViewQuestions = () => {
-  return <div>List of Quiz and Tests</div>;
-};
+export default function Quiz({
+  questions,
+}: {
+  questions: Question[] | undefined;
+}) {
+  const { courseTitle, quizId } = useParams({
+    from: '/_layout/(teacher)/course/quiz/$courseTitle/$quizId',
+  });
+  const apiEndPoint = `/API/teacher/course/quiz/${courseTitle}/${quizId}`;
 
-const tabsConfig = [
-  { title: 'View Quiz Questions', component: ViewQuestions },
-  { title: 'Add Multiple Choice', component: AddMultipleChoiceQuestion },
-  { title: 'Add Single Choice', component: AddSingleChoiceQuestion },
-  { title: 'Add User Input', component: AddUserInputQuestion },
-  { title: 'Add True False', component: AddTrueFalseQuestion },
-];
-
-export default function Quiz() {
   return (
     <Tabs variant="enclosed">
       <TabList>
-        {tabsConfig.map((tab, index) => (
-          <Tab key={index}>{tab.title}</Tab>
-        ))}
+        <Tab>View Quiz Questions</Tab>
+        <Tab>Add Multiple Choice</Tab>
+        <Tab>Add Single Choice</Tab>
+        <Tab>Add User Input</Tab>
+        <Tab>Add True False</Tab>
       </TabList>
+
       <TabPanels>
-        {tabsConfig.map((tab, index) => (
-          <TabPanel key={index}>
-            <tab.component />
-          </TabPanel>
-        ))}
+        <TabPanel>
+          {questions ? (
+            <ViewQuizQuestions questions={questions} />
+          ) : (
+            <Heading
+              size="lg"
+              textAlign={{ base: 'center', md: 'left' }}
+              py={12}
+            >
+              No Questions Found
+            </Heading>
+          )}
+        </TabPanel>
+        <TabPanel>
+          <AddMultipleChoiceQuestion apiEndPoint={apiEndPoint} />
+        </TabPanel>
+        <TabPanel>
+          <AddSingleChoiceQuestion apiEndPoint={apiEndPoint} />
+        </TabPanel>
+        <TabPanel>
+          <AddUserInputQuestion apiEndPoint={apiEndPoint} />
+        </TabPanel>
+        <TabPanel>
+          <AddTrueFalseQuestion apiEndPoint={apiEndPoint} />
+        </TabPanel>
       </TabPanels>
     </Tabs>
   );

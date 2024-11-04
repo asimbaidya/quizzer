@@ -1,5 +1,3 @@
-// AddTrueFalseQuestionWithPicture.tsx
-
 import { useState } from 'react';
 import {
   Box,
@@ -22,34 +20,32 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { TrueFalseQuestionSchema } from '../../../core/schemas/question_create';
 import OptionalImageUpload from './OptionalImageUpload';
 import useCustomToast from '../../../hooks/useCustomToast';
-import { useParams } from '@tanstack/react-router';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { useMutation } from '@tanstack/react-query';
-import { createQuizQuestion } from '../../../core/services/teacher';
+import { createQuestionOnAPIEndPoint } from '../../../core/services/teacher';
 
 type TrueFalseQuestionFormData = z.infer<typeof TrueFalseQuestionSchema>;
 
-const AddTrueFalseQuestion = () => {
-  const { courseTitle, quizId } = useParams({
-    from: '/_layout/(teacher)/course/quiz/$courseTitle/$quizId',
-  });
-
+const AddTrueFalseQuestion = ({ apiEndPoint }: { apiEndPoint: string }) => {
   const [image, setImage] = useState<string | null>(null);
   const { showToast } = useCustomToast();
+  const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: ({
-      courseTitle,
-      quizId,
+      apiEndPoint,
       questionData,
       signal,
     }: {
-      courseTitle: string;
-      quizId: number;
+      apiEndPoint: string;
       questionData: any;
       signal: AbortSignal;
-    }) => createQuizQuestion(courseTitle, quizId, questionData, signal),
+    }) => createQuestionOnAPIEndPoint(apiEndPoint, questionData, signal),
     onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['Questions'],
+      });
       // reset the form
       reset();
       setImage(null);
@@ -98,8 +94,7 @@ const AddTrueFalseQuestion = () => {
 
     const signal = new AbortController().signal;
     mutation.mutate({
-      courseTitle: courseTitle,
-      quizId: Number(quizId),
+      apiEndPoint: apiEndPoint,
       questionData: formData,
       signal,
     });
