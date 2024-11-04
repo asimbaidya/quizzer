@@ -58,9 +58,8 @@ export const fetchQuizQuestions = async (
   });
 };
 
-export const createQuizQuestion = async (
-  courseTitle: string,
-  quizId: number,
+export const createQuestionOnAPIEndPoint = async (
+  apiEndPoint: string,
   questionData: any,
   signal: AbortSignal
 ): Promise<any> => {
@@ -70,7 +69,7 @@ export const createQuizQuestion = async (
   }
   return await request({
     method: 'POST',
-    url: `/API/teacher/course/quiz/${courseTitle}/${quizId}`,
+    url: apiEndPoint,
     signal,
     body: questionData,
   });
@@ -88,23 +87,6 @@ export const fetchTestQuestions = async (
     method: 'GET',
     url: `/API/teacher/course/test/${courseTitle}/${testId}`,
     signal,
-  });
-};
-
-export const createTestQuestion = async (
-  courseTitle: string,
-  testId: number,
-  questionData: any,
-  signal: AbortSignal
-): Promise<any> => {
-  if (!localStorage.getItem('access_token')) {
-    throw new Error('No Token');
-  }
-  return await request({
-    method: 'POST',
-    url: `/API/teacher/course/test/${courseTitle}/${testId}`,
-    signal,
-    formData: questionData,
   });
 };
 
