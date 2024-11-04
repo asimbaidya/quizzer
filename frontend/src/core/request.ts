@@ -6,6 +6,7 @@ type ApiRequestOptions = {
   // formData?: Record<string, unknown>;
   formData?: any;
   signal?: AbortSignal;
+  body?: any;
 };
 
 const apiClient = axios.create({
@@ -39,6 +40,7 @@ export default async function request<T>({
   url,
   formData,
   signal,
+  body,
 }: ApiRequestOptions): Promise<T> {
   const options: AxiosRequestConfig = {
     method,
@@ -49,9 +51,13 @@ export default async function request<T>({
   };
 
   if (formData) {
-    options.headers = options.headers || {};
+    options.headers = options.headers || {}; // just to mitigate the linter warning
     options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
     options.data = new URLSearchParams(formData as any).toString();
+  } else if (body) {
+    options.headers = options.headers || {}; // just to mitigate the linter warning
+    options.headers['Content-Type'] = 'application/json';
+    options.data = body;
   }
 
   try {
