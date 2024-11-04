@@ -10,47 +10,8 @@ import {
 import { TeacherQuizAndTest } from '../../core/types/common';
 import QuizList from './QuizList';
 import TestList from './TestList';
-
-const QuizAndTests = ({ data }: { data: TeacherQuizAndTest | undefined }) => {
-  return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
-      w="100%"
-      h="100%"
-      p={4}
-    >
-      {data === undefined ? (
-        <Heading size="md">No Quizzes and Tests available</Heading>
-      ) : null}
-
-      {data?.quizzes && data.quizzes.length > 0 ? (
-        <QuizList quizzes={data.quizzes} />
-      ) : (
-        <Heading size="md">No Quizzes available</Heading>
-      )}
-      {data?.tests && data.tests.length > 0 ? (
-        <TestList tests={data.tests} />
-      ) : (
-        <Heading size="md">No Tests available</Heading>
-      )}
-    </Box>
-  );
-};
-const CreateQuiz = () => {
-  return <div>Create Quiz</div>;
-};
-const CreateTest = () => {
-  return <div>Create Test</div>;
-};
-
-const tabsConfig = [
-  { title: 'QuizAndTests', component: QuizAndTests },
-  { title: 'Create Quiz', component: CreateQuiz },
-  { title: 'Create Test', component: CreateTest },
-];
+import QuizCreateForm from './forms/QuizCreateForm';
+import TestCreateForm from './forms/TestCreateForm';
 
 interface Prop {
   data: TeacherQuizAndTest | undefined;
@@ -59,21 +20,53 @@ interface Prop {
 export default function CourseByTitle({ data }: Prop) {
   console.log(data);
   return (
-    <Tabs variant="enclosed">
+    <Tabs variant="enclosed" colorScheme="purple">
       <TabList>
-        <Tab>Course Materials</Tab>
+        <Tab>Quizzes</Tab>
+        <Tab>Tests</Tab>
         <Tab>Create Quiz</Tab>
         <Tab>Create Test</Tab>
       </TabList>
       <TabPanels>
         <TabPanel>
-          <QuizAndTests data={data} />
+          <Box
+            display="flex"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+            w="100%"
+            h="100%"
+            p={4}
+          >
+            {data?.quizzes && data.quizzes.length > 0 ? (
+              <QuizList quizzes={data.quizzes} />
+            ) : (
+              <Heading size="md">No Quizzes available</Heading>
+            )}
+          </Box>
         </TabPanel>
         <TabPanel>
-          <CreateQuiz />
+          <Box
+            display="flex"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+            w="100%"
+            h="100%"
+            p={4}
+          >
+            {data?.tests && data.tests.length > 0 ? (
+              <TestList tests={data.tests} />
+            ) : (
+              <Heading size="md">No Tests available</Heading>
+            )}
+          </Box>
         </TabPanel>
         <TabPanel>
-          <CreateTest />
+          <QuizCreateForm />
+        </TabPanel>
+        <TabPanel>
+          <TestCreateForm />
         </TabPanel>
       </TabPanels>
     </Tabs>

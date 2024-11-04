@@ -1,6 +1,8 @@
+import { format } from 'date-fns';
+import { Link } from '@tanstack/react-router';
+import { Quiz } from '../../core/types/common';
 import {
   Box,
-  Flex,
   Heading,
   Text,
   Badge,
@@ -8,43 +10,48 @@ import {
   Spacer,
   Stack,
   useColorModeValue,
+  HStack,
 } from '@chakra-ui/react';
-import { FaClipboardList, FaClock } from 'react-icons/fa';
-import { format } from 'date-fns';
-import { Link } from '@tanstack/react-router';
-import { Quiz } from '../../core/types/common';
 
 const QuizItem = ({ quiz }: { quiz: Quiz }) => {
-  const bgColor = useColorModeValue('white', 'gray.700');
-  const textColor = useColorModeValue('gray.600', 'gray.300');
-  const headingColor = useColorModeValue('gray.800', 'white');
+  const bgColor = useColorModeValue('gray.100', 'gray.700');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const textColor = useColorModeValue('black', 'white');
+  const descriptionColor = useColorModeValue('gray.600', 'gray.400');
 
   return (
-    <Box bg={bgColor} p={6} borderRadius="md" shadow="md" borderWidth={1}>
-      <Badge colorScheme="green" fontSize="lg" py={1} px={2} mb={4}>
-        Quiz
-      </Badge>
-      <Heading size="2xl" mb={2} color={headingColor} textAlign={'center'}>
-        {quiz.title}
-      </Heading>
-      <Flex alignItems="center" justifyContent="center">
-        <Text mt={2} color={textColor}>
+    <Box
+      p={8}
+      borderWidth={1}
+      borderRadius="md"
+      boxShadow="md"
+      width="full"
+      bg={bgColor}
+      borderColor={borderColor}
+    >
+      <HStack justify="space-between" width="full">
+        <Badge colorScheme="green" fontSize="lg" py={1} px={2}>
+          Quiz
+        </Badge>{' '}
+        <Spacer />{' '}
+        <Heading size="4xl" color={textColor} textAlign="center">
+          {quiz.title}
+        </Heading>
+        <Spacer />
+        <Text fontSize="sm" color={descriptionColor}>
           Created At: {format(new Date(quiz.created_at), 'PPP p')}
         </Text>
-      </Flex>
-      <Flex alignItems="center" mt={4} justifyContent="center">
-        <FaClipboardList />
-        <Text ml={2} color={textColor}>
+      </HStack>
+      <HStack justify="space-between" width="full" mt={4}>
+        <Text fontSize="md" color={descriptionColor}>
           Total Marks: {quiz.total_mark}
         </Text>
-      </Flex>
-      <Flex alignItems="center" mt={2} justifyContent="center">
-        <FaClock />
-        <Text ml={2} color={textColor}>
-          Allowed Attempts:{' '}
-          {quiz.is_unlimited_attempt ? 'Unlimited' : quiz.allowed_attempt}
+        <Text fontSize="md" color={descriptionColor}>
+          {quiz.is_unlimited_attempt
+            ? 'Unlimited Attempts'
+            : `${quiz.allowed_attempt} Attempt(s)`}
         </Text>
-      </Flex>
+      </HStack>
       <Button mt={6} width="full" colorScheme="blue" as={Link} to={quiz.url}>
         View Quiz
       </Button>
