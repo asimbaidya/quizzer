@@ -64,6 +64,7 @@ export const createQuizQuestion = async (
   questionData: any,
   signal: AbortSignal
 ): Promise<any> => {
+  console.log(questionData);
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -71,7 +72,7 @@ export const createQuizQuestion = async (
     method: 'POST',
     url: `/API/teacher/course/quiz/${courseTitle}/${quizId}`,
     signal,
-    formData: questionData,
+    body: questionData,
   });
 };
 
