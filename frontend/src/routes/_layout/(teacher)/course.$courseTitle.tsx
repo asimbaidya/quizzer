@@ -1,6 +1,6 @@
 import { Container, Heading } from '@chakra-ui/react';
 import { createFileRoute } from '@tanstack/react-router';
-
+import CourseByTitle from '../../../ui/Teacher/CourseByTitle';
 export const Route = createFileRoute('/_layout/(teacher)/course/$courseTitle')({
   component: () => <CourseCourseTitle />,
 });
@@ -11,9 +11,9 @@ function CourseCourseTitle() {
   return (
     <Container maxW="full">
       <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
-        Hello {courseTitle}
-        Create Quz and Test Here
+        Course: {courseTitle} - Create Quz and Test Here
       </Heading>
+      <CourseByTitle />
     </Container>
   );
 }

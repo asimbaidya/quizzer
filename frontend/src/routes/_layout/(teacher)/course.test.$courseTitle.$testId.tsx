@@ -2,22 +2,25 @@ import { createFileRoute, notFound } from '@tanstack/react-router';
 import { Container, Heading } from '@chakra-ui/react';
 import { useTestQuestions } from '../../../hooks/teacher';
 import { CustomError } from '../../../core/request';
+import Test from '../../../ui/Teacher/Test';
 
 export const Route = createFileRoute(
   '/_layout/(teacher)/course/test/$courseTitle/$testId'
 )({
   component: () => {
     const { courseTitle, testId } = Route.useParams();
-    const { data, isLoading, error } = useTestQuestions(courseTitle, testId);
+    const { data, isLoading, error } = useTestQuestions(
+      courseTitle,
+      Number(testId)
+    );
 
     if (isLoading) return <div>Loading...</div>;
     if (error) {
       const customError = error as CustomError;
+      <div>Error: {customError?.details}</div>;
       throw notFound();
-      // return <div>Error: {customError?.details}</div>;
     }
 
-    // console.log('data', data);
     return <CourseTestCourseTitleTestId questions={data} />;
   },
 });
@@ -29,15 +32,8 @@ function CourseTestCourseTitleTestId({ questions }) {
     <Container maxW="full">
       <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
         Course: {courseTitle}
-        View all The Question on Test {testId}
-        You can Add Question on Test {testId}
-        {questions?.map((question) => (
-          <p size="sm" key={question.id}>
-            {question.id}
-          </p>
-        ))}
-        {questions.length !== 0 || 'No Questions'}
       </Heading>
+      <Test />
     </Container>
   );
 }
