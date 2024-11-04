@@ -1,3 +1,4 @@
+import json
 from typing import Any, List, Optional, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -111,6 +112,15 @@ class QuestionTeacherView(BaseModel):
     tag: str = Field(default='untagged')
     total_marks: int = Field(default=5)
     image: Optional[str] = None
+
+    @model_validator(mode='before')
+    @classmethod
+    def validate_question_create_before(cls, value: Any) -> Self:
+        print('-' * 50)
+        print('>>> RAW Question Data')
+        print(json.dumps(value, indent=4))
+        print('-' * 50)
+        return value
 
     @model_validator(mode='after')
     @classmethod

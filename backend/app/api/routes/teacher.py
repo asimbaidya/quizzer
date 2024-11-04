@@ -143,7 +143,6 @@ def create_test(
 
 @router.post(
     '/course/quiz/{course_title}/{quiz_id}',
-    response_model=QuestionTeacherView,
 )
 def create_question_in_quiz(
     course_title: str,
@@ -166,7 +165,6 @@ def create_question_in_quiz(
 
 @router.post(
     '/course/test/{course_title}/{test_id}',
-    response_model=QuestionTeacherView,
 )
 def create_question_in_test(
     course_title: str,

@@ -424,7 +424,7 @@ def create_question_in_quiz(
     course_title: str,
     quiz_id: int,
     teacher_id: int,
-) -> Question:
+):
     course = get_course_by_title_creator_id(db, course_title, teacher_id)
     if course is None:
         raise HTTPException(status_code=404, detail='Course not found')
@@ -444,7 +444,7 @@ def create_question_in_quiz(
 
     db.add(question_instance)
     db.commit()
-    return question_instance
+    return {'detail': 'Question Created Successfullly'}
 
 
 def create_question_in_test(
@@ -453,7 +453,7 @@ def create_question_in_test(
     course_title: str,
     test_id: int,
     teacher_id: int,
-) -> Question:
+):
     course = get_course_by_title_creator_id(db, course_title, teacher_id)
     if course is None:
         raise HTTPException(status_code=404, detail='Course not found')
@@ -474,7 +474,7 @@ def create_question_in_test(
 
     db.add(question_instance)
     db.commit()
-    return question_instance
+    return {'detail': 'Question Created Successfullly'}
 
 
 # helper functions

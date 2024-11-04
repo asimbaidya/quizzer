@@ -6,6 +6,9 @@ class TestStatus(str, Enum):
     NOT_STARTED = 'not_started'  # student has not started the test
     IN_PROGRESS = 'in_progress'  # student is currently taking the test duration left
     COMPLETED = 'completed'  # student has completed the test
+    NOT_PARTICIPATED = (
+        'not_participated'  # student has not participated in the test and test ended
+    )
 
 
 class UserRole(str, Enum):
