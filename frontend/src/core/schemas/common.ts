@@ -50,6 +50,8 @@ export const QuizSchema = z.object({
     .min(10, 'Minimum quiz mask should be 10')
     .max(100, '100 is max allowed quiz mark')
     .default(20),
+  is_unlimited: z.boolean().default(false),
+  allowed_attempt: z.number().default(1),
 });
 
 export const parseDate = (value: unknown): Date => {
@@ -60,13 +62,38 @@ export const parseDate = (value: unknown): Date => {
   return date;
 };
 
-export const TestSchema = z.object({
-  title: z.string().default('New Test'),
-  total_mark: z.number().default(20),
-  duration: z.number().default(30),
-  window_start: z.preprocess(parseDate, z.date()),
-  window_end: z.preprocess(parseDate, z.date()),
-});
+export const TestSchema = z
+  .object({
+    title: z.string().min(1, 'Title is required').default('New Test'),
+    total_mark: z.number().min(0, 'Total Mark must be at least 0').default(20),
+    duration: z
+      .number()
+      .min(1, 'Duration must be at least 1 minute')
+      .default(30),
+    window_start: z.date().refine((date) => date >= new Date(), {
+      message: 'Window start must be in the future',
+    }),
+    window_end: z.date().refine((date) => date >= new Date(), {
+      message: 'Window end must be in the future',
+    }),
+  })
+  .superRefine((data, ctx) => {
+    const { window_start, window_end, duration } = data;
+
+    // calculate the difference in minutes
+    const differenceInMinutes =
+      (window_end.getTime() - window_start.getTime()) / (1000 * 60);
+
+    // validate the logic
+    if (differenceInMinutes <= duration) {
+      const minutesShort = duration - differenceInMinutes;
+      ctx.addIssue({
+        path: ['window_end'],
+        message: `Window is  ${minutesShort} minutes shorter than the duration`,
+        code: z.ZodIssueCode.custom,
+      });
+    }
+  });
 
 export const EnrollMetadataSchema = z.object({
   course_title: z.string().min(6, 'Title must be at least 6 characters long'),

@@ -10,6 +10,7 @@ import {
   Spacer,
   Badge,
   useColorModeValue,
+  HStack,
 } from '@chakra-ui/react';
 import { format } from 'date-fns';
 import { Link } from '@tanstack/react-router';
@@ -31,6 +32,52 @@ interface QuizListProps {
   quizzes: Quiz[];
 }
 
+const QuizItem = ({ quiz }: { quiz: Quiz }) => {
+  const bgColor = useColorModeValue('gray.100', 'gray.700');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const textColor = useColorModeValue('black', 'white');
+  const descriptionColor = useColorModeValue('gray.600', 'gray.400');
+
+  return (
+    <Box
+      p={8}
+      borderWidth={1}
+      borderRadius="md"
+      boxShadow="md"
+      width="full"
+      bg={bgColor}
+      borderColor={borderColor}
+    >
+      <HStack justify="space-between" width="full">
+        <Badge colorScheme="green" fontSize="lg" py={1} px={2}>
+          Quiz
+        </Badge>
+        <Spacer />
+        <Heading size="4xl" color={textColor} textAlign="center">
+          {quiz.title}
+        </Heading>
+        <Spacer />
+        <Text fontSize="sm" color={descriptionColor}>
+          Created At: {format(new Date(quiz.created_at), 'PPP p')}
+        </Text>
+      </HStack>
+      <HStack justify="space-between" width="full" mt={4}>
+        <Text fontSize="md" color={descriptionColor}>
+          Total Marks: {quiz.total_mark}
+        </Text>
+        <Text fontSize="md" color={descriptionColor}>
+          {quiz.is_unlimited_attempt
+            ? 'Unlimited Attempts'
+            : `${quiz.allowed_attempt} Attempt(s)`}
+        </Text>
+      </HStack>
+      <Button mt={6} width="full" colorScheme="blue" as={Link} to={quiz.url}>
+        View Quiz
+      </Button>
+    </Box>
+  );
+};
+
 const QuizList: React.FC<QuizListProps> = ({ quizzes }) => {
   // color scheme based on color mode
   const cardBg = useColorModeValue('white', 'gray.700');
@@ -49,49 +96,7 @@ const QuizList: React.FC<QuizListProps> = ({ quizzes }) => {
       >
         {quizzes.map((quiz) => (
           <GridItem key={quiz.id}>
-            <Box
-              borderWidth="1px"
-              borderRadius="lg"
-              overflow="hidden"
-              bg={cardBg}
-              borderColor={cardBorder}
-              boxShadow="md"
-              _hover={{ boxShadow: 'xl' }}
-              transition="box-shadow 0.2s"
-            >
-              <Box p={6}>
-                <Flex alignItems="center">
-                  <Heading size="md" fontSize={'2xl'}>
-                    {quiz.title}
-                  </Heading>
-                  <Spacer />
-                  <Badge colorScheme="green">
-                    {quiz.is_unlimited_attempt
-                      ? 'Unlimited Attempts'
-                      : `${quiz.allowed_attempt} Attempt(s)`}
-                  </Badge>
-                </Flex>
-
-                <Text mt={4} color="gray.500">
-                  Total Marks: {quiz.total_mark}
-                </Text>
-                <Text mt={2} color="gray.500">
-                  Created At: {format(new Date(quiz.created_at), 'PPP p')}
-                </Text>
-
-                {quiz.updated_at && (
-                  <Text mt={2} color="gray.500">
-                    Updated At: {format(new Date(quiz.updated_at), 'PPP p')}
-                  </Text>
-                )}
-
-                <Link to={quiz.url}>
-                  <Button mt={4} colorScheme="teal" width="full">
-                    Go to Quiz
-                  </Button>
-                </Link>
-              </Box>
-            </Box>
+            <QuizItem quiz={quiz} />
           </GridItem>
         ))}
       </Grid>
