@@ -1,8 +1,11 @@
 export type TestStatus =
-  | 'not_opened'
-  | 'not_started'
-  | 'in_progress'
-  | 'completed';
+  | 'not_opened' // Start window has not been reached
+  | 'not_started' // Student has not started the test
+  | 'in_progress' // Student is currently taking the test; duration left
+  | 'in_waiting_for_result' // Test has ended and is waiting for the window to close
+  | 'completed' // Student has completed the test
+  | 'not_participated'; // Student has not participated in the test and the test has ended; this type of tests won't be visible to the student
+
 export type UserRole = 'admin' | 'teacher' | 'student';
 
 export type QuestionType =
@@ -86,26 +89,6 @@ export interface TeacherQuizAndTest {
   quizzes: Quiz[];
   tests: Test[];
 }
-// export interface Quiz {
-//   id: number;
-//   course_id: number;
-//   title: string;
-//   question_set_id: number;
-//   created_at: Date;
-//   updated_at?: Date;
-//   total_mark: number;
-// }
-
-// export interface Test {
-//   id: number;
-//   course_id: number;
-//   question_set_id: number;
-//   title: string;
-//   duration: number;
-//   total_mark: number;
-//   time_window_start: Date;
-//   time_window_end: Date;
-// }
 
 export interface StudentQuizProgress {
   quiz_total_mark: number;

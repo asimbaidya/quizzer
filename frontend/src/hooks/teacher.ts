@@ -4,13 +4,9 @@ import {
   fetchCourseDetails,
   fetchEnrolledStudents,
   fetchQuizQuestions,
-  createQuestionOnAPIEndPoint,
   fetchTestQuestions,
   fetchQuizStudentProgress,
   fetchTestStudentProgress,
-  createCourse,
-  createQuiz,
-  createTest,
 } from '../core/services/teacher';
 
 export const useCreatedCourses = () => {
@@ -44,20 +40,6 @@ export const useQuizQuestions = (courseTitle: string, quizId: number) => {
   });
 };
 
-export const mutationCreateQuizQuestion = () => {
-  return useMutation({
-    mutationFn: ({
-      url,
-      questionData,
-      signal,
-    }: {
-      url: string;
-      questionData: any;
-      signal: AbortSignal;
-    }) => createQuestionOnAPIEndPoint(url, questionData, signal),
-  });
-};
-
 export const useTestQuestions = (courseTitle: string, testId: number) => {
   return useQuery({
     queryKey: ['Questions'],
@@ -79,45 +61,5 @@ export const useTestStudentProgress = (courseTitle: string, testId: number) => {
     queryKey: ['testStudentProgress', courseTitle, testId],
     queryFn: ({ signal }: { signal: AbortSignal }) =>
       fetchTestStudentProgress(courseTitle, testId, signal),
-  });
-};
-
-export const mutationCreateCourse = () => {
-  return useMutation({
-    mutationFn: ({
-      courseData,
-      signal,
-    }: {
-      courseData: any;
-      signal: AbortSignal;
-    }) => createCourse(courseData, signal),
-  });
-};
-
-export const mutationCreateQuiz = () => {
-  return useMutation({
-    mutationFn: ({
-      courseTitle,
-      quizData,
-      signal,
-    }: {
-      courseTitle: string;
-      quizData: any;
-      signal: AbortSignal;
-    }) => createQuiz(courseTitle, quizData, signal),
-  });
-};
-
-export const mutationCreateTest = () => {
-  return useMutation({
-    mutationFn: ({
-      courseTitle,
-      testData,
-      signal,
-    }: {
-      courseTitle: string;
-      testData: any;
-      signal: AbortSignal;
-    }) => createTest(courseTitle, testData, signal),
   });
 };

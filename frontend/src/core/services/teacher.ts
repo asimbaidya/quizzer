@@ -1,6 +1,6 @@
 import request from '../request';
-import { User, Course, Quiz, Test, TeacherQuizAndTest } from '../types/common';
-import { Question } from '../types/question';
+import { User, Course, TeacherQuizAndTest } from '../types/common';
+import { Question, TestQuestions } from '../types/question';
 
 //TODO: apply missing type annotations
 
@@ -58,28 +58,11 @@ export const fetchQuizQuestions = async (
   });
 };
 
-export const createQuestionOnAPIEndPoint = async (
-  apiEndPoint: string,
-  questionData: any,
-  signal: AbortSignal
-): Promise<any> => {
-  console.log(questionData);
-  if (!localStorage.getItem('access_token')) {
-    throw new Error('No Token');
-  }
-  return await request({
-    method: 'POST',
-    url: apiEndPoint,
-    signal,
-    body: questionData,
-  });
-};
-
 export const fetchTestQuestions = async (
   courseTitle: string,
   testId: number,
   signal: AbortSignal
-): Promise<Question[]> => {
+): Promise<TestQuestions> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -131,7 +114,7 @@ export const createCourse = async (
     method: 'POST',
     url: '/API/teacher/course',
     signal,
-    formData: courseData,
+    body: courseData,
   });
 };
 
@@ -147,7 +130,7 @@ export const createQuiz = async (
     method: 'POST',
     url: `/API/teacher/course/quiz/${courseTitle}`,
     signal,
-    formData: quizData,
+    body: quizData,
   });
 };
 
@@ -163,6 +146,23 @@ export const createTest = async (
     method: 'POST',
     url: `/API/teacher/course/test/${courseTitle}`,
     signal,
-    formData: testData,
+    body: testData,
+  });
+};
+
+export const createQuestionOnAPIEndPoint = async (
+  apiEndPoint: string,
+  questionData: any,
+  signal: AbortSignal
+): Promise<any> => {
+  console.log(questionData);
+  if (!localStorage.getItem('access_token')) {
+    throw new Error('No Token');
+  }
+  return await request({
+    method: 'POST',
+    url: apiEndPoint,
+    signal,
+    body: questionData,
   });
 };

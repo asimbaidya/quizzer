@@ -1,4 +1,4 @@
-import { TestStatus, SubmissionStatus, QuestionType } from './common';
+import { TestStatus, SubmissionStatus, QuestionType, Test } from './common';
 
 export interface Question {
   question_data: {
@@ -133,4 +133,9 @@ export interface TestQuestionWithSubmission {
   total_mark: number;
   start_time?: Date;
   status: TestStatus;
+}
+
+export interface TestQuestions {
+  questions: Question[];
+  test: Test;
 }

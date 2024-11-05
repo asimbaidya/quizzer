@@ -101,7 +101,7 @@ export const createNote = async (
     method: 'POST',
     url: '/API/student/notes',
     signal,
-    formData: noteData,
+    body: noteData,
   });
 };
 
@@ -131,7 +131,7 @@ export const updateNote = async (
     method: 'PUT',
     url: `/API/student/notes/${noteId}`,
     signal,
-    formData: noteData,
+    body: noteData,
   });
 };
 
@@ -161,7 +161,7 @@ export const enrollCourse = async (
     method: 'POST',
     url: '/API/student/enrolled_courses/',
     signal,
-    formData: data,
+    body: data,
   });
 };
 
@@ -178,6 +178,6 @@ export const submitQuestionAnswer = async (
     method: 'POST',
     url: `/API/student/questions/submit/${questionId}`,
     signal,
-    formData: answerData,
+    body: answerData,
   });
 };

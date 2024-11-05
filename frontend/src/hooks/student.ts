@@ -10,10 +10,8 @@ import {
   fetchNote,
   updateNote,
   deleteNote,
-  enrollCourse,
   submitQuestionAnswer,
 } from '../core/services/student';
-import { EnrollMetadata } from '../core/types/common';
 
 export const useEnrolledCourses = () => {
   return useQuery({
@@ -39,20 +37,6 @@ export const useQuizQuestions = (courseTitle: string, quizId: number) => {
   });
 };
 
-export const mutationStartTest = () => {
-  return useMutation({
-    mutationFn: ({
-      courseTitle,
-      testId,
-      signal,
-    }: {
-      courseTitle: string;
-      testId: number;
-      signal: AbortSignal;
-    }) => startTest(courseTitle, testId, signal),
-  });
-};
-
 export const useTestQuestions = (courseTitle: string, testId: number) => {
   return useQuery({
     queryKey: ['testQuestions', courseTitle, testId],
@@ -68,6 +52,27 @@ export const useNotes = () => {
   });
 };
 
+export const useNote = (noteId: number) => {
+  return useQuery({
+    queryKey: ['note', noteId],
+    queryFn: ({ signal }: { signal: AbortSignal }) => fetchNote(noteId, signal),
+  });
+};
+
+// Fix THESE
+export const mutationStartTest = () => {
+  return useMutation({
+    mutationFn: ({
+      courseTitle,
+      testId,
+      signal,
+    }: {
+      courseTitle: string;
+      testId: number;
+      signal: AbortSignal;
+    }) => startTest(courseTitle, testId, signal),
+  });
+};
 export const mutationCreateNote = () => {
   return useMutation({
     mutationFn: ({
@@ -77,13 +82,6 @@ export const mutationCreateNote = () => {
       noteData: any;
       signal: AbortSignal;
     }) => createNote(noteData, signal),
-  });
-};
-
-export const useNote = (noteId: number) => {
-  return useQuery({
-    queryKey: ['note', noteId],
-    queryFn: ({ signal }: { signal: AbortSignal }) => fetchNote(noteId, signal),
   });
 };
 
@@ -105,18 +103,6 @@ export const mutationDeleteNote = () => {
   return useMutation({
     mutationFn: ({ noteId, signal }: { noteId: number; signal: AbortSignal }) =>
       deleteNote(noteId, signal),
-  });
-};
-
-export const mutationEnrollCourse = () => {
-  return useMutation({
-    mutationFn: ({
-      data,
-      signal,
-    }: {
-      signal: AbortSignal;
-      data: EnrollMetadata;
-    }) => enrollCourse(signal, data),
   });
 };
 
