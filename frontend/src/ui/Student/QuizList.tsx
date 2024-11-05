@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Box,
   Heading,
@@ -6,33 +5,13 @@ import {
   Button,
   Grid,
   GridItem,
-  Flex,
-  Spacer,
-  Badge,
   useColorModeValue,
   HStack,
 } from '@chakra-ui/react';
-import { format } from 'date-fns';
 import { Link } from '@tanstack/react-router';
+import { QuizWithUrl } from '../../core/types/common';
 
-export interface Quiz {
-  id: number;
-  course_id: number;
-  title: string;
-  created_at: string;
-  updated_at: string | null;
-  allowed_attempt: number;
-  question_set_id: number;
-  total_mark: number;
-  is_unlimited_attempt: boolean;
-  url: string;
-}
-
-interface QuizListProps {
-  quizzes: Quiz[];
-}
-
-const QuizItem = ({ quiz }: { quiz: Quiz }) => {
+const QuizItem = ({ quiz }: { quiz: QuizWithUrl }) => {
   const bgColor = useColorModeValue('gray.100', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const textColor = useColorModeValue('black', 'white');
@@ -40,28 +19,21 @@ const QuizItem = ({ quiz }: { quiz: Quiz }) => {
 
   return (
     <Box
-      p={8}
+      p={4}
       borderWidth={1}
       borderRadius="md"
       boxShadow="md"
       width="full"
       bg={bgColor}
       borderColor={borderColor}
+      userSelect={'none'}
     >
-      <HStack justify="space-between" width="full">
-        <Badge colorScheme="green" fontSize="lg" py={1} px={2}>
-          Quiz
-        </Badge>
-        <Spacer />
-        <Heading size="4xl" color={textColor} textAlign="center">
+      <HStack justify="center" width="full">
+        <Heading size="lg" color={textColor} textAlign="center">
           {quiz.title}
         </Heading>
-        <Spacer />
-        <Text fontSize="sm" color={descriptionColor}>
-          Created At: {format(new Date(quiz.created_at), 'PPP p')}
-        </Text>
       </HStack>
-      <HStack justify="space-between" width="full" mt={4}>
+      <HStack justify="center" width="full" mt={4}>
         <Text fontSize="md" color={descriptionColor}>
           Total Marks: {quiz.total_mark}
         </Text>
@@ -78,11 +50,7 @@ const QuizItem = ({ quiz }: { quiz: Quiz }) => {
   );
 };
 
-const QuizList: React.FC<QuizListProps> = ({ quizzes }) => {
-  // color scheme based on color mode
-  const cardBg = useColorModeValue('white', 'gray.700');
-  const cardBorder = useColorModeValue('gray.200', 'gray.600');
-
+const QuizList = ({ quizzes }: { quizzes: QuizWithUrl[] }) => {
   return (
     <Box p={5}>
       <Heading mb={6} textAlign="center">

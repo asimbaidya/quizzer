@@ -1,4 +1,12 @@
-import { Box, Button, Flex, Text, Image } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  Text,
+  Image,
+  useColorModeValue,
+  Badge,
+} from '@chakra-ui/react';
 import { useState } from 'react';
 
 import { TrueFalseResponseSchema } from '../../../core/schemas/question_submission';
@@ -35,10 +43,12 @@ const SubmissionTrueFalse: React.FC<QuestionSubmission> = ({
     alert(`Feedback: ${question.feedback}\nScore: ${question.score}`);
   };
 
+  const textColor = useColorModeValue('black', 'white');
+
   return (
-    <Box p={5} borderWidth={1} borderRadius="md" mt={5}>
-      <Text fontSize="4xl" mb={4}>
-        {question_text}
+    <Box p={5} borderWidth={1} borderRadius="md" mt={5} userSelect={'none'}>
+      <Text fontSize="4xl" mb={4} color={textColor}>
+        Q. {question_text}
       </Text>
       {image_url && (
         <Image src={image_url} alt="Question Image" mb={4} mx={'auto'} />

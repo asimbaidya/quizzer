@@ -1,4 +1,12 @@
-import { Box, Button, Flex, Text, Image } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  Text,
+  Image,
+  useColorModeValue,
+  Badge,
+} from '@chakra-ui/react';
 import { useState } from 'react';
 import {
   SingleChoiceSubmissionResponse,
@@ -35,10 +43,16 @@ const SubmissionSingleChoice: React.FC<QuestionSubmission> = ({
     alert(`Feedback: ${question.feedback}\nScore: ${question.score}`);
   };
 
+  const textColor = useColorModeValue('black', 'white');
+  const borderColor = useColorModeValue('gray.300', 'gray.600');
+  const selectedBorderColor = useColorModeValue('green.500', 'teal.500');
+  const hoverBorderColor = useColorModeValue('green.300', 'teal.300');
+  const selectedTextColor = useColorModeValue('green.500', 'teal.500');
+
   return (
     <Box p={5} borderWidth={1} borderRadius="md" mt={5}>
-      <Text fontSize="4xl" mb={4}>
-        {question_text}
+      <Text fontSize="4xl" mb={4} color={textColor}>
+        Q. {question_text}
       </Text>
       {image_url && (
         <Image src={image_url} alt="Question Image" mb={4} mx={'auto'} />
@@ -51,15 +65,17 @@ const SubmissionSingleChoice: React.FC<QuestionSubmission> = ({
           p={2}
           borderWidth={2}
           borderColor={
-            selectedOption === choice.text ? 'green.500' : 'gray.300'
+            selectedOption === choice.text ? selectedBorderColor : borderColor
           }
           borderRadius="md"
           cursor="pointer"
-          _hover={{ borderColor: 'green.300' }}
+          _hover={{ borderColor: hoverBorderColor }}
           onClick={() => handleOptionSelect(choice.text)}
         >
           <Text
-            color={selectedOption === choice.text ? 'green.500' : 'black'}
+            color={
+              selectedOption === choice.text ? selectedTextColor : textColor
+            }
             fontWeight={selectedOption === choice.text ? 'bold' : 'normal'}
             fontSize={'xl'}
           >

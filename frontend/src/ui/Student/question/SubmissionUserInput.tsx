@@ -1,4 +1,11 @@
-import { Box, Button, Input, Text, Image } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Input,
+  Text,
+  Image,
+  useColorModeValue,
+} from '@chakra-ui/react';
 import { useState } from 'react';
 
 import {
@@ -17,6 +24,11 @@ const SubmissionUserInput: React.FC<QuestionSubmission> = ({
 
   const [userInput, setUserInput] = useState<string>('');
 
+  const inputBg = useColorModeValue('gray.400', 'gray.700');
+  const inputColor = useColorModeValue('black', 'white');
+  const inputBorderColor = useColorModeValue('green', 'teal');
+  const textColor = useColorModeValue('black', 'white');
+
   const handleSubmit = () => {
     const submission: UserInputSubmissionResponse =
       UserInputResponseSchema.parse({
@@ -33,8 +45,8 @@ const SubmissionUserInput: React.FC<QuestionSubmission> = ({
 
   return (
     <Box p={5} borderWidth={1} borderRadius="md" mt={5}>
-      <Text fontSize="4xl" mb={4}>
-        {question_text}
+      <Text fontSize="4xl" mb={4} color={textColor}>
+        Q. {question_text}
       </Text>
       {image_url && (
         <Image src={image_url} alt="Question Image" mb={4} mx={'auto'} />
@@ -46,9 +58,9 @@ const SubmissionUserInput: React.FC<QuestionSubmission> = ({
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             mb={4}
-            bg={'gray.400'}
-            color={'black'}
-            borderColor={'green'}
+            bg={inputBg}
+            color={inputColor}
+            borderColor={inputBorderColor}
             borderWidth={'2px'}
             fontSize={'xl'}
           />
