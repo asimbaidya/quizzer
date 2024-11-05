@@ -24,7 +24,6 @@ export default function Course({ quizandtests }: CourseProps) {
           </TabPanel>
         </TabPanels>
       </Tabs>
-      ;
     </>
   );
 }

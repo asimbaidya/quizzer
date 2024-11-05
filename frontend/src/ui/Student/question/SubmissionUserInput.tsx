@@ -13,13 +13,27 @@ import {
   QuestionSubmission,
 } from '../../../core/types/question';
 import { UserInputResponseSchema } from '../../../core/schemas/question_submission';
+import { useMutation } from '@tanstack/react-query';
+import useCustomToast from '../../../hooks/useCustomToast';
+import { submitQuestionAnswerAtAPI } from '../../../core/services/student';
+import { useQueryClient } from '@tanstack/react-query';
 
-const SubmissionUserInput: React.FC<QuestionSubmission> = ({
-  question,
-  submission,
+interface Prop {
+  questionSubmission: QuestionSubmission;
+  canSubmit: boolean;
+}
+
+const SubmissionUserInput: React.FC<Prop> = ({
+  questionSubmission,
+  canSubmit,
 }) => {
+  // unpack value
+  const { question, submission } = questionSubmission;
+
   const { image_url } = question;
   const { question_text } = question.question_data;
+  // const is_submitted = submission?.made_attempt || false;
+  // const is_submitted = submission?.is_correct || false;
   const is_submitted = false;
 
   const [userInput, setUserInput] = useState<string>('');
@@ -29,14 +43,62 @@ const SubmissionUserInput: React.FC<QuestionSubmission> = ({
   const inputBorderColor = useColorModeValue('green', 'teal');
   const textColor = useColorModeValue('black', 'white');
 
+  const { showToast } = useCustomToast();
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: ({
+      apiEndPoint,
+      answerData,
+      signal,
+    }: {
+      apiEndPoint: string;
+      answerData: any;
+      signal: AbortSignal;
+    }) => submitQuestionAnswerAtAPI(apiEndPoint, answerData, signal),
+    onSuccess: () => {
+      showToast({
+        title: 'Success',
+        description: 'Answer Submitted Successfully',
+        status: 'success',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['Questions'],
+      });
+    },
+    onError: (error) => {
+      showToast({
+        title: 'Error',
+        description: error.message,
+        status: 'error',
+      });
+    },
+  });
+
   const handleSubmit = () => {
-    const submission: UserInputSubmissionResponse =
-      UserInputResponseSchema.parse({
+    const user_answer = UserInputResponseSchema.parse({
+      question_type: 'user_input',
+      user_response: {
         question_type: 'user_input',
         user_response: userInput,
-        is_submitted: true,
+      },
+      is_submitted: true,
+    });
+
+    if (question?.url === undefined) {
+      showToast({
+        title: 'Error',
+        description: 'Question URL is undefined',
+        status: 'error',
       });
-    alert(JSON.stringify(submission));
+      return;
+    }
+
+    mutation.mutate({
+      apiEndPoint: question.url,
+      answerData: user_answer,
+      signal: new AbortController().signal,
+    });
   };
 
   const handleShowFeedback = () => {
@@ -66,7 +128,8 @@ const SubmissionUserInput: React.FC<QuestionSubmission> = ({
           />
           {userInput && <Button onClick={handleSubmit}>Submit</Button>}
         </>
-      ) : (
+      ) : null}
+      {submission.feedback && (
         <Button onClick={handleShowFeedback}>Show Feedback</Button>
       )}
     </Box>

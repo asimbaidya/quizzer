@@ -8,21 +8,65 @@ import {
   Badge,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import {
-  SingleChoiceSubmissionResponse,
-  QuestionSubmission,
-} from '../../../core/types/question';
+import { QuestionSubmission } from '../../../core/types/question';
 import { SingleChoiceResponseSchema } from '../../../core/schemas/question_submission';
+import { useMutation } from '@tanstack/react-query';
+import useCustomToast from '../../../hooks/useCustomToast';
+import { submitQuestionAnswerAtAPI } from '../../../core/services/student';
+import { useQueryClient } from '@tanstack/react-query';
 
-const SubmissionSingleChoice: React.FC<QuestionSubmission> = ({
-  question,
-  submission,
+interface Prop {
+  questionSubmission: QuestionSubmission;
+  canSubmit: boolean;
+}
+
+const SubmissionSingleChoice: React.FC<Prop> = ({
+  questionSubmission,
+  canSubmit,
 }) => {
+  // unpack value
+  const { question, submission } = questionSubmission;
+
   const { image_url } = question;
   const { question_text, choices } = question.question_data;
-  const is_submitted = submission?.made_attempt || false;
+
+  // const is_submitted = submission?.made_attempt || false;
+  // const is_submitted = submission?.is_correct || false;
+  const is_submitted = false;
 
   const [selectedOption, setSelectedOption] = useState<string>('');
+
+  const { showToast } = useCustomToast();
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: ({
+      apiEndPoint,
+      answerData,
+      signal,
+    }: {
+      apiEndPoint: string;
+      answerData: any;
+      signal: AbortSignal;
+    }) => submitQuestionAnswerAtAPI(apiEndPoint, answerData, signal),
+    onSuccess: () => {
+      showToast({
+        title: 'Success',
+        description: 'Answer Submitted Successfully',
+        status: 'success',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['Questions'],
+      });
+    },
+    onError: (error) => {
+      showToast({
+        title: 'Error',
+        description: error.message,
+        status: 'error',
+      });
+    },
+  });
 
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option);
@@ -30,13 +74,29 @@ const SubmissionSingleChoice: React.FC<QuestionSubmission> = ({
 
   console.log(image_url);
   const handleSubmit = () => {
-    const submission: SingleChoiceSubmissionResponse =
-      SingleChoiceResponseSchema.parse({
+    const user_answer = SingleChoiceResponseSchema.parse({
+      question_type: 'single_choice',
+      user_response: {
         question_type: 'single_choice',
         user_response: selectedOption,
-        is_submitted: true,
+      },
+      is_submitted: true,
+    });
+
+    if (question?.url === undefined) {
+      showToast({
+        title: 'Error',
+        description: 'Question URL is undefined',
+        status: 'error',
       });
-    alert(JSON.stringify(submission));
+      return;
+    }
+
+    mutation.mutate({
+      apiEndPoint: question.url,
+      answerData: user_answer,
+      signal: new AbortController().signal,
+    });
   };
 
   const handleShowFeedback = () => {
@@ -88,10 +148,8 @@ const SubmissionSingleChoice: React.FC<QuestionSubmission> = ({
           Submit
         </Button>
       )}
-      {is_submitted && (
-        <Button mt={4} onClick={handleShowFeedback}>
-          Show Feedback
-        </Button>
+      {submission.feedback && (
+        <Button onClick={handleShowFeedback}>Show Feedback</Button>
       )}
     </Box>
   );

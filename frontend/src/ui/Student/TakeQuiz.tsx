@@ -76,38 +76,41 @@ const TakeQuiz: React.FC<TakeQuizProp> = ({ questionWithSubmission }) => {
           </Text>
         )}
       </Flex>
-      {randomizedQuestions.map(({ question, submission }, index) => {
+      {randomizedQuestions.map((questionSubmission, index) => {
+        const { question } = questionSubmission;
+        const canSubmit = true;
+
         switch (question.question_type) {
           case 'single_choice':
             return (
               <SubmissionSingleChoice
                 key={index}
-                question={question}
-                submission={submission}
+                questionSubmission={questionSubmission}
+                canSubmit={canSubmit}
               />
             );
           case 'multiple_choice':
             return (
               <SubmissionMultipleChoice
                 key={index}
-                question={question}
-                submission={submission}
+                questionSubmission={questionSubmission}
+                canSubmit={canSubmit}
               />
             );
           case 'user_input':
             return (
               <SubmissionUserInput
                 key={index}
-                question={question}
-                submission={submission}
+                questionSubmission={questionSubmission}
+                canSubmit={canSubmit}
               />
             );
           case 'true_false':
             return (
               <SubmissionTrueFalse
                 key={index}
-                question={question}
-                submission={submission}
+                questionSubmission={questionSubmission}
+                canSubmit={canSubmit}
               />
             );
           default:

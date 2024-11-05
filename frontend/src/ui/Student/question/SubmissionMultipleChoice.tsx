@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Box,
   Button,
@@ -5,25 +6,96 @@ import {
   Text,
   Image,
   useColorModeValue,
-  Badge,
 } from '@chakra-ui/react';
-import { useState } from 'react';
-import {
-  MultipleChoiceSubmissionResponse,
-  QuestionSubmission,
-} from '../../../core/types/question';
-
+import { QuestionSubmission } from '../../../core/types/question';
 import { MultipleChoiceResponseSchema } from '../../../core/schemas/question_submission';
 
-const SubmissionMultipleChoice: React.FC<QuestionSubmission> = ({
-  question,
-  submission,
+import { submitQuestionAnswerAtAPI } from '../../../core/services/student';
+import { useMutation } from '@tanstack/react-query';
+import useCustomToast from '../../../hooks/useCustomToast';
+import { useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
+
+type MultipleChoiceChoice = z.infer<typeof MultipleChoiceResponseSchema>;
+
+interface Prop {
+  questionSubmission: QuestionSubmission;
+  canSubmit: boolean;
+}
+
+const SubmissionMultipleChoice: React.FC<Prop> = ({
+  questionSubmission,
+  canSubmit,
 }) => {
+  // unpack value
+  const { question, submission } = questionSubmission;
+
   const { image_url } = question;
   const { question_text, choices } = question.question_data;
-  const is_submitted = submission?.made_attempt || false;
+  // const is_submitted = submission?.is_correct || false;
+  const is_submitted = false;
 
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+
+  const { showToast } = useCustomToast();
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: ({
+      apiEndPoint,
+      answerData,
+      signal,
+    }: {
+      apiEndPoint: string;
+      answerData: any;
+      signal: AbortSignal;
+    }) => submitQuestionAnswerAtAPI(apiEndPoint, answerData, signal),
+    onSuccess: () => {
+      showToast({
+        title: 'Success',
+        description: 'Answer Submitted Successfully',
+        status: 'success',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['Questions'],
+      });
+    },
+    onError: (error) => {
+      showToast({
+        title: 'Error',
+        description: error.message,
+        status: 'error',
+      });
+    },
+  });
+
+  const handleSubmit = () => {
+    const user_answer: MultipleChoiceChoice =
+      MultipleChoiceResponseSchema.parse({
+        question_type: 'multiple_choice',
+        user_response: {
+          question_type: 'multiple_choice',
+          user_response: selectedOptions,
+        },
+      });
+
+    // handle the submission if url exist
+    if (question?.url === undefined) {
+      showToast({
+        title: 'Error',
+        description: 'Question URL is undefined',
+        status: 'error',
+      });
+      return;
+    }
+    // alert(JSON.stringify(user_response, null, 2));
+    console.log(user_answer);
+    mutation.mutate({
+      apiEndPoint: question.url,
+      answerData: user_answer,
+      signal: new AbortController().signal,
+    });
+  };
 
   const handleOptionSelect = (option: string) => {
     setSelectedOptions((prev) =>
@@ -33,18 +105,8 @@ const SubmissionMultipleChoice: React.FC<QuestionSubmission> = ({
     );
   };
 
-  const handleSubmit = () => {
-    const submission: MultipleChoiceSubmissionResponse =
-      MultipleChoiceResponseSchema.parse({
-        question_type: 'multiple_choice',
-        user_response: selectedOptions,
-        is_submitted: true,
-      });
-    alert(JSON.stringify(submission));
-  };
-
   const handleShowFeedback = () => {
-    alert(`Feedback: ${question.feedback}\nScore: ${question.score}`);
+    alert(`Feedback: ${submission.feedback}\nScore: ${question.score}`);
   };
 
   const textColor = useColorModeValue('black', 'white');
@@ -101,7 +163,7 @@ const SubmissionMultipleChoice: React.FC<QuestionSubmission> = ({
           Submit
         </Button>
       )}
-      {is_submitted && (
+      {submission.feedback && (
         <Button mt={4} onClick={handleShowFeedback}>
           Show Feedback
         </Button>
