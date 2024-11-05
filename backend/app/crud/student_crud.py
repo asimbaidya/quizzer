@@ -70,7 +70,7 @@ def get_all_quizzes_tests(  # type: ignore
     for test in tests:
         test.url = f'/enrolled_courses/test/{course_title}/{test.id}'
         if test.status == TestStatus.NOT_STARTED:
-            test.start_url = f'/enrolled_courses/test/e{course_title}/{test.id}'
+            test.start_url = f'/enrolled_courses/test/{course_title}/{test.id}'
 
     return {
         'quizzes': quizzes,
@@ -90,7 +90,7 @@ def get_all_question_in_quiz(  # type: ignore
             status_code=404, detail='Quiz not found in the specified course'
         )
 
-    # Ensure question submissions
+    # now ensure that a submission exist for student to view the question
     ensure_question_submissions(db, quiz.question_set_id, student_id)
 
     # Fetch questions and their submissions
@@ -151,13 +151,10 @@ def start_test(db: Session, course_title: str, test_id: int, student_id: int):
         test.window_start, test.window_end, user_test_session, test.duration
     )
 
-    if user_test_session:
+    if user_test_session or test_status != TestStatus.NOT_STARTED:
         return HTTPException(
             status_code=400, detail=f'Test is already started, status: {test_status}'
         )
-
-    # check if test window is open
-    validate_test_window(db, test_id, student_id)
 
     # create a new session
     user_test_session = UserTestSession(
@@ -320,6 +317,112 @@ def enroll_course(db: Session, course_title: str, course_pin: str, student_id: i
     return enrollment
 
 
+# def submit_question_answer(
+#     db: Session,
+#     course_title: str,
+#     question_set_id: int,
+#     question_id: int,
+#     user_submission: QuestionStudentSubmission,
+#     student_id: int,
+# ):
+#     ensure_question_submissions(db, question_set_id, student_id)
+#     submission = (
+#         db.query(QuestionSubmission)
+#         .filter(
+#             QuestionSubmission.question_id == question_id,
+#             QuestionSubmission.user_id == student_id,
+#         )
+#         .first()
+#     )
+#     if submission is None:
+#         raise HTTPException(status_code=404, detail='Question submission not found')
+#     # check if it's a quiz or test
+#     quiz = db.query(Quiz).filter(Quiz.question_set_id == question_set_id).first()
+#     test = db.query(Test).filter(Test.question_set_id == question_set_id).first()
+#     if quiz:
+#         validate_quiz_attempt(db, quiz.id, submission.attempt_count)
+#     elif test:
+#         validate_test_window(db, test.id, student_id=student_id)
+#     else:
+#         raise HTTPException(status_code=404, detail='Quiz or Test not found')
+#     return submit_question(
+#         db,
+#         course_title,
+#         question_set_id,
+#         question_id,
+#         user_submission,
+#         student_id,
+#     )
+# # helper functionf or submitting question
+# def submit_question(
+#     db: Session,
+#     _course_title: str,
+#     question_set_id: int,
+#     question_id: int,
+#     user_submission: QuestionStudentSubmission,
+#     student_id: int,
+# ):
+#     # initialize or retrieve the existing submission
+#     submission = (
+#         db.query(QuestionSubmission)
+#         .filter(
+#             QuestionSubmission.question_id == question_id,
+#             QuestionSubmission.user_id == student_id,
+#         )
+#         .first()
+#     )
+#     if not submission:
+#         return HTTPException(status_code=404, detail='Question submission not found')
+#     # Retrieve the question
+#     question = (
+#         db.query(Question)
+#         .filter(
+#             Question.id == question_id,
+#             Question.question_set_id == question_set_id,
+#         )
+#         .first()
+#     )
+#     if question is None:
+#         raise HTTPException(status_code=404, detail='Question not found')
+#     if question.question_type != user_submission.question_type:
+#         raise HTTPException(
+#             status_code=400,
+#             detail=f'Invalid question submission, {question.question_type} expected but got {user_submission.question_type}',  # noqa: E501
+#         )
+#     # Determine if the question belongs to a Quiz or Test
+#     quiz = db.query(Quiz).filter(Quiz.question_set_id == question_set_id).first()
+#     test = db.query(Test).filter(Test.question_set_id == question_set_id).first()
+#     if quiz:
+#         validate_quiz_attempt(db, quiz.id, submission.attempt_count)
+#     elif test:
+#         validate_test_window(db, test.id, student_id)
+#     else:
+#         raise HTTPException(status_code=400, detail='Invalid question set type')
+#     question_create = QuestionTeacherView.model_validate(question.to_dict())
+#     try:
+#         marked_user_submission = mark_user_submission(user_submission, question_create)
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=str(e))
+#     # prepare the update data
+#     update_data = {  # type: ignore
+#         'status': SubmissionStatus.SUBMITTED,
+#         'attempt_count': submission.attempt_count + 1,
+#         'score': marked_user_submission.score,
+#         'feedback': marked_user_submission.feedback,
+#         'user_response': marked_user_submission.model_dump(
+#             exclude=['id', 'user_id', 'question_id']  # type: ignore
+#         ),
+#     }
+#     # perform a single update query
+#     db.query(QuestionSubmission).filter(QuestionSubmission.id == submission.id).update(
+#         update_data  # type: ignore
+#     )
+#     db.commit()
+#     db.refresh(submission)
+#     return submission
+
+
+## merged version
 def submit_question_answer(
     db: Session,
     course_title: str,
@@ -328,7 +431,11 @@ def submit_question_answer(
     user_submission: QuestionStudentSubmission,
     student_id: int,
 ):
+    """Submit an answer to a question, handling both quizzes and tests."""
+    # Ensure question submissions exist (creates if not)
     ensure_question_submissions(db, question_set_id, student_id)
+
+    # Retrieve the existing submission
     submission = (
         db.query(QuestionSubmission)
         .filter(
@@ -337,10 +444,32 @@ def submit_question_answer(
         )
         .first()
     )
-    if submission is None:
+    if not submission:
         raise HTTPException(status_code=404, detail='Question submission not found')
 
-    # check if it's a quiz or test
+    # Retrieve the question
+    question = (
+        db.query(Question)
+        .filter(
+            Question.id == question_id,
+            Question.question_set_id == question_set_id,
+        )
+        .first()
+    )
+    if not question:
+        raise HTTPException(status_code=404, detail='Question not found')
+
+    # Validate question type
+    if question.question_type != user_submission.question_type:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f'Invalid question submission, expected {question.question_type} '
+                f'but got {user_submission.question_type}'
+            ),
+        )
+
+    # Check if the question set is part of a quiz or test
     quiz = db.query(Quiz).filter(Quiz.question_set_id == question_set_id).first()
     test = db.query(Test).filter(Test.question_set_id == question_set_id).first()
 
@@ -351,14 +480,37 @@ def submit_question_answer(
     else:
         raise HTTPException(status_code=404, detail='Quiz or Test not found')
 
-    return submit_question(
-        db,
-        course_title,
-        question_set_id,
-        question_id,
-        user_submission,
-        student_id,
+    # Validate and mark the user's submission
+    question_data = QuestionTeacherView.model_validate(question.to_dict())
+    try:
+        marked_user_submission = mark_user_submission(user_submission, question_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # Prepare the update data
+    update_data = {  # type: ignore
+        'status': SubmissionStatus.SUBMITTED,
+        'attempt_count': submission.attempt_count + 1,
+        'score': marked_user_submission.score,
+        'feedback': marked_user_submission.feedback,
+        'user_response': marked_user_submission.user_response.model_dump(),
+        'is_correct': marked_user_submission.is_correct,
+        'made_attempt': True,
+    }
+    # bug fix
+    # 'user_response': marked_user_submission.model_dump(
+    #     exclude=['id', 'user_id', 'question_id']  # type: ignore
+    # ),
+
+    # Update the submission in the database
+    db.query(QuestionSubmission).filter(QuestionSubmission.id == submission.id).update(
+        update_data  # type: ignore
     )
+
+    db.commit()
+    db.refresh(submission)
+
+    return submission
 
 
 # helper functions
@@ -405,84 +557,6 @@ def get_test_by_test_id_or_404(db: Session, test_id: int):
     if test is None:
         raise HTTPException(status_code=404, detail='Test not found')
     return test
-
-
-# helper functionf or submitting question
-def submit_question(
-    db: Session,
-    _course_title: str,
-    question_set_id: int,
-    question_id: int,
-    user_submission: QuestionStudentSubmission,
-    student_id: int,
-):
-    # initialize or retrieve the existing submission
-    submission = (
-        db.query(QuestionSubmission)
-        .filter(
-            QuestionSubmission.question_id == question_id,
-            QuestionSubmission.user_id == student_id,
-        )
-        .first()
-    )
-    if not submission:
-        return HTTPException(status_code=404, detail='Question submission not found')
-
-    # Retrieve the question
-    question = (
-        db.query(Question)
-        .filter(
-            Question.id == question_id,
-            Question.question_set_id == question_set_id,
-        )
-        .first()
-    )
-    if question is None:
-        raise HTTPException(status_code=404, detail='Question not found')
-
-    if question.question_type != user_submission.question_type:
-        raise HTTPException(
-            status_code=400,
-            detail=f'Invalid question submission, {question.question_type} expected but got {user_submission.question_type}',  # noqa: E501
-        )
-
-    # Determine if the question belongs to a Quiz or Test
-    quiz = db.query(Quiz).filter(Quiz.question_set_id == question_set_id).first()
-    test = db.query(Test).filter(Test.question_set_id == question_set_id).first()
-
-    if quiz:
-        validate_quiz_attempt(db, quiz.id, submission.attempt_count)
-    elif test:
-        validate_test_window(db, test.id, student_id)
-    else:
-        raise HTTPException(status_code=400, detail='Invalid question set type')
-
-    question_create = QuestionTeacherView.model_validate(question.to_dict())
-    try:
-        marked_user_submission = mark_user_submission(user_submission, question_create)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-    # prepare the update data
-    update_data = {  # type: ignore
-        'status': SubmissionStatus.SUBMITTED,
-        'attempt_count': submission.attempt_count + 1,
-        'score': marked_user_submission.score,
-        'feedback': marked_user_submission.feedback,
-        'user_response': marked_user_submission.model_dump(
-            exclude=['id', 'user_id', 'question_id']  # type: ignore
-        ),
-    }
-
-    # perform a single update query
-    db.query(QuestionSubmission).filter(QuestionSubmission.id == submission.id).update(
-        update_data  # type: ignore
-    )
-
-    db.commit()
-    db.refresh(submission)
-
-    return submission
 
 
 # Validation functions

@@ -383,6 +383,9 @@ def create_quiz(
         title=quiz_create.title,
         total_mark=quiz_create.total_mark,
         question_set_id=question_set.id,
+        # bug-fix
+        is_unlimited_attempt=quiz_create.is_unlimited_attempt,
+        allowed_attempt=quiz_create.allowed_attempt,
     )
     db.add(db_instance)
     db.commit()

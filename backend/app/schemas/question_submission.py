@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, List, Optional, Self, Union
+from typing import List, Optional, Self, Union
 
 from pydantic import (
     BaseModel,
@@ -57,10 +57,11 @@ class QuestionStudentSubmission(BaseModel):
     score: int = 0
     feedback: str = ''
 
-    @model_validator(mode='before')
-    @classmethod
-    def validate_data_before(cls, value: Any) -> Self:
-        return value
+    # @model_validator(mode='before')
+    # @classmethod
+    # def validate_data_before(cls, value: any) -> self:
+    #     print(value)
+    #     return value
 
     @model_validator(mode='after')
     def validate_data_after(self) -> Self:
