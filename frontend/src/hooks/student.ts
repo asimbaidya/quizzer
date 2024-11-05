@@ -3,7 +3,6 @@ import {
   fetchEnrolledCourses,
   fetchCourseQuizzesAndTests,
   fetchQuizQuestions,
-  startTest,
   fetchTestQuestions,
   fetchNotes,
   createNote,
@@ -59,20 +58,6 @@ export const useNote = (noteId: number) => {
   });
 };
 
-// Fix THESE
-export const mutationStartTest = () => {
-  return useMutation({
-    mutationFn: ({
-      courseTitle,
-      testId,
-      signal,
-    }: {
-      courseTitle: string;
-      testId: number;
-      signal: AbortSignal;
-    }) => startTest(courseTitle, testId, signal),
-  });
-};
 export const mutationCreateNote = () => {
   return useMutation({
     mutationFn: ({
