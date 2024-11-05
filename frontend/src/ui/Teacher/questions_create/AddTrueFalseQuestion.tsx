@@ -5,9 +5,6 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Radio,
-  RadioGroup,
-  Stack,
   Textarea,
   Badge,
   HStack,
@@ -29,6 +26,7 @@ type TrueFalseQuestionFormData = z.infer<typeof TrueFalseQuestionSchema>;
 
 const AddTrueFalseQuestion = ({ apiEndPoint }: { apiEndPoint: string }) => {
   const [image, setImage] = useState<string | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<boolean | null>(null);
   const { showToast } = useCustomToast();
   const queryClient = useQueryClient();
 
@@ -89,8 +87,14 @@ const AddTrueFalseQuestion = ({ apiEndPoint }: { apiEndPoint: string }) => {
   const questionText = watch('question_data.question_text', '');
 
   const onSubmit = (data: TrueFalseQuestionFormData) => {
-    // include the image in the data
-    const formData = { ...data, image };
+    const formData = {
+      ...data,
+      image,
+      question_data: {
+        ...data.question_data,
+        true_false_answer: selectedAnswer,
+      },
+    };
 
     const signal = new AbortController().signal;
     mutation.mutate({
@@ -145,30 +149,25 @@ const AddTrueFalseQuestion = ({ apiEndPoint }: { apiEndPoint: string }) => {
         mt={4}
       >
         <FormLabel>Answer</FormLabel>
-        <RadioGroup defaultValue="true">
-          <Stack direction="row" width={'100%'}>
-            <Radio
-              value="true"
-              p={4}
-              width={'50%'}
-              {...register('question_data.true_false_answer')}
-            >
-              <Button width={'500px'} colorScheme="green" variant="outline">
-                True
-              </Button>
-            </Radio>
-            <Radio
-              value="false"
-              p={4}
-              width={'50%'}
-              {...register('question_data.true_false_answer')}
-            >
-              <Button width={'500px'} colorScheme="red" variant="outline">
-                False
-              </Button>
-            </Radio>
-          </Stack>
-        </RadioGroup>
+        <Flex mb={4}>
+          <Button
+            mr={2}
+            colorScheme={selectedAnswer === true ? 'green' : 'gray'}
+            onClick={() => setSelectedAnswer(true)}
+            width={'50%'}
+            fontSize={'xl'}
+          >
+            True
+          </Button>
+          <Button
+            colorScheme={selectedAnswer === false ? 'green' : 'gray'}
+            onClick={() => setSelectedAnswer(false)}
+            width={'50%'}
+            fontSize={'xl'}
+          >
+            False
+          </Button>
+        </Flex>
         {errors.question_data?.true_false_answer && (
           <p style={{ color: 'red' }}>
             {errors.question_data.true_false_answer.message}

@@ -11,7 +11,7 @@ import AddMultipleChoiceQuestion from './questions_create/AddMultipleChoiceQuest
 import AddSingleChoiceQuestion from './questions_create/AddSingleChoiceQuestion';
 import AddUserInputQuestion from './questions_create/AddUserInputQuestion';
 import AddTrueFalseQuestion from './questions_create/AddTrueFalseQuestion';
-import ViewQuizQuestions from './question_view/ViewQuizQuestions';
+import ViewQuestions from './question_view/ViewQuestions';
 import { Question } from '../../core/types/question';
 
 export default function Quiz({
@@ -37,7 +37,7 @@ export default function Quiz({
       <TabPanels>
         <TabPanel>
           {questions ? (
-            <ViewQuizQuestions questions={questions} />
+            <ViewQuestions questions={questions} />
           ) : (
             <Heading
               size="lg"
