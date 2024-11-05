@@ -1,3 +1,12 @@
+import useCustomToast from '../../../hooks/useCustomToast';
+import { CourseSchema } from '../../../core/schemas/common';
+import { CustomError } from '../../../core/request';
+import { createCourse } from '../../../core/services/teacher';
+import { useForm } from 'react-hook-form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
 import {
   Box,
   Button,
@@ -9,14 +18,6 @@ import {
   Textarea,
   Switch,
 } from '@chakra-ui/react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { CourseSchema } from '../../../core/schemas/common';
-import { z } from 'zod';
-import { createCourse } from '../../../core/services/teacher';
-
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import useCustomToast from '../../../hooks/useCustomToast';
 
 type CourseFormData = z.infer<typeof CourseSchema>;
 
@@ -52,11 +53,23 @@ const CourseCreateForm = () => {
 
       reset();
       queryClient.invalidateQueries({
-        queryKey: ['createCourse'],
+        queryKey: ['CreatedCourses'],
       });
     },
     onError: (error) => {
-      alert(error.message);
+      if (error instanceof CustomError) {
+        showToast({
+          title: 'Enrollment Failed',
+          description: error.details,
+          status: 'error',
+        });
+      } else {
+        showToast({
+          title: 'Enrollment Failed',
+          description: error.name,
+          status: 'error',
+        });
+      }
     },
   });
 

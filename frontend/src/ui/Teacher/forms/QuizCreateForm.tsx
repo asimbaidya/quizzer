@@ -1,7 +1,13 @@
-import { useForm, Controller } from 'react-hook-form';
+import useCustomToast from '../../../hooks/useCustomToast';
+import { CustomError } from '../../../core/request';
+import { QuizSchema } from '../../../core/schemas/common';
+import { createQuiz } from '../../../core/services/teacher';
+import { useForm } from 'react-hook-form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useParams } from '@tanstack/react-router';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { QuizSchema } from '../../../core/schemas/common';
+
 import {
   Box,
   Button,
@@ -14,12 +20,6 @@ import {
   useColorModeValue,
   HStack,
 } from '@chakra-ui/react';
-
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import useCustomToast from '../../../hooks/useCustomToast';
-import { useParams } from '@tanstack/react-router';
-
-import { createQuiz } from '../../../core/services/teacher';
 
 // Define the form data type from the schema
 type QuizFormData = z.infer<typeof QuizSchema>;
@@ -74,11 +74,19 @@ const QuizCreateForm = () => {
       });
     },
     onError: (error) => {
-      showToast({
-        title: 'Error',
-        description: error.message,
-        status: 'error',
-      });
+      if (error instanceof CustomError) {
+        showToast({
+          title: 'Enrollment Failed',
+          description: error.details,
+          status: 'error',
+        });
+      } else {
+        showToast({
+          title: 'Enrollment Failed',
+          description: error.name,
+          status: 'error',
+        });
+      }
     },
   });
 

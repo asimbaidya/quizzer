@@ -28,6 +28,7 @@ export default function Quiz({
     <Tabs variant="enclosed">
       <TabList>
         <Tab>View Quiz Questions</Tab>
+        <Tab>Student Progress</Tab>
         <Tab>Add Multiple Choice</Tab>
         <Tab>Add Single Choice</Tab>
         <Tab>Add User Input</Tab>
@@ -47,6 +48,9 @@ export default function Quiz({
               No Questions Found
             </Heading>
           )}
+        </TabPanel>
+        <TabPanel>
+          <Heading as="h1">Not Implemented Yet</Heading>
         </TabPanel>
         <TabPanel>
           <AddMultipleChoiceQuestion apiEndPoint={apiEndPoint} />

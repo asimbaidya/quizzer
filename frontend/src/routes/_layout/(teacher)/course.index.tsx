@@ -17,7 +17,7 @@ function Course() {
 
   return (
     <>
-      <Container maxW="full">
+      <Container maxW="100%">
         <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
           Course Dashboard
         </Heading>

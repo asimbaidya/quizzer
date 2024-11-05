@@ -1,17 +1,14 @@
 import DatePicker from 'react-datepicker';
 import React from 'react';
+import useCustomToast from '../../../hooks/useCustomToast';
+import { CustomError } from '../../../core/request';
+import { TestSchema } from '../../../core/schemas/common';
+import { createTest } from '../../../core/services/teacher';
 import { useForm, Controller } from 'react-hook-form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useParams } from '@tanstack/react-router';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { TestSchema } from '../../../core/schemas/common';
-import 'react-datepicker/dist/react-datepicker.css';
-
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import useCustomToast from '../../../hooks/useCustomToast';
-import { useParams } from '@tanstack/react-router';
-
-import { createTest } from '../../../core/services/teacher';
-
 import {
   Button,
   FormControl,
@@ -76,11 +73,19 @@ const TestCreateForm: React.FC = () => {
       });
     },
     onError: (error) => {
-      showToast({
-        title: 'Test Creation Failed',
-        description: error.message,
-        status: 'error',
-      });
+      if (error instanceof CustomError) {
+        showToast({
+          title: 'Enrollment Failed',
+          description: error.details,
+          status: 'error',
+        });
+      } else {
+        showToast({
+          title: 'Enrollment Failed',
+          description: error.name,
+          status: 'error',
+        });
+      }
     },
   });
 

@@ -3,7 +3,7 @@ import { Container, Heading } from '@chakra-ui/react';
 import { useTestQuestions } from '../../../hooks/teacher';
 import { CustomError } from '../../../core/request';
 import Test from '../../../ui/Teacher/Test';
-import { Question } from '../../../core/types/question';
+import { Question, TestQuestions } from '../../../core/types/question';
 
 export const Route = createFileRoute(
   '/_layout/(teacher)/course/test/$courseTitle/$testId'
@@ -12,7 +12,7 @@ export const Route = createFileRoute(
     const { courseTitle, testId } = Route.useParams();
 
     const {
-      data: testQustions,
+      data: testAndQustions,
       isLoading,
       error,
     } = useTestQuestions(courseTitle, Number(testId));
@@ -24,14 +24,14 @@ export const Route = createFileRoute(
       throw notFound();
     }
 
-    return <CourseTestCourseTitleTestId questions={testQustions} />;
+    return <CourseTestCourseTitleTestId testQuestions={testAndQustions} />;
   },
 });
 
 function CourseTestCourseTitleTestId({
-  questions,
+  testQuestions,
 }: {
-  questions: Question[] | undefined;
+  testQuestions: TestQuestions | undefined;
 }) {
   console.log('Route.useParams():', Route.useParams());
   const { courseTitle, testId } = Route.useParams();
@@ -40,7 +40,7 @@ function CourseTestCourseTitleTestId({
       <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
         Course: {courseTitle}
       </Heading>
-      <Test questions={questions} />
+      <Test testQuestions={testQuestions} />
     </Container>
   );
 }
