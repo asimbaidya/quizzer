@@ -1,6 +1,3 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { CourseSchema } from '../../../core/schemas/common';
 import {
   Box,
   Button,
@@ -12,12 +9,22 @@ import {
   Textarea,
   Switch,
 } from '@chakra-ui/react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CourseSchema } from '../../../core/schemas/common';
 import { z } from 'zod';
+import { createCourse } from '../../../core/services/teacher';
 
-// define the form data type from the schema
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import useCustomToast from '../../../hooks/useCustomToast';
+
 type CourseFormData = z.infer<typeof CourseSchema>;
 
 const CourseCreateForm = () => {
+  // common utility
+  const queryClient = useQueryClient();
+  const { showToast } = useCustomToast();
+
   const {
     register,
     handleSubmit,
@@ -27,10 +34,36 @@ const CourseCreateForm = () => {
     resolver: zodResolver(CourseSchema),
   });
 
+  const mutation = useMutation({
+    mutationFn: ({
+      courseData,
+      signal,
+    }: {
+      courseData: any;
+      signal: AbortSignal;
+    }) => createCourse(courseData, signal),
+    onSuccess: () => {
+      showToast({
+        title: 'Course Created',
+        description:
+          'Course has been created successfully, you can now add Quiz and Test to this course',
+        status: 'success',
+      });
+
+      reset();
+      queryClient.invalidateQueries({
+        queryKey: ['createCourse'],
+      });
+    },
+    onError: (error) => {
+      alert(error.message);
+    },
+  });
+
   const onSubmit = (data: CourseFormData) => {
-    //
-    alert(JSON.stringify(data, null, 2));
-    reset();
+    console.log(data);
+    mutation.mutate({ courseData: data, signal: new AbortController().signal });
+    // alert(JSON.stringify(data, null, 2));
   };
 
   return (

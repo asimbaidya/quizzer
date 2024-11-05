@@ -15,10 +15,23 @@ import {
   HStack,
 } from '@chakra-ui/react';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import useCustomToast from '../../../hooks/useCustomToast';
+import { useParams } from '@tanstack/react-router';
+
+import { createQuiz } from '../../../core/services/teacher';
+
 // Define the form data type from the schema
 type QuizFormData = z.infer<typeof QuizSchema>;
 
 const QuizCreateForm = () => {
+  // common utility
+  const queryClient = useQueryClient();
+  const { showToast } = useCustomToast();
+  const { courseTitle } = useParams({
+    from: '/_layout/(teacher)/course/$courseTitle',
+  });
+
   const inputBg = useColorModeValue('gray.100', 'gray.700');
 
   const {
@@ -38,13 +51,47 @@ const QuizCreateForm = () => {
     },
   });
 
-  const isUnlimited = watch('is_unlimited');
+  const mutation = useMutation({
+    mutationFn: ({
+      courseTitle,
+      quizData,
+      signal,
+    }: {
+      courseTitle: string;
+      quizData: any;
+      signal: AbortSignal;
+    }) => createQuiz(courseTitle, quizData, signal),
+    onSuccess: () => {
+      showToast({
+        title: 'Quiz Created',
+        description: 'Quiz has been created successfully',
+        status: 'success',
+      });
+
+      reset();
+      queryClient.invalidateQueries({
+        queryKey: ['courseDetails', courseTitle],
+      });
+    },
+    onError: (error) => {
+      showToast({
+        title: 'Error',
+        description: error.message,
+        status: 'error',
+      });
+    },
+  });
 
   const onSubmit = (data: QuizFormData) => {
-    alert(JSON.stringify(data, null, 2));
-    reset();
+    // alert(JSON.stringify(data, null, 2));
+    mutation.mutate({
+      courseTitle: courseTitle,
+      quizData: data,
+      signal: new AbortController().signal,
+    });
   };
 
+  const isUnlimited = watch('is_unlimited');
   return (
     <Box
       maxW="4xl"

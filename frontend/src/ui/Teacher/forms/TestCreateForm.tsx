@@ -6,6 +6,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { TestSchema } from '../../../core/schemas/common';
 import 'react-datepicker/dist/react-datepicker.css';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import useCustomToast from '../../../hooks/useCustomToast';
+import { useParams } from '@tanstack/react-router';
+
+import { createTest } from '../../../core/services/teacher';
+
 import {
   Button,
   FormControl,
@@ -22,6 +28,13 @@ import {
 type TestCreateFormData = z.infer<typeof TestSchema>;
 
 const TestCreateForm: React.FC = () => {
+  // common utility
+  const queryClient = useQueryClient();
+  const { showToast } = useCustomToast();
+  const { courseTitle } = useParams({
+    from: '/_layout/(teacher)/course/$courseTitle',
+  });
+
   const {
     handleSubmit,
     register,
@@ -34,8 +47,40 @@ const TestCreateForm: React.FC = () => {
       title: 'New Test',
       total_mark: 20,
       duration: 30,
-      window_start: new Date(),
-      window_end: new Date(new Date().getTime() + 60 * 60 * 1000),
+
+      window_start: new Date(Date.now() + 10 * 60 * 1000), // 10 minute from now
+      window_end: new Date(Date.now() + 60 * 60 * 1000), // 60 minutes from now
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: ({
+      courseTitle,
+      testData,
+      signal,
+    }: {
+      courseTitle: string;
+      testData: any;
+      signal: AbortSignal;
+    }) => createTest(courseTitle, testData, signal),
+    onSuccess: () => {
+      showToast({
+        title: 'Test Created',
+        description: 'Test has been created successfully',
+        status: 'success',
+      });
+
+      reset();
+      queryClient.invalidateQueries({
+        queryKey: ['courseDetails', courseTitle],
+      });
+    },
+    onError: (error) => {
+      showToast({
+        title: 'Test Creation Failed',
+        description: error.message,
+        status: 'error',
+      });
     },
   });
 
@@ -45,8 +90,14 @@ const TestCreateForm: React.FC = () => {
       window_start: data.window_start.toISOString(),
       window_end: data.window_end.toISOString(),
     };
-    alert(JSON.stringify(formattedData, null, 2));
-    reset();
+    // alert(JSON.stringify(formattedData, null, 2));
+    // reset();
+
+    mutation.mutate({
+      courseTitle: courseTitle,
+      testData: formattedData,
+      signal: new AbortController().signal,
+    });
   };
 
   const inputBg = useColorModeValue('gray.100', 'gray.700');
