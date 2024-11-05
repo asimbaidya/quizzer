@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Container, Heading } from '@chakra-ui/react';
 import { useTestQuestions } from '../../../hooks/student';
-import Test from '../../../ui/Student/Test';
+import TakeTest from '../../../ui/Student/TakeTest';
 
 export const Route = createFileRoute(
   '/_layout/(student)/enrolled_courses/test/$courseTitle/$testId'
@@ -26,7 +26,7 @@ function EnrolledCoursesTestCourseTitleTestId() {
         {!questions && `No Question found for test ${testId}`}
       </Heading>
 
-      {questions && <Test questionWithSubmission={questions} />}
+      {questions && <TakeTest questionWithSubmission={questions} />}
     </Container>
   );
 }

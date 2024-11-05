@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Container, Heading } from '@chakra-ui/react';
-import Quiz from '../../../ui/Student/Quiz';
+import TakeQuiz from '../../../ui/Student/TakeQuiz';
 import { useQuizQuestions } from '../../../hooks/student';
 import { Text } from '@chakra-ui/react';
 
@@ -25,13 +25,7 @@ function EnrolledCoursesQuizCourseTitleQuizId() {
       <Heading size="4lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
         {courseTitle} : {quizId}
       </Heading>
-      <p>
-        Allowed Attempt: {questions?.allowed_attempt}
-        <br />
-        Is Unlimited Attempt : {questions?.is_unlimited_attempt ? 'Yes' : 'No'}
-      </p>
-
-      {questions && <Quiz questionWithSubmission={questions} />}
+      {questions && <TakeQuiz questionWithSubmission={questions} />}
     </Container>
   );
 }
