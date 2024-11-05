@@ -57,7 +57,7 @@ def get_questions_in_quiz(
 @router.get(
     '/course/test/{course_title}/{test_id}',
 )
-def get_questions_in_test(
+def get_questions_in_test(  # type: ignore
     course_title: str, test_id: int, db: SessionDep, teacher: CurrentTeacher
 ):
     return teacher_crud.get_questions_in_test(

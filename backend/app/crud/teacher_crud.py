@@ -38,11 +38,11 @@ def get_quiz_and_test(  # type: ignore
         .all()
     )
     for quiz in quizzes:
-        quiz.url = f'teacher/courses/quiz/{course_title}/{quiz.id}'
+        quiz.url = f'/course/quiz/{course_title}/{quiz.id}'
 
     # Create URLs for tests
     for test in tests:
-        test.url = f'teacher/courses/test/{course_title}/{test.id}'
+        test.url = f'/course/test/{course_title}/{test.id}'
 
     return {
         'quizzes': quizzes,
@@ -87,7 +87,7 @@ def get_questions_in_quiz(
     return questions
 
 
-def get_questions_in_test(
+def get_questions_in_test(  # type: ignore
     db: Session, course_title: str, test_id: int, teacher_id: int
 ):
     course = db.query(Course).filter(Course.title == course_title).first()
@@ -115,7 +115,11 @@ def get_questions_in_test(
             question.image_url = (
                 f'http://127.0.0.1:8000/API/image_show/{question.image}'
             )
-    return questions
+    # return questions
+    return {
+        'questions': questions,
+        'test': test,
+    }  # type: ignore
 
 
 def get_student_progress_in_quiz(
@@ -165,13 +169,13 @@ def get_student_progress_in_quiz(
             User.id.label('student_id'),
             User.email.label('email'),
             func.sum(QuestionSubmission.score)
-            .filter(QuestionSubmission.score != None)
+            .filter(QuestionSubmission.score != None)  # noqa: E711
             .label('received_marks'),
             func.count(QuestionSubmission.id)
-            .filter(QuestionSubmission.made_attempt == True)
+            .filter(QuestionSubmission.made_attempt == True)  # noqa: E712
             .label('total_attempts'),
             func.sum(QuestionSubmission.attempt_count)
-            .filter(QuestionSubmission.made_attempt == True)
+            .filter(QuestionSubmission.made_attempt == True)  # noqa: E712
             .label('total_questions_attempted'),
         )
         .join(QuestionSubmission, QuestionSubmission.user_id == User.id)
@@ -275,13 +279,13 @@ def get_student_progress_in_test(
             User.id.label('student_id'),
             User.email.label('email'),
             func.sum(QuestionSubmission.score)
-            .filter(QuestionSubmission.score != None)
+            .filter(QuestionSubmission.score != None)  # noqa: E711
             .label('received_marks'),
             func.count(QuestionSubmission.id)
-            .filter(QuestionSubmission.made_attempt == True)
+            .filter(QuestionSubmission.made_attempt == True)  # noqa: E712
             .label('total_attempts'),
             func.sum(QuestionSubmission.attempt_count)
-            .filter(QuestionSubmission.made_attempt == True)
+            .filter(QuestionSubmission.made_attempt == True)  # noqa: E712
             .label('total_questions_attempted'),
         )
         .join(QuestionSubmission, QuestionSubmission.user_id == User.id)

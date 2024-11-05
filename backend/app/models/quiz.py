@@ -145,6 +145,16 @@ class Question(Base):
     )
     question_set = relationship('QuestionSet', back_populates='questions')
 
+    def to_dict(self) -> dict[str, str | bool | int]:
+        return {
+            'id': self.id,
+            'question_type': self.question_type,
+            'question_data': self.question_data,
+            'total_marks': self.total_marks,
+            'tag': self.tag,
+            'image': self.image,
+        }  # type: ignore
+
 
 class QuestionSubmission(Base):
     __tablename__ = 'question_submission'

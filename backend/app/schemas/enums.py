@@ -2,12 +2,15 @@ from enum import Enum
 
 
 class TestStatus(str, Enum):
+    # logical status(not stored in db )
     NOT_OPENED = 'not_opened'  # start window has is not reached
     NOT_STARTED = 'not_started'  # student has not started the test
     IN_PROGRESS = 'in_progress'  # student is currently taking the test duration left
     COMPLETED = 'completed'  # student has completed the test
     NOT_PARTICIPATED = (
-        'not_participated'  # student has not participated in the test and test ended
+        'not_participated'
+        # student has not participated in the test and test ended
+        # this type of tests won't be visible to student
     )
 
 

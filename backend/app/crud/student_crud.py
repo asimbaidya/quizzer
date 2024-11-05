@@ -463,6 +463,12 @@ def submit_question(
     if question is None:
         raise HTTPException(status_code=404, detail='Question not found')
 
+    if question.question_type != user_submission.question_type:
+        raise HTTPException(
+            status_code=400,
+            detail=f'Invalid question submission, {question.question_type} expected but got {user_submission.question_type}',  # noqa: E501
+        )
+
     # Determine if the question belongs to a Quiz or Test
     quiz = db.query(Quiz).filter(Quiz.question_set_id == question_set_id).first()
     test = db.query(Test).filter(Test.question_set_id == question_set_id).first()
@@ -475,7 +481,23 @@ def submit_question(
         raise HTTPException(status_code=400, detail='Invalid question set type')
 
     # Mark the user's submission
-    question_create = QuestionTeacherView.model_validate(question)
+    try:
+        # model_config = ConfigDict(from_attributes=True)
+
+        # question_type: QuestionType
+        # question_data: QuestionTeacherData
+        # tag: str = Field(default='untagged')
+        # total_marks: int = Field(default=5)
+        # image: Optional[str] = None
+        # print(dict(question.to_dict()))
+        # print(dict(user_submission))
+        # print(question.to_dict())
+        # print(question.to_dict())
+        question_create = QuestionTeacherView.model_validate(question.to_dict())
+        print(question_create)
+
+    except Exception as e:
+        print(e)
     try:
         marked_user_submission = mark_user_submission(user_submission, question_create)
     except Exception as e:

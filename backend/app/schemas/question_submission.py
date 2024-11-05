@@ -62,6 +62,16 @@ class QuestionStudentSubmission(BaseModel):
     def validate_data_before(cls, value: Any) -> Self:
         return value
 
+    @model_validator(mode='after')
+    def validate_data_after(self) -> Self:
+        outer_type = self.question_type
+        inner_type = self.user_response.question_type
+        if outer_type != inner_type:
+            raise ValueError(
+                f'Outer question type {outer_type} does not match inner question type {inner_type}'  # noqa: E501
+            )
+        return self
+
 
 # --------------------------
 class StudentChoice(BaseModel):
