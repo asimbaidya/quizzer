@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Optional
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -41,48 +42,33 @@ def get_all_quizzes_tests(  # type: ignore
     course, _enrollment = get_course_and_enrollment_or_404(db, course_title, student_id)
 
     quizzes = db.query(Quiz).filter(Quiz.course_id == course.id).all()
-    tests = db.query(Test).filter(Test.course_id == course.id).all()
+    all_tests = db.query(Test).filter(Test.course_id == course.id).all()
+
+    tests: list[Test] = []
+    for test in all_tests:
+        test_submission = (
+            db.query(UserTestSession)
+            .filter(
+                UserTestSession.test_id == test.id,
+                UserTestSession.user_id == student_id,
+            )
+            .first()
+        )
+        test_status = get_test_status(
+            test.window_start,
+            test.window_end,
+            test_submission,
+            test.duration,
+        )
+        if test_status != TestStatus.NOT_PARTICIPATED:
+            test.status = test_status
+            tests.append(test)
 
     for quiz in quizzes:
         quiz.url = f'/enrolled_courses/quiz/{course_title}/{quiz.id}'
 
     for test in tests:
         test.url = f'/enrolled_courses/test/{course_title}/{test.id}'
-
-    for test in tests:
-        now = datetime.now(timezone.utc)
-        window_start = test.window_start.astimezone(timezone.utc)
-        window_end = test.window_end.astimezone(timezone.utc)
-
-        if now < window_start:
-            # Test has not opened yet
-            test.status = TestStatus.NOT_OPENED
-        elif now > window_end:
-            # Test window has ended
-            test.status = TestStatus.COMPLETED
-        else:
-            # Test is within the window
-            test_submission = (
-                db.query(UserTestSession)
-                .filter(
-                    UserTestSession.test_id == test.id,
-                    UserTestSession.user_id == student_id,
-                )
-                .first()
-            )
-            if not test_submission:
-                test.status = TestStatus.NOT_STARTED
-            else:
-                time_elapsed = now - test_submission.start_time
-                if time_elapsed.total_seconds() > test.duration * 60:
-                    # Test duration has been exceeded
-                    test.status = TestStatus.COMPLETED
-                else:
-                    # Test is in progress
-                    test.status = TestStatus.IN_PROGRESS
-                    print(f'Time elapsed: {time_elapsed}')
-    # add start url
-    for test in tests:
         if test.status == TestStatus.NOT_STARTED:
             test.start_url = f'/enrolled_courses/test/e{course_title}/{test.id}'
 
@@ -161,9 +147,13 @@ def start_test(db: Session, course_title: str, test_id: int, student_id: int):
         )
         .first()
     )
+    test_status = get_test_status(
+        test.window_start, test.window_end, user_test_session, test.duration
+    )
+
     if user_test_session:
         return HTTPException(
-            status_code=400, detail='Test already started by the student'
+            status_code=400, detail=f'Test is already started, status: {test_status}'
         )
 
     # check if test window is open
@@ -179,10 +169,12 @@ def start_test(db: Session, course_title: str, test_id: int, student_id: int):
     return user_test_session
 
 
-def get_all_question_in_test(
+def get_all_question_in_test(  # type: ignore
     db: Session, course_title: str, test_id: int, student_id: int
 ):
     """Get the quiz for the course."""
+
+    # this ensures that the student is enrolled in the course
     course, _enrollment = get_course_and_enrollment_or_404(db, course_title, student_id)
 
     test = get_test_by_test_id_or_404(db, test_id)
@@ -190,8 +182,7 @@ def get_all_question_in_test(
         raise HTTPException(
             status_code=404, detail='Test not found in the specified course'
         )
-    # Ensure question submissions
-    ensure_question_submissions(db, test.question_set_id, student_id)
+    # after this point test also exist
 
     # check if started
     test_submission = (
@@ -202,43 +193,26 @@ def get_all_question_in_test(
         .first()
     )
 
-    # start test status
-    now = datetime.now(timezone.utc)
-    window_start = test.window_start.astimezone(timezone.utc)
-    window_end = test.window_end.astimezone(timezone.utc)
-    test_start_time = 'NOT ATTEMPTED'
+    test_status = get_test_status(
+        test.window_start, test.window_end, test_submission, test.duration
+    )
 
-    if now > window_end and not test_submission:
-        # todo
-        test.status = TestStatus.COMPLETED
+    start_time: None | datetime = None
+    if test_submission:
+        start_time = test_submission.start_time
 
-        # also create a test submission to let see questions
-        # user_test_session = UserTestSession(
-        #     test_id=test_id, user_id=student_id, start_time=datetime.now()
-        # )
-        # db.add(user_test_session)
-        # db.commit()
-        # db.refresh(user_test_session)
+    if (
+        test_status == TestStatus.NOT_OPENED
+        or test_status == TestStatus.NOT_STARTED
+        or test_status == TestStatus.NOT_PARTICIPATED
+        or test_status == TestStatus.IN_WAITING_FOR_RESULT
+    ):
+        raise HTTPException(
+            status_code=400, detail='Unauthorized to view the test questions'
+        )
 
-    elif not test_submission:
-        raise HTTPException(status_code=400, detail='Test not started by the student')
-    else:
-        time_elapsed = now - test_submission.start_time
-        test_start_time = test_submission.start_time
-        if time_elapsed.total_seconds() > test.duration * 60 and now < test.window_end:
-            raise HTTPException(
-                status_code=400,
-                detail='Test duration exceeded, Visit result after test window end',
-            )
-
-        if now < window_start and time_elapsed.total_seconds() < test.duration * 60:
-            return HTTPException(status_code=400, detail='Test has not started yet')
-
-        if now < window_end and time_elapsed.total_seconds() < test.duration * 60:
-            test.status = TestStatus.IN_PROGRESS
-
-        if now > window_end:
-            test.status = TestStatus.COMPLETED
+    # now ensure that a submission exist for student to view the question
+    ensure_question_submissions(db, test.question_set_id, student_id)
 
     # Fetch questions and their submissions
     all_question_submission = (
@@ -255,12 +229,15 @@ def get_all_question_in_test(
     )
 
     question_submissions = []
+
     for question, submission in all_question_submission:
-        question.url = f'/API/student/questions/submit/{question.id}?course_title={course_title}&question_set_id={question.question_set_id}&question_id={question.id}'  # noqa: E501
+        if test_status == TestStatus.IN_PROGRESS:
+            question.url = f'/API/student/questions/submit/{question.id}?course_title={course_title}&question_set_id={question.question_set_id}&question_id={question.id}'  # noqa: E501
         if question.image:
             question.image_url = (
                 f'http://127.0.0.1:8000/API/image_show/{question.image}'
             )
+
         question_submission = {
             'question': question,
             'submission': submission,
@@ -270,8 +247,8 @@ def get_all_question_in_test(
     return {
         'question_submissions': question_submissions,
         'total_mark': test.total_mark,
-        'status': test.status,
-        'start_time': test_start_time,
+        'status': test_status,
+        'start_time': start_time,
     }  # type: ignore
 
 
@@ -480,24 +457,7 @@ def submit_question(
     else:
         raise HTTPException(status_code=400, detail='Invalid question set type')
 
-    # Mark the user's submission
-    try:
-        # model_config = ConfigDict(from_attributes=True)
-
-        # question_type: QuestionType
-        # question_data: QuestionTeacherData
-        # tag: str = Field(default='untagged')
-        # total_marks: int = Field(default=5)
-        # image: Optional[str] = None
-        # print(dict(question.to_dict()))
-        # print(dict(user_submission))
-        # print(question.to_dict())
-        # print(question.to_dict())
-        question_create = QuestionTeacherView.model_validate(question.to_dict())
-        print(question_create)
-
-    except Exception as e:
-        print(e)
+    question_create = QuestionTeacherView.model_validate(question.to_dict())
     try:
         marked_user_submission = mark_user_submission(user_submission, question_create)
     except Exception as e:
@@ -572,3 +532,31 @@ def validate_test_window(db: Session, test_id: int, student_id: int) -> None:
     time_elapsed = now - session.start_time
     if time_elapsed.total_seconds() > test.duration * 60:
         raise HTTPException(status_code=400, detail='Test duration exceeded')
+
+
+def get_test_status(
+    window_start: datetime,
+    window_end: datetime,
+    test_submission: Optional[UserTestSession],
+    test_duration: int,
+) -> str:
+    now = datetime.now(timezone.utc)
+    window_start = window_start.astimezone(timezone.utc)
+    window_end = window_end.astimezone(timezone.utc)
+
+    if now < window_start:
+        return TestStatus.NOT_OPENED
+    if window_start <= now <= window_end:
+        if test_submission:
+            # Check if test duration has been exceeded
+            time_elapsed = now - test_submission.start_time
+            if time_elapsed.total_seconds() < test_duration * 60:
+                return TestStatus.IN_PROGRESS
+            # Test duration exceeded but window not ended
+            return TestStatus.IN_WAITING_FOR_RESULT
+        return TestStatus.NOT_STARTED
+
+    # now > window_end
+    if test_submission:
+        return TestStatus.COMPLETED
+    return TestStatus.NOT_PARTICIPATED
