@@ -21,21 +21,23 @@ const ViewUserInput: React.FC<Props> = ({ question }) => {
 
   return (
     <Box p={5} borderWidth={1} borderRadius="md" mt={5}>
-      <HStack>
-        <Badge m={4} fontSize={'lg'} colorScheme="blue">
+      <HStack justify="center" spacing={2} mb={4}>
+        <Badge fontSize={'lg'} colorScheme="blue" px={4} py={2}>
           Type: {question.question_type}
         </Badge>
-        <Badge m={4} fontSize={'lg'} colorScheme="purple">
+        <Badge fontSize={'lg'} colorScheme="purple" px={4} py={2}>
           Tag: {question.tag}
         </Badge>
-        <Badge m={4} fontSize={'lg'} color={'orange'}>
+        <Badge fontSize={'lg'} colorScheme="orange" px={4} py={2}>
           Mark: {question.total_marks}
         </Badge>
       </HStack>
       <Text fontSize="4xl" mb={4}>
         {question_text}
       </Text>
-      {image_url && <Image src={image_url} alt="Question Image" mb={4} />}
+      {image_url && (
+        <Image src={image_url} mx={'auto'} alt="Question Image" mb={4} />
+      )}
       <Input
         readOnly
         fontSize={'xl'}
