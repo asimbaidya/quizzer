@@ -1,40 +1,37 @@
 import {
   Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Select,
-  FormErrorMessage,
-  Heading,
   VStack,
-  Text,
+  FormControl,
+  Input,
+  FormErrorMessage,
+  FormLabel,
+  Select,
+  Button,
+  Heading,
 } from '@chakra-ui/react';
-import { Link } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { UserCreateSchema } from '../../core/schemas/common';
 import useCustomToast from '../../hooks/useCustomToast';
 
-type SignupFormData = z.infer<typeof UserCreateSchema>;
+type UserFormData = z.infer<typeof UserCreateSchema>;
 
-export default function Signup() {
+export default function AddUser() {
+  const { showToast } = useCustomToast();
   const {
-    register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignupFormData>({
+    register,
+  } = useForm<UserFormData>({
     resolver: zodResolver(UserCreateSchema),
   });
 
-  const { showToast } = useCustomToast();
-
-  const onSubmit = (data: SignupFormData) => {
-    const { confirm_password, ...submitData } = data;
-    // handle signup logic with submitData (e.g., send to the backend)
+  const onSubmit = (data: UserFormData) => {
+    const { confirm_password, ...submitData } = data; // exclude confirm_password
+    // Handle form submission with submitData
     showToast({
-      title: 'Signup Successful',
+      title: 'User Added',
       description: `${JSON.stringify(submitData, null, 2)}`,
       status: 'success',
       duration: 5000,
@@ -43,15 +40,13 @@ export default function Signup() {
   };
 
   return (
-    // Gradient Background Wrapper
     <Box
       minHeight="100vh"
-      bgGradient="linear(to-r, pink.100, purple.300)"
+      bgGradient="linear(to-r,blue.800, purple.500)"
       display="flex"
       alignItems="center"
       justifyContent="center"
     >
-      {/* Form Container with Blurry Dark Background */}
       <Box
         maxWidth="500px"
         width="90%"
@@ -63,7 +58,7 @@ export default function Signup() {
         backdropFilter="blur(10px)"
       >
         <Heading mb="6" textAlign="center">
-          Signup
+          Add User
         </Heading>
         <form onSubmit={handleSubmit(onSubmit)}>
           <VStack spacing={6}>
@@ -80,6 +75,7 @@ export default function Signup() {
                 {errors.full_name && errors.full_name.message}
               </FormErrorMessage>
             </FormControl>
+
             <FormControl isInvalid={!!errors.email}>
               <FormLabel htmlFor="email">Email</FormLabel>
               <Input
@@ -94,6 +90,7 @@ export default function Signup() {
                 {errors.email && errors.email.message}
               </FormErrorMessage>
             </FormControl>
+
             <FormControl isInvalid={!!errors.role}>
               <FormLabel htmlFor="role">Role</FormLabel>
               <Select
@@ -103,6 +100,7 @@ export default function Signup() {
                 border="none"
                 _focus={{ bg: 'rgba(255, 255, 255, 0.3)' }}
               >
+                <option value="admin">Admin</option>
                 <option value="teacher">Teacher</option>
                 <option value="student">Student</option>
               </Select>
@@ -110,6 +108,7 @@ export default function Signup() {
                 {errors.role && errors.role.message}
               </FormErrorMessage>
             </FormControl>
+
             <FormControl isInvalid={!!errors.password}>
               <FormLabel htmlFor="password">Password</FormLabel>
               <Input
@@ -124,6 +123,7 @@ export default function Signup() {
                 {errors.password && errors.password.message}
               </FormErrorMessage>
             </FormControl>
+
             <FormControl isInvalid={!!errors.confirm_password}>
               <FormLabel htmlFor="confirm_password">Confirm Password</FormLabel>
               <Input
@@ -138,22 +138,12 @@ export default function Signup() {
                 {errors.confirm_password && errors.confirm_password.message}
               </FormErrorMessage>
             </FormControl>
-            <Button type="submit" colorScheme="blue" width="full">
-              Signup
+
+            <Button type="submit" colorScheme="blue">
+              Add User
             </Button>
           </VStack>
         </form>
-        <Box mt={6} textAlign="center">
-          <Text>
-            Already have an account?{' '}
-            <Link
-              to="/login"
-              style={{ color: 'blue.300', textDecoration: 'underline' }}
-            >
-              Login
-            </Link>
-          </Text>
-        </Box>
       </Box>
     </Box>
   );

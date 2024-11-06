@@ -1,16 +1,40 @@
 // Enums
 import { z } from 'zod';
 
-// define the userrole enum
 export const UserRole = z.enum(['admin', 'teacher', 'student']);
 
-// update the userschema to use the userrole enum
-export const UserSchema = z.object({
+export const UserCreateSchema = z
+  .object({
+    id: z.number().optional(),
+    full_name: z.string(),
+    email: z.string().email(),
+    role: UserRole,
+    joined_at: z.string().optional(),
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters long')
+      .max(32, 'Password must be at most 32 characters long'),
+    confirm_password: z.string(),
+  })
+  .refine((data) => data.password === data.confirm_password, {
+    message: 'Passwords do not match',
+    path: ['confirm_password'],
+  });
+
+export const AdminUserCreateSchema = z.object({
+  id: z.number().optional(),
   full_name: z.string(),
   email: z.string().email(),
   role: UserRole,
-  joined_at: z.date().optional(),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters long')
+    .max(32, 'Password must be at most 32 characters long'),
 });
+
+// Export TypeScript types
+export type UserCreateFormData = z.infer<typeof UserCreateSchema>;
+export type AdminUserFormData = z.infer<typeof AdminUserCreateSchema>;
 
 export const NoteCreateSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters long'),

@@ -32,9 +32,9 @@ const QuizItem = ({ quiz }: { quiz: Quiz }) => {
       <HStack justify="space-between" width="full">
         <Badge colorScheme="green" fontSize="lg" py={1} px={2}>
           Quiz
-        </Badge>{' '}
-        <Spacer />{' '}
-        <Heading size="4xl" color={textColor} textAlign="center">
+        </Badge>
+        <Spacer />
+        <Heading size="lg" color={textColor} textAlign="center">
           {quiz.title}
         </Heading>
         <Spacer />

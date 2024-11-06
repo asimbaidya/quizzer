@@ -35,7 +35,7 @@ const TestItem = ({ test }: { test: Test }) => {
           Test
         </Badge>
         <Spacer />
-        <Heading size="4xl" color={textColor} textAlign="center">
+        <Heading size="lg" color={textColor} textAlign="center">
           {test.title}
         </Heading>
         <Spacer />
