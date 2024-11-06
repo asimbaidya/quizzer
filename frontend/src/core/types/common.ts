@@ -21,7 +21,7 @@ export interface User {
   full_name: string;
   email: string;
   role: string;
-  joined_at?: string;
+  joined_at: string;
 }
 
 // export interface NoteItem {

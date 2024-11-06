@@ -1,64 +1,47 @@
 import useAuth from '../../hooks/useAuth';
-import { useEffect } from 'react';
 
-import {
-  Container,
-  Heading,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-} from '@chakra-ui/react';
-import { useQueryClient } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { Container, Heading } from '@chakra-ui/react';
 import Appearance from './Appearance';
-
-// TODO
-const UserInformation = () => {
-  return <div>User Information</div>;
-};
-const ChangePassword = () => {
-  return <div>Change Password</div>;
-};
-
-const tabsConfig = [
-  { title: 'My profile', component: UserInformation },
-  { title: 'Password', component: ChangePassword },
-  { title: 'Appearance', component: Appearance },
-];
+import { Box, Text, useColorMode } from '@chakra-ui/react';
+import { User } from '../../core/types/common';
 
 export default function Profile() {
   const { user } = useAuth();
-  const finalTabs = [...tabsConfig];
 
-  // temporary information show up
-  useEffect(() => {
-    if (!user) {
-      console.log('User not found');
-    }
-    console.log('rendering Profile for', user);
-  }, []);
+  if (user) {
+    console.log('User:', user);
+  }
 
   return (
     <Container maxW="full">
       <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>
-        User Settings
+        User Settings {user?.email}
       </Heading>
-      <Tabs variant="enclosed">
-        <TabList>
-          {finalTabs.map((tab, index) => (
-            <Tab key={index}>{tab.title}</Tab>
-          ))}
-        </TabList>
-        <TabPanels>
-          {finalTabs.map((tab, index) => (
-            <TabPanel key={index}>
-              <tab.component />
-            </TabPanel>
-          ))}
-        </TabPanels>
-      </Tabs>
+      {user && <UserInfo user={user} />}
+      <Appearance />
     </Container>
+  );
+}
+
+function UserInfo({ user }: { user: User }) {
+  const { colorMode } = useColorMode();
+  const bgColor = { light: 'gray.100', dark: 'gray.700' };
+  const textColor = { light: 'black', dark: 'white' };
+
+  return (
+    <Box
+      bg={bgColor[colorMode]}
+      color={textColor[colorMode]}
+      p={4}
+      borderRadius="md"
+      mb={4}
+    >
+      <Text fontSize="lg" fontWeight="bold">
+        {user.full_name}
+      </Text>
+      <Text>Email: {user.email}</Text>
+      <Text>Joined: {new Date(user.joined_at).toLocaleDateString()}</Text>
+      <Text>Role: {user.role}</Text>
+    </Box>
   );
 }
