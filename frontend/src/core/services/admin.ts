@@ -25,6 +25,6 @@ export const addUser = async (
     method: 'POST',
     url: '/API/admin/users',
     signal,
-    formData: data,
+    body: data,
   });
 };

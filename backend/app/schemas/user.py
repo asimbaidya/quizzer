@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
-
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
+import json
+from typing import Any, Self
 from app.schemas.enums import UserRole
 
 
@@ -9,11 +10,19 @@ class User(BaseModel):
     full_name: str = Field(default='John Doe')
     email: EmailStr = Field(default='john_doe@gmail.com')
     role: UserRole = UserRole.STUDENT
-    joined_at: datetime = Field(default_factory=datetime.now)
 
 
 class UserCreate(User):
     password: str = Field('password', min_length=8, max_length=32)
+
+    @model_validator(mode='before')
+    @classmethod
+    def validate_question_create_before(cls, value: Any) -> Self:
+        print('-' * 50)
+        print('>>> RAW Question Data')
+        print(json.dumps(value, indent=4))
+        print('-' * 50)
+        return value
 
 
 class UserInDB(User):
@@ -21,6 +30,7 @@ class UserInDB(User):
     hashed_password: str
 
     model_config = ConfigDict(from_attributes=True)
+    joined_at: datetime = Field(default_factory=datetime.now)
 
 
 class UserPublic(User):

@@ -14,28 +14,55 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { UserCreateSchema } from '../../core/schemas/common';
 import useCustomToast from '../../hooks/useCustomToast';
+import { useMutation } from '@tanstack/react-query';
+import { addUser } from '../../core/services/admin';
+import { CustomError } from '../../core/request';
 
 type UserFormData = z.infer<typeof UserCreateSchema>;
 
 export default function AddUser() {
   const { showToast } = useCustomToast();
+
   const {
     handleSubmit,
     formState: { errors },
     register,
+    reset,
   } = useForm<UserFormData>({
     resolver: zodResolver(UserCreateSchema),
   });
 
-  const onSubmit = (data: UserFormData) => {
-    const { confirm_password, ...submitData } = data; // exclude confirm_password
-    // Handle form submission with submitData
-    showToast({
-      title: 'User Added',
-      description: `${JSON.stringify(submitData, null, 2)}`,
-      status: 'success',
-      duration: 5000,
-      isClosable: true,
+  const mutation = useMutation({
+    mutationFn: ({ signal, data }: { signal: AbortSignal; data: any }) =>
+      addUser(signal, data),
+    onSuccess: () => {
+      reset();
+      showToast({
+        title: 'User Added',
+        description: 'User has been added successfully',
+        status: 'success',
+      });
+    },
+    onError: (error) => {
+      let msg = error.message;
+      if (error instanceof CustomError) {
+        msg = error.details;
+      }
+      showToast({
+        title: 'Error',
+        description: msg,
+        status: 'error',
+      });
+    },
+  });
+
+  const onSubmit = (rawFormData: UserFormData) => {
+    const { confirm_password, ...submitData } = rawFormData;
+
+    // alert(JSON.stringify(submitData, null, 2));
+    mutation.mutate({
+      signal: new AbortController().signal,
+      data: submitData,
     });
   };
 

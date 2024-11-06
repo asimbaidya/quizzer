@@ -22,7 +22,7 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
   // calculate the timer only if start_time is provided
   useEffect(() => {
     if (start_time) {
-      const endTime = new Date(start_time).getTime() + duration;
+      const endTime = new Date(start_time).getTime() + duration * 60 * 1000;
       const interval = setInterval(() => {
         const currentTime = new Date().getTime();
         const timeRemaining = endTime - currentTime;
@@ -38,7 +38,7 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
       // cleanup interval on component unmount or when timer expired
       return () => clearInterval(interval);
     }
-  }, [start_time, total_mark]);
+  }, []);
 
   // shuffle the questions only once, when the component mounts or when the questions change
   useEffect(() => {
@@ -109,7 +109,8 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
       {/* render the questions */}
       {randomizedQuestions.map((questionSubmission, index) => {
         const { question, submission } = questionSubmission;
-        if (submission.made_attempt === true) {
+        console.log('questionSubmission', questionSubmission);
+        if (status === 'in_progress' && submission.made_attempt === true) {
           return null;
         }
         //

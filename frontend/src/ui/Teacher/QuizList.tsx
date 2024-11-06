@@ -5,71 +5,86 @@ import {
   Box,
   Heading,
   Text,
-  Badge,
   Button,
-  Spacer,
   Stack,
   useColorModeValue,
   HStack,
+  Select,
+  VStack,
 } from '@chakra-ui/react';
+import { useState } from 'react';
 
 const QuizItem = ({ quiz }: { quiz: Quiz }) => {
-  const bgColor = useColorModeValue('gray.100', 'gray.700');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
-  const textColor = useColorModeValue('black', 'white');
+  const bgColor = useColorModeValue('gray.50', 'gray.700');
+  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const textColor = useColorModeValue('gray.800', 'white');
   const descriptionColor = useColorModeValue('gray.600', 'gray.400');
 
   return (
     <Box
-      p={8}
+      p={4}
       borderWidth={1}
       borderRadius="md"
-      boxShadow="md"
       width="full"
       bg={bgColor}
       borderColor={borderColor}
     >
-      <HStack justify="space-between" width="full">
-        <Badge colorScheme="green" fontSize="lg" py={1} px={2}>
-          Quiz
-        </Badge>
-        <Spacer />
-        <Heading size="lg" color={textColor} textAlign="center">
-          {quiz.title}
-        </Heading>
-        <Spacer />
-        <Text fontSize="sm" color={descriptionColor}>
-          Created At: {format(new Date(quiz.created_at), 'PPP p')}
-        </Text>
-      </HStack>
-      <HStack justify="space-between" width="full" mt={4}>
-        <Text fontSize="md" color={descriptionColor}>
-          Total Marks: {quiz.total_mark}
-        </Text>
-        <Text fontSize="md" color={descriptionColor}>
-          {quiz.is_unlimited_attempt
-            ? 'Unlimited Attempts'
-            : `${quiz.allowed_attempt} Attempt(s)`}
-        </Text>
-      </HStack>
-      <Button mt={6} width="full" colorScheme="blue" as={Link} to={quiz.url}>
-        View Quiz
-      </Button>
+      <VStack align="stretch" spacing={2}>
+        <HStack justify="space-between">
+          <Heading size="md" color={textColor}>
+            {quiz.title}
+          </Heading>
+          <Text fontSize="sm" color={descriptionColor}>
+            {format(new Date(quiz.created_at), 'PPP')}
+          </Text>
+        </HStack>
+
+        <HStack justify="space-between" fontSize="sm">
+          <Text color={descriptionColor}>Total Marks: {quiz.total_mark}</Text>
+          <Text color={descriptionColor}>
+            Max Attempts:{' '}
+            {quiz.is_unlimited_attempt ? '∞' : quiz.allowed_attempt}
+          </Text>
+          <Button size="sm" colorScheme="blue" as={Link} to={quiz.url}>
+            View Quiz
+          </Button>
+        </HStack>
+      </VStack>
     </Box>
   );
 };
 
 const QuizList = ({ quizzes }: { quizzes: Quiz[] }) => {
+  const [filter, setFilter] = useState<'all' | 'limited' | 'unlimited'>('all');
+
+  const filteredQuizzes = quizzes.filter((quiz) => {
+    if (filter === 'unlimited') return quiz.is_unlimited_attempt;
+    if (filter === 'limited') return !quiz.is_unlimited_attempt;
+    return true;
+  });
+
   return (
     <Box w="100%">
-      <Heading size="xl" mb={4} textAlign={'center'}>
-        Quizzes
-      </Heading>
-      <Stack spacing={4}>
-        {quizzes.map((quiz) => (
-          <QuizItem key={quiz.id} quiz={quiz} />
-        ))}
-      </Stack>
+      <VStack spacing={4} align="stretch">
+        <Heading size="xl" textAlign={'center'}>
+          Quizzes
+        </Heading>
+        <Select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value as typeof filter)}
+          maxW="200px"
+          alignSelf="flex-end"
+        >
+          <option value="all">All Quizzes</option>
+          <option value="limited">Limited Attempts</option>
+          <option value="unlimited">Unlimited Attempts</option>
+        </Select>
+        <Stack spacing={3}>
+          {filteredQuizzes.map((quiz) => (
+            <QuizItem key={quiz.id} quiz={quiz} />
+          ))}
+        </Stack>
+      </VStack>
     </Box>
   );
 };

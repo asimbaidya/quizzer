@@ -37,7 +37,13 @@ def delete_unused_images(db: SessionDep, _admin: CurrentAdmin):
                 status_code=500, detail=f'Error deleting file {file_name}: {e!s}'
             )
 
-    return {'message': f'Deleted {len(unused_files)} unused images'}
+    success = len(unused_files) != 0
+    if success:
+        detail = f'Deleted {len(unused_files)} unused images'
+    else:
+        detail = 'No File to Delete'
+
+    return {'success': success, 'detail': detail}
 
 
 @router.post('/users')

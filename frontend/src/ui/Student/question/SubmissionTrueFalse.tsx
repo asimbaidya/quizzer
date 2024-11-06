@@ -159,9 +159,6 @@ const SubmissionTrueFalse: React.FC<Prop> = ({
               False
             </Button>
           </Flex>
-          {userResponse !== null && (
-            <Button onClick={handleSubmit}>Submit</Button>
-          )}
         </>
       ) : null}
       <Flex mt={4} gap={2}>
