@@ -45,9 +45,13 @@ export type NoteCreateFormData = z.infer<typeof NoteCreateSchema>;
 // zod schemas for notes
 export const NoteItemSchema = z.object({
   title: z.string().default('Untitled'),
-  content: z.string().default(''),
+  content: z.string().max(75).default(''),
   flag: z.number().min(0).max(5).default(0),
-  updatedAt: z.string().optional(),
+  image: z
+    .string()
+    .max(255, 'Image URL cannot exceed 255 characters')
+    .nullable()
+    .optional(),
 });
 
 export const NotesDocumentSchema = z.object({

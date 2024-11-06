@@ -11,6 +11,7 @@ import {
 } from '@chakra-ui/react';
 import { BiDotsVerticalRounded } from 'react-icons/bi';
 import { FLAG_SCHEMES } from './flag_schemes';
+import OptionalImageUpload from './OptionalImageUpload';
 
 import { NoteItem } from '../../../core/schemas/common';
 import FlagSelector from './FlagSelector';
@@ -23,7 +24,7 @@ const NoteComponent: React.FC<{
   onUpdateNote: (
     index: number,
     field: keyof NoteItem,
-    value: string | number
+    value: string | number | null
   ) => void;
   onToggle: (index: number) => void;
   onDelete: (index: number) => void;
@@ -110,6 +111,11 @@ const NoteComponent: React.FC<{
           onSelectFlag={(flag) => onUpdateNote(index, 'flag', flag)}
         />
       </Box>
+      <OptionalImageUpload
+        image={note.image}
+        setFile={(file) => onUpdateNote(index, 'image', file)}
+        isVisible={isExpanded}
+      />
     </Box>
   );
 };
