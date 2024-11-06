@@ -1,5 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Container, Heading } from '@chakra-ui/react';
+import ShowTestProgress from '../../../ui/Teacher/ShowTestProgress';
+import { useTestStudentProgress } from '../../../hooks/teacher';
 
 export const Route = createFileRoute(
   '/_layout/(teacher)/course/students/test/$courseTitle/$testId'
@@ -9,6 +11,12 @@ export const Route = createFileRoute(
 
 function CourseStudentsTestCourseTitleQuizId() {
   const { courseTitle, testId } = Route.useParams();
+
+  const { data: testStudentProgress } = useTestStudentProgress(
+    courseTitle,
+    Number(testId)
+  );
+
   console.log('Route.useParams():', Route.useParams());
   return (
     <Container maxW="full">
@@ -16,6 +24,7 @@ function CourseStudentsTestCourseTitleQuizId() {
         Course: {courseTitle}
         You can See All student's Progress for Test {testId}
       </Heading>
+      <ShowTestProgress progressData={testStudentProgress || []} />
     </Container>
   );
 }

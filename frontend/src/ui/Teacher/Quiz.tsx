@@ -1,4 +1,5 @@
 import {
+  Button,
   Heading,
   Tab,
   TabList,
@@ -13,6 +14,7 @@ import AddUserInputQuestion from './questions_create/AddUserInputQuestion';
 import AddTrueFalseQuestion from './questions_create/AddTrueFalseQuestion';
 import ViewQuestions from './question_view/ViewQuestions';
 import { Question } from '../../core/types/question';
+import { Link } from '@tanstack/react-router';
 
 export default function Quiz({
   questions,
@@ -50,7 +52,12 @@ export default function Quiz({
           )}
         </TabPanel>
         <TabPanel>
-          <Heading as="h1">Not Implemented Yet</Heading>
+          <Button
+            as={Link}
+            to={`/course/students/quiz/${courseTitle}/${quizId}`}
+          >
+            Visit Progress
+          </Button>
         </TabPanel>
         <TabPanel>
           <AddMultipleChoiceQuestion apiEndPoint={apiEndPoint} />

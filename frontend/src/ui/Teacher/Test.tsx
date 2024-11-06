@@ -5,6 +5,7 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
+  Button,
 } from '@chakra-ui/react';
 import { useParams } from '@tanstack/react-router';
 import AddMultipleChoiceQuestion from './questions_create/AddMultipleChoiceQuestion';
@@ -13,6 +14,7 @@ import AddUserInputQuestion from './questions_create/AddUserInputQuestion';
 import AddTrueFalseQuestion from './questions_create/AddTrueFalseQuestion';
 import ViewQuestions from './question_view/ViewQuestions';
 import { TestQuestions } from '../../core/types/question';
+import { Link } from '@tanstack/react-router';
 
 export default function Test({
   testQuestions,
@@ -102,7 +104,12 @@ export default function Test({
 
         {notOpened || (
           <TabPanel>
-            <Heading as="h1">Not Implemented Yet</Heading>
+            <Button
+              as={Link}
+              to={`/course/students/test/${courseTitle}/${testId}`}
+            >
+              Visit Progress
+            </Button>
           </TabPanel>
         )}
       </TabPanels>
