@@ -12,7 +12,6 @@ import {
   Badge,
   HStack,
   Card,
-  useColorModeValue,
 } from '@chakra-ui/react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -38,7 +37,6 @@ const AddMultipleChoiceQuestion = ({
   const [image, setImage] = useState<string | null>(null);
   const { showToast } = useCustomToast();
   const queryClient = useQueryClient();
-  const colorScheme = useColorModeValue('purple.50', 'purple.800');
 
   const mutation = useMutation({
     mutationFn: ({
@@ -123,7 +121,7 @@ const AddMultipleChoiceQuestion = ({
   };
 
   return (
-    <Card bg={colorScheme}>
+    <Card>
       <Box
         as="form"
         onSubmit={handleSubmit(onSubmit)}
