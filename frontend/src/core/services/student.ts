@@ -1,5 +1,6 @@
 import request from '../request';
-import { Course, AllQuizzesTests, Note, EnrollMetadata } from '../types/common';
+import { NotesDocument } from '../schemas/common';
+import { Course, AllQuizzesTests, EnrollMetadata } from '../types/common';
 import {
   QuizQuestionWithSubmission,
   TestQuestionWithSubmission,
@@ -78,7 +79,9 @@ export const fetchTestQuestions = async (
   });
 };
 
-export const fetchNotes = async (signal: AbortSignal): Promise<Note[]> => {
+export const fetchNotes = async (
+  signal: AbortSignal
+): Promise<NotesDocument[]> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -91,7 +94,7 @@ export const fetchNotes = async (signal: AbortSignal): Promise<Note[]> => {
 
 // TODO: fix the return type from any
 export const createNote = async (
-  noteData: Note,
+  noteData: NotesDocument,
   signal: AbortSignal
 ): Promise<any> => {
   if (!localStorage.getItem('access_token')) {
@@ -108,7 +111,7 @@ export const createNote = async (
 export const fetchNote = async (
   noteId: number,
   signal: AbortSignal
-): Promise<Note> => {
+): Promise<NotesDocument> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -121,9 +124,9 @@ export const fetchNote = async (
 
 export const updateNote = async (
   noteId: number,
-  noteData: Note,
+  noteData: NotesDocument,
   signal: AbortSignal
-): Promise<Note> => {
+): Promise<NotesDocument> => {
   if (!localStorage.getItem('access_token')) {
     throw new Error('No Token');
   }
@@ -166,8 +169,8 @@ export const enrollCourse = async (
 };
 
 // TODO: Fix the return type from any
-export const submitQuestionAnswer = async (
-  questionId: number,
+export const submitQuestionAnswerAtAPI = async (
+  endPoint: string,
   answerData: any,
   signal: AbortSignal
 ): Promise<any> => {
@@ -176,7 +179,7 @@ export const submitQuestionAnswer = async (
   }
   return await request({
     method: 'POST',
-    url: `/API/student/questions/submit/${questionId}`,
+    url: endPoint,
     signal,
     body: answerData,
   });

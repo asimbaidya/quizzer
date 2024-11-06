@@ -46,7 +46,7 @@ const QuizCreateForm = () => {
     defaultValues: {
       title: 'New Quiz',
       total_mark: 20,
-      is_unlimited: false,
+      is_unlimited_attempt: false,
       allowed_attempt: 1,
     },
   });
@@ -99,7 +99,7 @@ const QuizCreateForm = () => {
     });
   };
 
-  const isUnlimited = watch('is_unlimited');
+  const isUnlimited = watch('is_unlimited_attempt');
   return (
     <Box
       maxW="4xl"
@@ -133,7 +133,7 @@ const QuizCreateForm = () => {
           <FormControl mb={4} flexBasis={'50%'}>
             <HStack>
               <FormLabel fontSize={'lg'}>Unlimited Attempts</FormLabel>
-              <Switch {...register('is_unlimited')} size={'lg'} />
+              <Switch {...register('is_unlimited_attempt')} size={'lg'} />
             </HStack>
           </FormControl>
 

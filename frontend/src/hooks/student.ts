@@ -9,7 +9,7 @@ import {
   fetchNote,
   updateNote,
   deleteNote,
-  submitQuestionAnswer,
+  submitQuestionAnswerAtAPI,
 } from '../core/services/student';
 
 export const useEnrolledCourses = () => {
@@ -30,7 +30,7 @@ export const useCourseQuizzesAndTests = (courseTitle: string) => {
 
 export const useQuizQuestions = (courseTitle: string, quizId: number) => {
   return useQuery({
-    queryKey: ['quizQuestions', courseTitle, quizId],
+    queryKey: ['Questions'],
     queryFn: ({ signal }: { signal: AbortSignal }) =>
       fetchQuizQuestions(courseTitle, quizId, signal),
   });
@@ -38,7 +38,7 @@ export const useQuizQuestions = (courseTitle: string, quizId: number) => {
 
 export const useTestQuestions = (courseTitle: string, testId: number) => {
   return useQuery({
-    queryKey: ['testQuestions', courseTitle, testId],
+    queryKey: ['Questions'],
     queryFn: ({ signal }: { signal: AbortSignal }) =>
       fetchTestQuestions(courseTitle, testId, signal),
   });
@@ -55,52 +55,5 @@ export const useNote = (noteId: number) => {
   return useQuery({
     queryKey: ['note', noteId],
     queryFn: ({ signal }: { signal: AbortSignal }) => fetchNote(noteId, signal),
-  });
-};
-
-export const mutationCreateNote = () => {
-  return useMutation({
-    mutationFn: ({
-      noteData,
-      signal,
-    }: {
-      noteData: any;
-      signal: AbortSignal;
-    }) => createNote(noteData, signal),
-  });
-};
-
-export const mutationUpdateNote = () => {
-  return useMutation({
-    mutationFn: ({
-      noteId,
-      noteData,
-      signal,
-    }: {
-      noteId: number;
-      noteData: any;
-      signal: AbortSignal;
-    }) => updateNote(noteId, noteData, signal),
-  });
-};
-
-export const mutationDeleteNote = () => {
-  return useMutation({
-    mutationFn: ({ noteId, signal }: { noteId: number; signal: AbortSignal }) =>
-      deleteNote(noteId, signal),
-  });
-};
-
-export const mutationSubmitQuestionAnswer = () => {
-  return useMutation({
-    mutationFn: ({
-      questionId,
-      answerData,
-      signal,
-    }: {
-      questionId: number;
-      answerData: any;
-      signal: AbortSignal;
-    }) => submitQuestionAnswer(questionId, answerData, signal),
   });
 };

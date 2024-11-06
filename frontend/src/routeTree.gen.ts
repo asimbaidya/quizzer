@@ -26,7 +26,9 @@ import { Route as LayoutstudentEnrolledcoursesIndexImport } from './routes/_layo
 import { Route as LayoutteacherCourseCourseTitleImport } from './routes/_layout/(teacher)/course.$courseTitle'
 import { Route as LayoutstudentEnrolledcoursesCourseTitleImport } from './routes/_layout/(student)/enrolled_courses.$courseTitle'
 import { Route as LayoutstudentnotesNoteImport } from './routes/_layout/(student)/(notes)/note'
+import { Route as LayoutstudentnotesNoteIndexImport } from './routes/_layout/(student)/(notes)/note.index'
 import { Route as LayoutteacherCourseStudentsCourseTitleImport } from './routes/_layout/(teacher)/course.students.$courseTitle'
+import { Route as LayoutstudentnotesNoteNoteIdImport } from './routes/_layout/(student)/(notes)/note.$noteId'
 import { Route as LayoutteacherCourseTestCourseTitleTestIdImport } from './routes/_layout/(teacher)/course.test.$courseTitle.$testId'
 import { Route as LayoutteacherCourseQuizCourseTitleQuizIdImport } from './routes/_layout/(teacher)/course.quiz.$courseTitle.$quizId'
 import { Route as LayoutstudentEnrolledcoursesTestCourseTitleTestIdImport } from './routes/_layout/(student)/enrolled_courses.test.$courseTitle.$testId'
@@ -129,11 +131,25 @@ const LayoutstudentnotesNoteRoute = LayoutstudentnotesNoteImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
+const LayoutstudentnotesNoteIndexRoute =
+  LayoutstudentnotesNoteIndexImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => LayoutstudentnotesNoteRoute,
+  } as any)
+
 const LayoutteacherCourseStudentsCourseTitleRoute =
   LayoutteacherCourseStudentsCourseTitleImport.update({
     id: '/students/$courseTitle',
     path: '/students/$courseTitle',
     getParentRoute: () => LayoutteacherCourseRoute,
+  } as any)
+
+const LayoutstudentnotesNoteNoteIdRoute =
+  LayoutstudentnotesNoteNoteIdImport.update({
+    id: '/$noteId',
+    path: '/$noteId',
+    getParentRoute: () => LayoutstudentnotesNoteRoute,
   } as any)
 
 const LayoutteacherCourseTestCourseTitleTestIdRoute =
@@ -287,12 +303,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutteacherCourseIndexImport
       parentRoute: typeof LayoutteacherCourseImport
     }
+    '/_layout/(student)/(notes)/note/$noteId': {
+      id: '/_layout/(student)/(notes)/note/$noteId'
+      path: '/$noteId'
+      fullPath: '/note/$noteId'
+      preLoaderRoute: typeof LayoutstudentnotesNoteNoteIdImport
+      parentRoute: typeof LayoutstudentnotesNoteImport
+    }
     '/_layout/(teacher)/course/students/$courseTitle': {
       id: '/_layout/(teacher)/course/students/$courseTitle'
       path: '/students/$courseTitle'
       fullPath: '/course/students/$courseTitle'
       preLoaderRoute: typeof LayoutteacherCourseStudentsCourseTitleImport
       parentRoute: typeof LayoutteacherCourseImport
+    }
+    '/_layout/(student)/(notes)/note/': {
+      id: '/_layout/(student)/(notes)/note/'
+      path: '/'
+      fullPath: '/note/'
+      preLoaderRoute: typeof LayoutstudentnotesNoteIndexImport
+      parentRoute: typeof LayoutstudentnotesNoteImport
     }
     '/_layout/(student)/enrolled_courses/quiz/$courseTitle/$quizId': {
       id: '/_layout/(student)/enrolled_courses/quiz/$courseTitle/$quizId'
@@ -369,6 +399,22 @@ const LayoutteacherCourseRouteChildren: LayoutteacherCourseRouteChildren = {
 const LayoutteacherCourseRouteWithChildren =
   LayoutteacherCourseRoute._addFileChildren(LayoutteacherCourseRouteChildren)
 
+interface LayoutstudentnotesNoteRouteChildren {
+  LayoutstudentnotesNoteNoteIdRoute: typeof LayoutstudentnotesNoteNoteIdRoute
+  LayoutstudentnotesNoteIndexRoute: typeof LayoutstudentnotesNoteIndexRoute
+}
+
+const LayoutstudentnotesNoteRouteChildren: LayoutstudentnotesNoteRouteChildren =
+  {
+    LayoutstudentnotesNoteNoteIdRoute: LayoutstudentnotesNoteNoteIdRoute,
+    LayoutstudentnotesNoteIndexRoute: LayoutstudentnotesNoteIndexRoute,
+  }
+
+const LayoutstudentnotesNoteRouteWithChildren =
+  LayoutstudentnotesNoteRoute._addFileChildren(
+    LayoutstudentnotesNoteRouteChildren,
+  )
+
 interface LayoutRouteChildren {
   LayoutProfileRoute: typeof LayoutProfileRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
@@ -376,7 +422,7 @@ interface LayoutRouteChildren {
   LayoutadminDashboardRoute: typeof LayoutadminDashboardRoute
   LayoutstudentEnrolledoursesRoute: typeof LayoutstudentEnrolledoursesRoute
   LayoutteacherCourseRoute: typeof LayoutteacherCourseRouteWithChildren
-  LayoutstudentnotesNoteRoute: typeof LayoutstudentnotesNoteRoute
+  LayoutstudentnotesNoteRoute: typeof LayoutstudentnotesNoteRouteWithChildren
   LayoutstudentEnrolledcoursesCourseTitleRoute: typeof LayoutstudentEnrolledcoursesCourseTitleRoute
   LayoutstudentEnrolledcoursesIndexRoute: typeof LayoutstudentEnrolledcoursesIndexRoute
   LayoutstudentEnrolledcoursesQuizCourseTitleQuizIdRoute: typeof LayoutstudentEnrolledcoursesQuizCourseTitleQuizIdRoute
@@ -390,7 +436,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutadminDashboardRoute: LayoutadminDashboardRoute,
   LayoutstudentEnrolledoursesRoute: LayoutstudentEnrolledoursesRoute,
   LayoutteacherCourseRoute: LayoutteacherCourseRouteWithChildren,
-  LayoutstudentnotesNoteRoute: LayoutstudentnotesNoteRoute,
+  LayoutstudentnotesNoteRoute: LayoutstudentnotesNoteRouteWithChildren,
   LayoutstudentEnrolledcoursesCourseTitleRoute:
     LayoutstudentEnrolledcoursesCourseTitleRoute,
   LayoutstudentEnrolledcoursesIndexRoute:
@@ -415,12 +461,14 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof LayoutadminDashboardRoute
   '/enrolled_ourses': typeof LayoutstudentEnrolledoursesRoute
   '/course': typeof LayoutteacherCourseRouteWithChildren
-  '/note': typeof LayoutstudentnotesNoteRoute
+  '/note': typeof LayoutstudentnotesNoteRouteWithChildren
   '/enrolled_courses/$courseTitle': typeof LayoutstudentEnrolledcoursesCourseTitleRoute
   '/course/$courseTitle': typeof LayoutteacherCourseCourseTitleRoute
   '/enrolled_courses': typeof LayoutstudentEnrolledcoursesIndexRoute
   '/course/': typeof LayoutteacherCourseIndexRoute
+  '/note/$noteId': typeof LayoutstudentnotesNoteNoteIdRoute
   '/course/students/$courseTitle': typeof LayoutteacherCourseStudentsCourseTitleRoute
+  '/note/': typeof LayoutstudentnotesNoteIndexRoute
   '/enrolled_courses/quiz/$courseTitle/$quizId': typeof LayoutstudentEnrolledcoursesQuizCourseTitleQuizIdRoute
   '/enrolled_courses/test/$courseTitle/$testId': typeof LayoutstudentEnrolledcoursesTestCourseTitleTestIdRoute
   '/course/quiz/$courseTitle/$quizId': typeof LayoutteacherCourseQuizCourseTitleQuizIdRoute
@@ -438,12 +486,13 @@ export interface FileRoutesByTo {
   '/addUser': typeof LayoutadminAddUserRoute
   '/dashboard': typeof LayoutadminDashboardRoute
   '/enrolled_ourses': typeof LayoutstudentEnrolledoursesRoute
-  '/note': typeof LayoutstudentnotesNoteRoute
   '/enrolled_courses/$courseTitle': typeof LayoutstudentEnrolledcoursesCourseTitleRoute
   '/course/$courseTitle': typeof LayoutteacherCourseCourseTitleRoute
   '/enrolled_courses': typeof LayoutstudentEnrolledcoursesIndexRoute
   '/course': typeof LayoutteacherCourseIndexRoute
+  '/note/$noteId': typeof LayoutstudentnotesNoteNoteIdRoute
   '/course/students/$courseTitle': typeof LayoutteacherCourseStudentsCourseTitleRoute
+  '/note': typeof LayoutstudentnotesNoteIndexRoute
   '/enrolled_courses/quiz/$courseTitle/$quizId': typeof LayoutstudentEnrolledcoursesQuizCourseTitleQuizIdRoute
   '/enrolled_courses/test/$courseTitle/$testId': typeof LayoutstudentEnrolledcoursesTestCourseTitleTestIdRoute
   '/course/quiz/$courseTitle/$quizId': typeof LayoutteacherCourseQuizCourseTitleQuizIdRoute
@@ -464,12 +513,14 @@ export interface FileRoutesById {
   '/_layout/(admin)/dashboard': typeof LayoutadminDashboardRoute
   '/_layout/(student)/enrolled_ourses': typeof LayoutstudentEnrolledoursesRoute
   '/_layout/(teacher)/course': typeof LayoutteacherCourseRouteWithChildren
-  '/_layout/(student)/(notes)/note': typeof LayoutstudentnotesNoteRoute
+  '/_layout/(student)/(notes)/note': typeof LayoutstudentnotesNoteRouteWithChildren
   '/_layout/(student)/enrolled_courses/$courseTitle': typeof LayoutstudentEnrolledcoursesCourseTitleRoute
   '/_layout/(teacher)/course/$courseTitle': typeof LayoutteacherCourseCourseTitleRoute
   '/_layout/(student)/enrolled_courses/': typeof LayoutstudentEnrolledcoursesIndexRoute
   '/_layout/(teacher)/course/': typeof LayoutteacherCourseIndexRoute
+  '/_layout/(student)/(notes)/note/$noteId': typeof LayoutstudentnotesNoteNoteIdRoute
   '/_layout/(teacher)/course/students/$courseTitle': typeof LayoutteacherCourseStudentsCourseTitleRoute
+  '/_layout/(student)/(notes)/note/': typeof LayoutstudentnotesNoteIndexRoute
   '/_layout/(student)/enrolled_courses/quiz/$courseTitle/$quizId': typeof LayoutstudentEnrolledcoursesQuizCourseTitleQuizIdRoute
   '/_layout/(student)/enrolled_courses/test/$courseTitle/$testId': typeof LayoutstudentEnrolledcoursesTestCourseTitleTestIdRoute
   '/_layout/(teacher)/course/quiz/$courseTitle/$quizId': typeof LayoutteacherCourseQuizCourseTitleQuizIdRoute
@@ -496,7 +547,9 @@ export interface FileRouteTypes {
     | '/course/$courseTitle'
     | '/enrolled_courses'
     | '/course/'
+    | '/note/$noteId'
     | '/course/students/$courseTitle'
+    | '/note/'
     | '/enrolled_courses/quiz/$courseTitle/$quizId'
     | '/enrolled_courses/test/$courseTitle/$testId'
     | '/course/quiz/$courseTitle/$quizId'
@@ -513,12 +566,13 @@ export interface FileRouteTypes {
     | '/addUser'
     | '/dashboard'
     | '/enrolled_ourses'
-    | '/note'
     | '/enrolled_courses/$courseTitle'
     | '/course/$courseTitle'
     | '/enrolled_courses'
     | '/course'
+    | '/note/$noteId'
     | '/course/students/$courseTitle'
+    | '/note'
     | '/enrolled_courses/quiz/$courseTitle/$quizId'
     | '/enrolled_courses/test/$courseTitle/$testId'
     | '/course/quiz/$courseTitle/$quizId'
@@ -542,7 +596,9 @@ export interface FileRouteTypes {
     | '/_layout/(teacher)/course/$courseTitle'
     | '/_layout/(student)/enrolled_courses/'
     | '/_layout/(teacher)/course/'
+    | '/_layout/(student)/(notes)/note/$noteId'
     | '/_layout/(teacher)/course/students/$courseTitle'
+    | '/_layout/(student)/(notes)/note/'
     | '/_layout/(student)/enrolled_courses/quiz/$courseTitle/$quizId'
     | '/_layout/(student)/enrolled_courses/test/$courseTitle/$testId'
     | '/_layout/(teacher)/course/quiz/$courseTitle/$quizId'
@@ -644,7 +700,11 @@ export const routeTree = rootRoute
     },
     "/_layout/(student)/(notes)/note": {
       "filePath": "_layout/(student)/(notes)/note.tsx",
-      "parent": "/_layout"
+      "parent": "/_layout",
+      "children": [
+        "/_layout/(student)/(notes)/note/$noteId",
+        "/_layout/(student)/(notes)/note/"
+      ]
     },
     "/_layout/(student)/enrolled_courses/$courseTitle": {
       "filePath": "_layout/(student)/enrolled_courses.$courseTitle.tsx",
@@ -662,9 +722,17 @@ export const routeTree = rootRoute
       "filePath": "_layout/(teacher)/course.index.tsx",
       "parent": "/_layout/(teacher)/course"
     },
+    "/_layout/(student)/(notes)/note/$noteId": {
+      "filePath": "_layout/(student)/(notes)/note.$noteId.tsx",
+      "parent": "/_layout/(student)/(notes)/note"
+    },
     "/_layout/(teacher)/course/students/$courseTitle": {
       "filePath": "_layout/(teacher)/course.students.$courseTitle.tsx",
       "parent": "/_layout/(teacher)/course"
+    },
+    "/_layout/(student)/(notes)/note/": {
+      "filePath": "_layout/(student)/(notes)/note.index.tsx",
+      "parent": "/_layout/(student)/(notes)/note"
     },
     "/_layout/(student)/enrolled_courses/quiz/$courseTitle/$quizId": {
       "filePath": "_layout/(student)/enrolled_courses.quiz.$courseTitle.$quizId.tsx",

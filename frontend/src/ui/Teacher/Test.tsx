@@ -56,16 +56,12 @@ export default function Test({
     <Tabs variant="enclosed">
       <TabList>
         <Tab>View Test Questions</Tab>
-        {notOpened === true ? (
-          <>
-            <Tab>Add Multiple Choice</Tab>
-            <Tab>Add Single Choice</Tab>
-            <Tab>Add User Input</Tab>
-            <Tab>Add True False</Tab>
-          </>
-        ) : (
-          <Tab>View Student's Progress</Tab>
-        )}
+        {notOpened && <Tab>Add Multiple Choice</Tab>}
+        {notOpened && <Tab>Add Single Choice</Tab>}
+        {notOpened && <Tab>Add User Input</Tab>}
+        {notOpened && <Tab>Add True False</Tab>}
+
+        {notOpened || <Tab>View Student's Progress</Tab>}
       </TabList>
 
       <TabPanels>
@@ -83,22 +79,28 @@ export default function Test({
           )}
         </TabPanel>
 
-        {notOpened === true ? (
-          <>
-            <TabPanel>
-              <AddMultipleChoiceQuestion apiEndPoint={apiEndPoint} />
-            </TabPanel>
-            <TabPanel>
-              <AddSingleChoiceQuestion apiEndPoint={apiEndPoint} />
-            </TabPanel>
-            <TabPanel>
-              <AddUserInputQuestion apiEndPoint={apiEndPoint} />
-            </TabPanel>
-            <TabPanel>
-              <AddTrueFalseQuestion apiEndPoint={apiEndPoint} />
-            </TabPanel>
-          </>
-        ) : (
+        {notOpened && (
+          <TabPanel>
+            <AddMultipleChoiceQuestion apiEndPoint={apiEndPoint} />
+          </TabPanel>
+        )}
+        {notOpened && (
+          <TabPanel>
+            <AddSingleChoiceQuestion apiEndPoint={apiEndPoint} />
+          </TabPanel>
+        )}
+        {notOpened && (
+          <TabPanel>
+            <AddUserInputQuestion apiEndPoint={apiEndPoint} />
+          </TabPanel>
+        )}
+        {notOpened && (
+          <TabPanel>
+            <AddTrueFalseQuestion apiEndPoint={apiEndPoint} />
+          </TabPanel>
+        )}
+
+        {notOpened || (
           <TabPanel>
             <Heading as="h1">Not Implemented Yet</Heading>
           </TabPanel>

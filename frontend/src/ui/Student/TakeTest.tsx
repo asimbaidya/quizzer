@@ -1,4 +1,4 @@
-import { Box } from '@chakra-ui/react';
+import { Box, Text } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { TestQuestionWithSubmission } from '../../core/types/question';
 import SubmissionSingleChoice from './question/SubmissionSingleChoice';
@@ -15,7 +15,35 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
   const [randomizedQuestions, setRandomizedQuestions] = useState<
     TestQuestionWithSubmission['question_submissions']
   >([]);
+  const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [timerExpired, setTimerExpired] = useState<boolean>(false);
 
+  // Calculate the timer only if start_time is provided
+  useEffect(() => {
+    if (start_time) {
+      const totalTestDuration = total_mark * 60 * 1000;
+      const endTime = new Date(start_time).getTime() + totalTestDuration;
+      const interval = setInterval(() => {
+        const currentTime = new Date().getTime();
+        const timeRemaining = endTime - currentTime;
+
+        if (timeRemaining <= 0) {
+          clearInterval(interval);
+          setTimerExpired(true);
+          // setTimeout(() => {
+          //   window.location.reload();
+          // }, 500);
+        } else {
+          setTimeLeft(timeRemaining);
+        }
+      }, 1000);
+
+      // cleanup interval on component unmount or when timer expired
+      return () => clearInterval(interval);
+    }
+  }, [start_time, total_mark]);
+
+  // shuffle the questions only once, when the component mounts or when the questions change
   useEffect(() => {
     const shuffledQuestions = [
       ...questionWithSubmission.question_submissions,
@@ -23,8 +51,25 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
     setRandomizedQuestions(shuffledQuestions);
   }, [questionWithSubmission]);
 
+  // helper function to format time in mm:ss
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60000);
+    const seconds = Math.floor((time % 60000) / 1000);
+    return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+  };
+
   return (
     <Box>
+      {/* display the timer only if start_time is available */}
+      {start_time && (
+        <Box mb={4}>
+          <Text fontSize="lg" fontWeight="bold">
+            Time Remaining: {timerExpired ? "Time's up!" : formatTime(timeLeft)}
+          </Text>
+        </Box>
+      )}
+
+      {/* render the questions */}
       {randomizedQuestions.map((questionSubmission, index) => {
         const { question } = questionSubmission;
         const canSubmit = true;

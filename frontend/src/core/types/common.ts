@@ -24,24 +24,25 @@ export interface User {
   joined_at?: string;
 }
 
-export interface NoteItem {
-  heading: string;
-  content: string;
-  flag: number;
-}
+// export interface NoteItem {
+//   heading: string;
+//   content: string;
+//   flag: number;
+// }
 
-export interface NoteData {
-  notes: NoteItem[];
-}
+// export interface NoteData {
+//   notes: NoteItem[];
+// }
 
-export interface Note {
-  title: string;
-  note_data: NoteData;
-  id: number;
-  user_id: number;
-  created_at: Date;
-  updated_at?: Date;
-}
+// export interface Note {
+//   title: string;
+//   note_data: NoteData;
+//   id: number;
+//   user_id: number;
+//   created_at: Date;
+//   updated_at?: Date;
+//   url?: string;
+// }
 
 // Teacher(is the creator)
 export interface Course {

@@ -12,24 +12,31 @@ export const UserSchema = z.object({
   joined_at: z.date().optional(),
 });
 
-// students(note) related schemas
+export const NoteCreateSchema = z.object({
+  title: z.string().min(5, 'Title must be at least 5 characters long'),
+  note_data: z.array(z.string()).default([]),
+});
+export type NoteCreateFormData = z.infer<typeof NoteCreateSchema>;
+
+// zod schemas for notes
 export const NoteItemSchema = z.object({
-  heading: z.string(),
-  content: z.string(),
-  flag: z.number(),
+  title: z.string().default('Untitled'),
+  content: z.string().default(''),
+  flag: z.number().min(0).max(5).default(0),
+  updatedAt: z.string().optional(),
 });
 
-export const NoteDataSchema = z.object({
-  notes: z.array(NoteItemSchema),
-});
-
-export const NoteSchema = z.object({
+export const NotesDocumentSchema = z.object({
+  id: z.number().optional(),
   title: z.string(),
-  note_data: NoteDataSchema,
-  user_id: z.number(),
-  created_at: z.date(),
-  updated_at: z.date(),
+  note_data: z.array(NoteItemSchema),
+  updated_at: z.string().optional(),
+  created_at: z.string().optional(),
+  url: z.string().optional(),
 });
+// typescript types
+export type NoteItem = z.infer<typeof NoteItemSchema>;
+export type NotesDocument = z.infer<typeof NotesDocumentSchema>;
 
 // Teacher
 export const CourseSchema = z.object({
@@ -50,7 +57,7 @@ export const QuizSchema = z.object({
     .min(10, 'Minimum quiz mask should be 10')
     .max(100, '100 is max allowed quiz mark')
     .default(20),
-  is_unlimited: z.boolean().default(false),
+  is_unlimited_attempt: z.boolean().default(false),
   allowed_attempt: z.number().default(1),
 });
 
