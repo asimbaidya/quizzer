@@ -34,7 +34,6 @@ const NoteComponent: React.FC<{
   const hoverBgColor = useColorModeValue('gray.50', 'gray.600');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
   const textareaColor = useColorModeValue('inherit', 'whiteAlpha.900');
-  const textareaBorderColor = useColorModeValue('gray.200', 'gray.600');
   const textareaHoverBorderColor = useColorModeValue('gray.300', 'gray.500');
 
   return (
@@ -115,6 +114,7 @@ const NoteComponent: React.FC<{
         image={note.image}
         setFile={(file) => onUpdateNote(index, 'image', file)}
         isVisible={isExpanded}
+        flag={note.flag}
       />
     </Box>
   );

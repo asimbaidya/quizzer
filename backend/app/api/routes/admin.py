@@ -6,6 +6,7 @@ from app.api.deps import CurrentAdmin, SessionDep
 from app.core.config import settings
 from app.crud import user_crud
 from app.models.quiz import Question
+from app.models.user import Note
 from app.schemas.user import UserCreate
 
 router = APIRouter()
@@ -17,15 +18,24 @@ def home():
 
 
 @router.get('/delete_unused_images')
-def delete_unused_images(db: SessionDep, _admin: CurrentAdmin):
+def delete_unused_images(db: SessionDep, _admin: CurrentAdmin):  # type: ignore
     image_dir = settings.UPLOAD_DIRECTORY
 
     # get all files in the upload directory
     all_files = set(os.listdir(image_dir))
 
+    used_files: set[str] = set()
     questions = db.query(Question).filter(Question.image != None).all()  # noqa: E711
+    for question in questions:
+        if question.image:
+            used_files.add(question.image)
 
-    used_files = {question.image for question in questions if question.image}
+    notes = db.query(Note)
+    for note_doc in notes:
+        for note in note_doc.note_data:
+            if 'image' in note and isinstance(note['image'], str):
+                used_files.add(note['image'])
+
     unused_files = all_files - used_files
 
     for file_name in unused_files:
@@ -43,7 +53,7 @@ def delete_unused_images(db: SessionDep, _admin: CurrentAdmin):
     else:
         detail = 'No File to Delete'
 
-    return {'success': success, 'detail': detail}
+    return {'success': success, 'detail': detail}  # type: ignore
 
 
 @router.post('/users')
