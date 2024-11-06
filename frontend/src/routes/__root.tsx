@@ -1,5 +1,6 @@
 import { Link, Outlet, createRootRoute } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import NotFound from '../ui/Common/NotFound';
 
 export const Route = createRootRoute({
@@ -12,6 +13,7 @@ function RootComponent() {
     <>
       <Outlet />
       <TanStackRouterDevtools position="bottom-left" />
+      <ReactQueryDevtools initialIsOpen={false} />
     </>
   );
 }

@@ -6,7 +6,6 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
 import { StrictMode } from 'react';
 
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import theme from './theme';
 
 function App() {
@@ -47,7 +46,6 @@ if (!rootElement.innerHTML) {
       <ChakraProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={router} />
-          <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </ChakraProvider>
     </StrictMode>

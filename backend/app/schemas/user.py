@@ -1,8 +1,9 @@
+import json
 from datetime import datetime
+from typing import Any, Optional, Self
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
-import json
-from typing import Any, Self
+
 from app.schemas.enums import UserRole
 
 
@@ -41,6 +42,7 @@ class Note(BaseModel):
     title: str
     content: str
     flag: int
+    image: Optional[str] = None
 
 
 class NoteBase(BaseModel):

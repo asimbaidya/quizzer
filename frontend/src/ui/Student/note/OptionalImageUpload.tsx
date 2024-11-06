@@ -1,34 +1,40 @@
 import { useEffect, useRef } from 'react';
-import { Box, Image, Text, Button } from '@chakra-ui/react';
+import {
+  Box,
+  Image,
+  IconButton,
+  useColorModeValue,
+  Tooltip,
+} from '@chakra-ui/react';
+import { CloseIcon, AddIcon } from '@chakra-ui/icons';
 
 // dependency
 import useImage from './useImage';
 import useCustomToast from '../../../hooks/useCustomToast';
+import { IMAGE_COLORS } from './flag_schemes';
 
 interface ImageUploaderOptions {
   image: string | null | undefined;
   setFile: (file: string | null) => void;
   isVisible: boolean;
+  flag: keyof typeof IMAGE_COLORS;
 }
 
 const OptionalImageUpload = ({
   image,
   setFile,
   isVisible,
+  flag,
 }: ImageUploaderOptions) => {
-  // so when new image uploading, this hook will update the new url
-  // but if image is not null, this hook is not needed
-  // so pass the image, if it's not already undefined,null or it should get rendered
   const { uploadedFilePath, uploadImage, setUploadedFilePath } =
     useImage(setFile);
 
   useEffect(() => {
-    console.log('uploadedFilePath', uploadedFilePath);
     if (image) {
       const file_url: string = `http://127.0.0.1:8000/API/image_show/${image}`;
       setUploadedFilePath(file_url);
     }
-  });
+  }, [image, setUploadedFilePath]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showToast } = useCustomToast();
@@ -42,12 +48,10 @@ const OptionalImageUpload = ({
 
   const handleBoxClick = () => {
     if (uploadedFilePath) {
-      console.log('File Already Uploaded; Remove it first to add another');
       return;
     }
 
     if (fileInputRef.current) {
-      // Trigger the file input click no need to click again
       fileInputRef.current.click();
     }
   };
@@ -67,13 +71,22 @@ const OptionalImageUpload = ({
     });
   };
 
+  const removeButtonColor = useColorModeValue('red.500', 'red.300');
+  const addButtonBgColor = useColorModeValue('gray.100', 'gray.700');
+  const addButtonColor = useColorModeValue(
+    IMAGE_COLORS[flag].light,
+    IMAGE_COLORS[flag].dark
+  );
+
   return (
     <Box
-      border={uploadedFilePath ? 'none' : 'solid'}
-      borderColor={uploadedFilePath ? 'transparent' : 'gray.400'}
-      borderRadius={uploadedFilePath ? 'none' : 'md'}
-      borderWidth={uploadedFilePath ? 'none' : '1px'}
+      px={4}
+      my={4}
       display={isVisible ? 'block' : 'none'}
+      border={uploadedFilePath ? 'solid' : 'none'}
+      borderColor={uploadedFilePath ? addButtonColor : 'transparent'}
+      borderRadius={uploadedFilePath ? 'md' : 'none'}
+      borderWidth={uploadedFilePath ? '1px' : 'none'}
     >
       <input
         type="file"
@@ -83,8 +96,8 @@ const OptionalImageUpload = ({
       />
       <Box
         mt={4}
-        minHeight={uploadedFilePath ? 'auto' : '50px'}
-        maxWidth="800px"
+        maxWidth="100%"
+        py={4}
         display="flex"
         alignItems="center"
         justifyContent="center"
@@ -102,33 +115,26 @@ const OptionalImageUpload = ({
               boxSize="100%"
               borderRadius="md"
             />
-            <Button
+            <IconButton
               position="absolute"
               top="5px"
               right="5px"
-              colorScheme="red"
+              icon={<CloseIcon />}
               onClick={handleRemoveImage}
-            >
-              Remove
-            </Button>
+              aria-label="Remove Image"
+              color={removeButtonColor}
+            />
           </Box>
         ) : (
-          <Text
-            position="absolute"
-            top="0"
-            left="0"
-            right="0"
-            bottom="0"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            color="purple.500"
-            fontStyle="italic"
-            fontWeight="bold"
-            fontSize={'xl'}
-          >
-            Add Optional Image
-          </Text>
+          <Tooltip label="Add Optional Image" aria-label="Add Optional Image">
+            <IconButton
+              icon={<AddIcon />}
+              aria-label="Add Optional Image"
+              bg={addButtonBgColor}
+              color={addButtonColor}
+              size="lg"
+            />
+          </Tooltip>
         )}
       </Box>
     </Box>

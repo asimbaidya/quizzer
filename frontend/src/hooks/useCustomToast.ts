@@ -22,7 +22,7 @@ const useCustomToast = () => {
     title,
     description,
     status = 'info',
-    duration = 1000,
+    duration = 5000,
     isClosable = true,
     position = 'bottom-right',
   }: ToastOptions) => {
