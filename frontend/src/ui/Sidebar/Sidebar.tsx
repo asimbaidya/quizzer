@@ -46,6 +46,7 @@ const Sidebar = () => {
         display={{ base: 'flex', md: 'none' }}
         aria-label="Open Menu"
         position="absolute"
+        variant={'solid'}
         fontSize="20px"
         m={4}
         icon={<FiMenu />}

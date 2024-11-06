@@ -56,7 +56,7 @@ const TakeQuiz: React.FC<TakeQuizProp> = ({ questionWithSubmission }) => {
         mb={4}
         justifyContent="space-between"
       >
-        <Text>Total Score: {totalScore / totalMarks}</Text>
+        <Text>Total Score: {totalScore}</Text>
         <Text>
           Total Weighted Score: {totalWeightedScore.toFixed(2)} /
           {questionWithSubmission.total_mark}

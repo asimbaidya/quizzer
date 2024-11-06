@@ -124,6 +124,7 @@ export interface QuizWithUrl extends Quiz {
 export interface TestWithUrlAndStatus extends Test {
   url: string;
   status: TestStatus;
+  duration: number;
   start_url?: string;
 }
 

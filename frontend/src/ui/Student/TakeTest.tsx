@@ -11,18 +11,18 @@ interface TakeTestProp {
 }
 
 const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
-  const { status, total_mark, start_time } = questionWithSubmission;
+  const { duration, status, total_mark, start_time } = questionWithSubmission;
   const [randomizedQuestions, setRandomizedQuestions] = useState<
     TestQuestionWithSubmission['question_submissions']
   >([]);
+
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [timerExpired, setTimerExpired] = useState<boolean>(false);
 
-  // Calculate the timer only if start_time is provided
+  // calculate the timer only if start_time is provided
   useEffect(() => {
     if (start_time) {
-      const totalTestDuration = total_mark * 60 * 1000;
-      const endTime = new Date(start_time).getTime() + totalTestDuration;
+      const endTime = new Date(start_time).getTime() + duration;
       const interval = setInterval(() => {
         const currentTime = new Date().getTime();
         const timeRemaining = endTime - currentTime;
@@ -30,9 +30,6 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
         if (timeRemaining <= 0) {
           clearInterval(interval);
           setTimerExpired(true);
-          // setTimeout(() => {
-          //   window.location.reload();
-          // }, 500);
         } else {
           setTimeLeft(timeRemaining);
         }
@@ -61,7 +58,7 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
   return (
     <Box>
       {/* display the timer only if start_time is available */}
-      {start_time && (
+      {start_time && status === 'in_progress' && (
         <Box mb={4}>
           <Text fontSize="lg" fontWeight="bold">
             Time Remaining: {timerExpired ? "Time's up!" : formatTime(timeLeft)}
@@ -71,8 +68,15 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
 
       {/* render the questions */}
       {randomizedQuestions.map((questionSubmission, index) => {
-        const { question } = questionSubmission;
-        const canSubmit = true;
+        const { question, submission } = questionSubmission;
+        if (submission.made_attempt === true) {
+          return null;
+        }
+        //
+        let canSubmit = false;
+        if (status === 'in_progress' && submission.made_attempt === false) {
+          canSubmit = true;
+        }
 
         switch (question.question_type) {
           case 'single_choice':

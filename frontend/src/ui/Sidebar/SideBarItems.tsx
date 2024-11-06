@@ -1,5 +1,4 @@
 import { Box, Flex, Icon, Text, useColorModeValue } from '@chakra-ui/react';
-import { useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import {
   FiHome,
@@ -10,8 +9,6 @@ import {
   FiFileText,
 } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
-
-const currentUser = { role: 'teacher' };
 
 let items = [
   { icon: FiHome, title: 'Welcome', path: '/' },
@@ -25,7 +22,6 @@ interface SidebarItemsProps {
 }
 
 const SidebarItems = ({ onClose }: SidebarItemsProps) => {
-  const queryClient = useQueryClient();
   const textColor = useColorModeValue('ui.main', 'ui.light');
   const bgActive = useColorModeValue('#E2E8F0', '#4A5568');
 
@@ -72,7 +68,9 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
       onClick={onClose}
     >
       <Icon as={icon} alignSelf="center" />
-      <Text ml={2}>{title}</Text>
+      <Text ml={2} fontSize={'lg'}>
+        {title}
+      </Text>
     </Flex>
   ));
 
