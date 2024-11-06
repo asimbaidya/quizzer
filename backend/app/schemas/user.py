@@ -28,18 +28,14 @@ class UserPublic(User):
 
 
 class Note(BaseModel):
-    heading: str
+    title: str
     content: str
     flag: int
 
 
-class NoteDate(BaseModel):
-    notes: list[Note]
-
-
 class NoteBase(BaseModel):
     title: str = Field(default='Untitled')
-    note_data: NoteDate
+    note_data: list[Note] = []
 
 
 class NoteCreate(NoteBase):

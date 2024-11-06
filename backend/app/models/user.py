@@ -14,14 +14,14 @@ from sqlalchemy.orm import (
 
 from app.core.db import Base
 from app.schemas.enums import UserRole
-from app.schemas.user import NoteDate
+from app.schemas.user import Note
 
 
 class Note(Base):
     __tablename__ = 'note'
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String, nullable=False, default='Untitled')
-    note_data: Mapped[NoteDate] = mapped_column(JSONB, nullable=False)
+    note_data: Mapped[Note] = mapped_column(JSONB, nullable=False)
     user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey('users.id'), nullable=False
     )

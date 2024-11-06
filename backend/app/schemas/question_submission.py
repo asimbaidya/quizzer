@@ -132,3 +132,4 @@ class TestQuestionWithSubmission(BaseModel):
     total_mark: int
     start_time: Optional[datetime]
     status: TestStatus
+    duration: int

@@ -447,6 +447,7 @@ def create_question_in_quiz(
         tag=question_create.tag,
         question_set_id=question_set.id,
         image=question_create.image,
+        total_marks=question_create.total_marks,
     )
 
     db.add(question_instance)
@@ -477,6 +478,7 @@ def create_question_in_test(
         tag=question_create.tag,
         question_set_id=question_set.id,
         image=question_create.image,
+        total_marks=question_create.total_marks,
     )
 
     db.add(question_instance)

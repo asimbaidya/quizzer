@@ -246,11 +246,15 @@ def get_all_question_in_test(  # type: ignore
         'total_mark': test.total_mark,
         'status': test_status,
         'start_time': start_time,
+        'duration': test.duration,
     }  # type: ignore
 
 
 def get_all_notes_by_student_id(db: Session, student_id: int):
-    return db.query(Note).filter(Note.user_id == student_id).all()
+    notes = db.query(Note).filter(Note.user_id == student_id).all()
+    for note in notes:
+        note.url = f'/note/{note.id}'
+    return notes
 
 
 def get_single_note_by_student_id_note_id(db: Session, student_id: int, note_id: int):
@@ -277,11 +281,17 @@ def update_note_by_student_id_note_id(
     db_note = (
         db.query(Note).filter(Note.user_id == student_id, Note.id == note_id).first()
     )
+
     if db_note is None:
         raise HTTPException(status_code=404, detail='Note not found')
 
+    note_data = [note.model_dump() for note in note.note_data]
     db.query(Note).filter(Note.user_id == student_id, Note.id == note_id).update(
-        {'note_data': note.note_data.model_dump(), 'updated_at': datetime.now()}
+        {
+            'title': note.title,
+            'note_data': note_data,
+            'updated_at': datetime.now(),
+        }
     )
 
     db.commit()
