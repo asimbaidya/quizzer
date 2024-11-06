@@ -98,10 +98,6 @@ export interface QuestionStudentView {
   url?: string;
   image_url?: string;
   image?: string;
-  made_attempt?: boolean;
-  is_correct: boolean;
-  score: number;
-  feedback: string;
 }
 
 export interface QuestionSubmissionStudentView {
@@ -112,7 +108,7 @@ export interface QuestionSubmissionStudentView {
   score?: number;
   feedback?: string;
   attempt_time?: Date;
-  attempt_count?: number;
+  attempt_count: number;
   status: SubmissionStatus;
 }
 

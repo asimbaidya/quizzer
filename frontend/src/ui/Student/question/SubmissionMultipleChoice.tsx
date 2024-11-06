@@ -6,6 +6,7 @@ import {
   Text,
   Image,
   useColorModeValue,
+  Badge,
 } from '@chakra-ui/react';
 import { QuestionSubmission } from '../../../core/types/question';
 import { MultipleChoiceResponseSchema } from '../../../core/schemas/question_submission';
@@ -36,6 +37,7 @@ const SubmissionMultipleChoice: React.FC<Prop> = ({
   const is_submitted = false;
 
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   const { showToast } = useCustomToast();
   const queryClient = useQueryClient();
@@ -106,7 +108,7 @@ const SubmissionMultipleChoice: React.FC<Prop> = ({
   };
 
   const handleShowFeedback = () => {
-    alert(`Feedback: ${submission.feedback}\nScore: ${question.score}`);
+    setShowFeedback(!showFeedback);
   };
 
   const textColor = useColorModeValue('black', 'white');
@@ -114,9 +116,29 @@ const SubmissionMultipleChoice: React.FC<Prop> = ({
   const selectedBorderColor = useColorModeValue('green.500', 'teal.500');
   const hoverBorderColor = useColorModeValue('green.300', 'teal.300');
   const selectedTextColor = useColorModeValue('green.500', 'teal.500');
+  const boxBg = useColorModeValue('green.50', 'green.900');
+  const borderGreen = useColorModeValue('green.500', 'green.400');
+  const feedbackBorderColor = submission.is_correct
+    ? useColorModeValue('green.500', 'green.400')
+    : useColorModeValue('red.500', 'red.400');
 
   return (
-    <Box p={5} borderWidth={1} borderRadius="md" mt={5}>
+    <Box
+      p={5}
+      borderWidth={2}
+      borderRadius="md"
+      mt={5}
+      borderColor={submission.is_correct ? borderGreen : borderColor}
+    >
+      <Flex justify="space-between" mb={4}>
+        <Badge colorScheme="purple" px={2}>
+          Topic: {question.tag}
+        </Badge>
+        <Text>
+          Score: {submission.score || 0}/{question.total_marks}
+        </Text>
+      </Flex>
+
       <Text fontSize="4xl" mb={4} color={textColor}>
         Q. {question_text}
       </Text>
@@ -158,15 +180,36 @@ const SubmissionMultipleChoice: React.FC<Prop> = ({
       <Text fontSize="sm" color={textColor}>
         Select All That Apply
       </Text>
-      {!is_submitted && selectedOptions.length > 0 && (
-        <Button mt={4} onClick={handleSubmit}>
-          Submit
-        </Button>
-      )}
-      {submission.feedback && (
-        <Button mt={4} onClick={handleShowFeedback}>
-          Show Feedback
-        </Button>
+      <Flex mt={4} gap={2}>
+        {selectedOptions.length > 0 && (
+          <Button
+            colorScheme="blue"
+            onClick={handleSubmit}
+            isDisabled={!canSubmit}
+          >
+            Submit
+          </Button>
+        )}
+        {submission.feedback && (
+          <Button
+            colorScheme={submission.is_correct ? 'green' : 'red'}
+            onClick={handleShowFeedback}
+          >
+            {showFeedback ? 'Hide Feedback' : 'Show Feedback'}
+          </Button>
+        )}
+      </Flex>
+
+      {showFeedback && submission.feedback && (
+        <Box
+          mt={4}
+          p={4}
+          borderRadius="md"
+          borderWidth={2}
+          borderColor={feedbackBorderColor}
+        >
+          <Text color={textColor}>{submission.feedback}</Text>
+        </Box>
       )}
     </Box>
   );

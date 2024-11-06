@@ -35,6 +35,8 @@ const SubmissionTrueFalse: React.FC<Prop> = ({
   const is_submitted = false;
 
   const [userResponse, setUserResponse] = useState<boolean | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const borderColor = useColorModeValue('gray.300', 'gray.600');
 
   const { showToast } = useCustomToast();
   const queryClient = useQueryClient();
@@ -98,17 +100,41 @@ const SubmissionTrueFalse: React.FC<Prop> = ({
     });
   };
 
+  // Remove alert and toggle feedback visibility
   const handleShowFeedback = () => {
-    alert(`Feedback: ${submission.feedback}\nScore: ${question.score}`);
+    setShowFeedback(!showFeedback);
   };
 
+  // Determine feedback border color based on correctness
+  const feedbackBorderColor = submission.is_correct
+    ? useColorModeValue('green.500', 'green.400')
+    : useColorModeValue('red.500', 'red.400');
+
   const textColor = useColorModeValue('black', 'white');
+  const boxBg = useColorModeValue('green.50', 'green.900');
+  const borderGreen = useColorModeValue('green.500', 'green.400');
 
   return (
-    <Box p={5} borderWidth={1} borderRadius="md" mt={5} userSelect={'none'}>
+    <Box
+      p={5}
+      borderWidth={2}
+      borderRadius="md"
+      mt={5}
+      borderColor={submission.is_correct ? borderGreen : borderColor}
+    >
+      <Flex justify="space-between" mb={4}>
+        <Badge colorScheme="purple" px={2}>
+          Topic: {question.tag}
+        </Badge>
+        <Text>
+          Score: {submission.score || 0}/{question.total_marks}
+        </Text>
+      </Flex>
+
       <Text fontSize="4xl" mb={4} color={textColor}>
         Q. {question_text}
       </Text>
+
       {image_url && (
         <Image src={image_url} alt="Question Image" mb={4} mx={'auto'} />
       )}
@@ -138,8 +164,36 @@ const SubmissionTrueFalse: React.FC<Prop> = ({
           )}
         </>
       ) : null}
-      {submission.feedback && (
-        <Button onClick={handleShowFeedback}>Show Feedback</Button>
+      <Flex mt={4} gap={2}>
+        {userResponse !== null && (
+          <Button
+            colorScheme="blue"
+            onClick={handleSubmit}
+            isDisabled={!canSubmit}
+          >
+            Submit
+          </Button>
+        )}
+        {submission.feedback && (
+          <Button
+            colorScheme={submission.is_correct ? 'green' : 'red'}
+            onClick={handleShowFeedback}
+          >
+            {showFeedback ? 'Hide Feedback' : 'Show Feedback'}
+          </Button>
+        )}
+      </Flex>
+
+      {showFeedback && submission.feedback && (
+        <Box
+          mt={4}
+          p={4}
+          borderRadius="md"
+          borderWidth={2}
+          borderColor={feedbackBorderColor}
+        >
+          <Text color={textColor}>{submission.feedback}</Text>
+        </Box>
       )}
     </Box>
   );

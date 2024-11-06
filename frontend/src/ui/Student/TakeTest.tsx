@@ -1,4 +1,4 @@
-import { Box, Text } from '@chakra-ui/react';
+import { Box, Text, Flex } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { TestQuestionWithSubmission } from '../../core/types/question';
 import SubmissionSingleChoice from './question/SubmissionSingleChoice';
@@ -55,8 +55,48 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
     return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
   };
 
+  const _totalScore = randomizedQuestions.reduce((acc, { submission }) => {
+    return acc + (submission.score || 0);
+  }, 0);
+  const totalScore = _totalScore ? _totalScore : 0;
+
+  const totalWeightedScore =
+    (totalScore / total_mark) * questionWithSubmission.total_mark;
+
+  const totalQuestions = questionWithSubmission.question_submissions.length;
+  const totalCorrect = randomizedQuestions.filter(
+    ({ submission }) => submission.is_correct
+  ).length;
+
+  const totalAttempts = randomizedQuestions.filter(
+    ({ submission }) => submission.made_attempt
+  ).length;
+
   return (
     <Box>
+      {status !== 'in_progress' && (
+        <Flex
+          borderWidth={1}
+          borderRadius="md"
+          p={4}
+          mb={4}
+          justifyContent="space-between"
+        >
+          <Text>Total Score: {totalScore}</Text>
+          <Text>
+            Total Weighted Score: {totalWeightedScore.toFixed(2)} /
+            {questionWithSubmission.total_mark}
+          </Text>
+          <Text>Total Questions: {totalQuestions}</Text>
+          <Text>
+            Total Correct: {totalCorrect} / {totalQuestions}
+          </Text>
+          <Text>
+            Total Attempts: {totalAttempts} / {totalQuestions}
+          </Text>
+        </Flex>
+      )}
+
       {/* display the timer only if start_time is available */}
       {start_time && status === 'in_progress' && (
         <Box mb={4}>

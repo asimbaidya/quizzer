@@ -5,6 +5,8 @@ import {
   Text,
   Image,
   useColorModeValue,
+  Flex,
+  Badge,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 
@@ -37,11 +39,15 @@ const SubmissionUserInput: React.FC<Prop> = ({
   const is_submitted = false;
 
   const [userInput, setUserInput] = useState<string>('');
+  const [showFeedback, setShowFeedback] = useState<boolean>(false);
 
   const inputBg = useColorModeValue('gray.400', 'gray.700');
   const inputColor = useColorModeValue('black', 'white');
   const inputBorderColor = useColorModeValue('green', 'teal');
   const textColor = useColorModeValue('black', 'white');
+  const boxBg = useColorModeValue('green.50', 'green.900');
+  const borderGreen = useColorModeValue('green.500', 'green.400');
+  const borderColor = useColorModeValue('gray.300', 'gray.600');
 
   const { showToast } = useCustomToast();
   const queryClient = useQueryClient();
@@ -101,12 +107,33 @@ const SubmissionUserInput: React.FC<Prop> = ({
     });
   };
 
+  // Remove alert and toggle feedback visibility
   const handleShowFeedback = () => {
-    alert(`Feedback: ${question.feedback}\nScore: ${question.score}`);
+    setShowFeedback(!showFeedback);
   };
 
+  // Determine feedback border color based on correctness
+  const feedbackBorderColor = submission.is_correct
+    ? useColorModeValue('green.500', 'green.400')
+    : useColorModeValue('red.500', 'red.400');
+
   return (
-    <Box p={5} borderWidth={1} borderRadius="md" mt={5}>
+    <Box
+      p={5}
+      borderWidth={2}
+      borderRadius="md"
+      mt={5}
+      borderColor={submission.is_correct ? borderGreen : inputBorderColor}
+    >
+      <Flex justify="space-between" mb={4}>
+        <Badge colorScheme="purple" px={2}>
+          Topic: {question.tag}
+        </Badge>
+        <Text>
+          Score: {submission.score || 0}/{question.total_marks}
+        </Text>
+      </Flex>
+
       <Text fontSize="4xl" mb={4} color={textColor}>
         Q. {question_text}
       </Text>
@@ -126,11 +153,38 @@ const SubmissionUserInput: React.FC<Prop> = ({
             borderWidth={'2px'}
             fontSize={'xl'}
           />
-          {userInput && <Button onClick={handleSubmit}>Submit</Button>}
         </>
       ) : null}
-      {submission.feedback && (
-        <Button onClick={handleShowFeedback}>Show Feedback</Button>
+      <Flex mt={4} gap={2}>
+        {userInput && (
+          <Button
+            colorScheme="blue"
+            onClick={handleSubmit}
+            isDisabled={!canSubmit}
+          >
+            Submit
+          </Button>
+        )}
+        {submission.feedback && (
+          <Button
+            colorScheme={submission.is_correct ? 'green' : 'red'}
+            onClick={handleShowFeedback}
+          >
+            {showFeedback ? 'Hide Feedback' : 'Show Feedback'}
+          </Button>
+        )}
+      </Flex>
+
+      {showFeedback && submission.feedback && (
+        <Box
+          mt={4}
+          p={4}
+          borderRadius="md"
+          borderWidth={2}
+          borderColor={feedbackBorderColor}
+        >
+          <Text color={textColor}>{submission.feedback}</Text>
+        </Box>
       )}
     </Box>
   );

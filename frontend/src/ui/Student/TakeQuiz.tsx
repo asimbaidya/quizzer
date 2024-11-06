@@ -12,6 +12,8 @@ interface TakeQuizProp {
 }
 
 const TakeQuiz: React.FC<TakeQuizProp> = ({ questionWithSubmission }) => {
+  const { allowed_attempt, is_unlimited_attempt, total_mark } =
+    questionWithSubmission;
   const [randomizedQuestions, setRandomizedQuestions] = useState<
     QuizQuestionWithSubmission['question_submissions']
   >([]);
@@ -28,15 +30,8 @@ const TakeQuiz: React.FC<TakeQuizProp> = ({ questionWithSubmission }) => {
   }, 0);
   const totalScore = _totalScore ? _totalScore : 0;
 
-  const totalMarks = questionWithSubmission.question_submissions.reduce(
-    (acc, { question }) => acc + question.total_marks,
-    0
-  );
-  console.log(totalMarks);
-  console.log(totalScore);
-
   const totalWeightedScore =
-    (totalScore / totalMarks) * questionWithSubmission.total_mark;
+    (totalScore / total_mark) * questionWithSubmission.total_mark;
 
   const totalQuestions = questionWithSubmission.question_submissions.length;
   const totalCorrect = randomizedQuestions.filter(
@@ -77,8 +72,15 @@ const TakeQuiz: React.FC<TakeQuizProp> = ({ questionWithSubmission }) => {
         )}
       </Flex>
       {randomizedQuestions.map((questionSubmission, index) => {
-        const { question } = questionSubmission;
-        const canSubmit = true;
+        const { question, submission } = questionSubmission;
+
+        let canSubmit = false;
+        if (
+          is_unlimited_attempt ||
+          allowed_attempt > submission.attempt_count
+        ) {
+          canSubmit = true;
+        }
 
         switch (question.question_type) {
           case 'single_choice':
