@@ -11,6 +11,7 @@ import {
   Select,
   Box,
   HStack,
+  Heading,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 
@@ -42,9 +43,11 @@ export default function ShowQuizProgress({
 
   return (
     <Box>
+      <Heading size="md" my={4}>
+        Test Progress
+      </Heading>
       <HStack spacing={4} mb={4}>
         <Select
-          placeholder="Sort by"
           size="sm"
           width="200px"
           value={sortField}
@@ -67,33 +70,31 @@ export default function ShowQuizProgress({
         <Table variant="simple" size="sm">
           <Thead>
             <Tr>
-              <Th>ID</Th>
               <Th>Email</Th>
-              <Th>Marks</Th>
-              <Th>Attempts</Th>
-              <Th>Questions Done</Th>
-              <Th>Possible Marks</Th>
-              <Th>Weighted Marks</Th>
               <Th>Total Questions</Th>
-              <Th>Unlimited</Th>
-              <Th>Max Attempts</Th>
+              <Th>Graded Possible</Th>
+              <Th>Graded Reveived</Th>
               <Th>Quiz Total</Th>
+              <Th>Received </Th>
+              <Th>Total Attempts</Th>
+              <Th>Max Attempts(Per Q)</Th>
             </Tr>
           </Thead>
           <Tbody>
             {sortedData.map((progress) => (
               <Tr key={progress.student_id}>
-                <Td>{progress.student_id}</Td>
                 <Td whiteSpace="nowrap">{progress.email}</Td>
+                <Td>{progress.total_questions}</Td>
+                <Td>{progress.quiz_total_mark}</Td>
+                <Td>{progress.weighted_marks.toFixed(2)}</Td>
+                <Td>{progress.total_possible_marks}</Td>
                 <Td>{progress.received_marks}</Td>
                 <Td>{progress.total_attempts}</Td>
-                <Td>{progress.total_questions_attempted}</Td>
-                <Td>{progress.total_possible_marks}</Td>
-                <Td>{progress.weighted_marks.toFixed(2)}</Td>
-                <Td>{progress.total_questions}</Td>
-                <Td>{progress.is_unlimited_attempt ? 'Yes' : 'No'}</Td>
-                <Td>{progress.total_allowed_attempt}</Td>
-                <Td>{progress.quiz_total_mark}</Td>
+                <Td>
+                  {progress.is_unlimited_attempt
+                    ? 'Unlimited'
+                    : progress.total_allowed_attempt}
+                </Td>
               </Tr>
             ))}
           </Tbody>

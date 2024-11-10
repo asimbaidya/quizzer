@@ -69,7 +69,10 @@ export default function Test({
       <TabPanels>
         <TabPanel>
           {questions ? (
-            <ViewQuestions questions={questions} />
+            <ViewQuestions
+              questions={questions}
+              totalGradedMark={test.total_mark}
+            />
           ) : (
             <Heading
               size="lg"

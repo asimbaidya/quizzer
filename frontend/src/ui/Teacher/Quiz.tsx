@@ -40,7 +40,8 @@ export default function Quiz({
       <TabPanels>
         <TabPanel>
           {questions ? (
-            <ViewQuestions questions={questions} />
+            // Temporary Criticall BUG:
+            <ViewQuestions questions={questions} totalGradedMark={30} />
           ) : (
             <Heading
               size="lg"

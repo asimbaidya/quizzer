@@ -1,6 +1,5 @@
 import { QuizQuestionWithSubmission } from '../../core/types/question';
-import { Box, Flex, Text } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { Box, Flex, Heading, Text } from '@chakra-ui/react';
 
 import SubmissionSingleChoice from './question/SubmissionSingleChoice';
 import SubmissionMultipleChoice from './question/SubmissionMultipleChoice';
@@ -12,20 +11,18 @@ interface TakeQuizProp {
 }
 
 const TakeQuiz: React.FC<TakeQuizProp> = ({ questionWithSubmission }) => {
-  const { allowed_attempt, is_unlimited_attempt, total_mark } =
-    questionWithSubmission;
-  const [randomizedQuestions, setRandomizedQuestions] = useState<
-    QuizQuestionWithSubmission['question_submissions']
-  >([]);
+  const {
+    allowed_attempt,
+    is_unlimited_attempt,
+    total_mark,
+    question_submissions,
+  } = questionWithSubmission;
 
-  useEffect(() => {
-    const shuffledQuestions = [
-      ...questionWithSubmission.question_submissions,
-    ].sort(() => Math.random() - 0.5);
-    setRandomizedQuestions(shuffledQuestions);
-  }, [questionWithSubmission]);
+  if (question_submissions?.length === 0) {
+    return <Heading fontSize={'4xl'}>No Questions Added Yet</Heading>;
+  }
 
-  const _totalScore = randomizedQuestions.reduce((acc, { submission }) => {
+  const _totalScore = question_submissions.reduce((acc, { submission }) => {
     return acc + (submission.score || 0);
   }, 0);
   const totalScore = _totalScore ? _totalScore : 0;
@@ -34,11 +31,11 @@ const TakeQuiz: React.FC<TakeQuizProp> = ({ questionWithSubmission }) => {
     (totalScore / total_mark) * questionWithSubmission.total_mark;
 
   const totalQuestions = questionWithSubmission.question_submissions.length;
-  const totalCorrect = randomizedQuestions.filter(
+  const totalCorrect = question_submissions.filter(
     ({ submission }) => submission.is_correct
   ).length;
 
-  const totalAttempts = randomizedQuestions.filter(
+  const totalAttempts = question_submissions.filter(
     ({ submission }) => submission.made_attempt
   ).length;
 
@@ -71,7 +68,7 @@ const TakeQuiz: React.FC<TakeQuizProp> = ({ questionWithSubmission }) => {
           </Text>
         )}
       </Flex>
-      {randomizedQuestions.map((questionSubmission, index) => {
+      {question_submissions.map((questionSubmission, index) => {
         const { question, submission } = questionSubmission;
 
         let canSubmit = false;

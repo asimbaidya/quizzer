@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { Box, Select, Text, FormControl, FormLabel } from '@chakra-ui/react';
+import {
+  Box,
+  Select,
+  Text,
+  FormControl,
+  FormLabel,
+  Heading,
+} from '@chakra-ui/react';
 import { Question } from '../../../core/types/question';
 import { QuestionType } from '../../../core/types/common';
 import ViewMultipleChoice from './ViewMultipleChoice';
@@ -9,11 +16,17 @@ import ViewUserInput from './ViewUserInput';
 
 export default function ViewQuestions({
   questions,
+  totalGradedMark,
 }: {
   questions: Question[];
+  totalGradedMark: number;
 }) {
   const [filterType, setFilterType] = useState<QuestionType | 'all'>('all');
   const [filterTag, setFilterTag] = useState<string | 'all'>('all');
+
+  if (questions === undefined || questions?.length == 0) {
+    return <Heading>No Question Found, Add Question from the Tabs</Heading>;
+  }
 
   const totalMarks = questions.reduce(
     (sum, question) => sum + question.total_marks,
@@ -67,7 +80,10 @@ export default function ViewQuestions({
           </Select>
         </FormControl>
         <FormControl display="flex" alignItems="center">
-          <Text>Total Marks: {totalMarks}</Text>
+          <Text>Total Possible Score: {totalMarks}</Text>
+        </FormControl>
+        <FormControl display="flex" alignItems="center">
+          <Text>Total Graded Marks: {totalGradedMark}</Text>
         </FormControl>
       </Box>
 

@@ -24,15 +24,9 @@ const SubmissionSingleChoice: React.FC<Prop> = ({
   questionSubmission,
   canSubmit,
 }) => {
-  // unpack value
   const { question, submission } = questionSubmission;
-
   const { image_url } = question;
   const { question_text, choices } = question.question_data;
-
-  // const is_submitted = submission?.made_attempt || false;
-  // const is_submitted = submission?.is_correct || false;
-  const is_submitted = false;
 
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [showFeedback, setShowFeedback] = useState<boolean>(false);
@@ -52,9 +46,8 @@ const SubmissionSingleChoice: React.FC<Prop> = ({
     }) => submitQuestionAnswerAtAPI(apiEndPoint, answerData, signal),
     onSuccess: () => {
       showToast({
-        title: 'Success',
-        description: 'Answer Submitted Successfully',
-        status: 'success',
+        title: 'Your Answer Submitted',
+        status: 'info',
       });
       queryClient.invalidateQueries({
         queryKey: ['Questions'],
@@ -100,23 +93,20 @@ const SubmissionSingleChoice: React.FC<Prop> = ({
     });
   };
 
-  // Remove alert and toggle feedback visibility
+  // remove alert and toggle feedback visibility
   const handleShowFeedback = () => {
     setShowFeedback(!showFeedback);
   };
-
-  // Determine feedback border color based on correctness
-  const feedbackBorderColor = submission.is_correct
-    ? useColorModeValue('green.500', 'green.400')
-    : useColorModeValue('red.500', 'red.400');
 
   const textColor = useColorModeValue('black', 'white');
   const borderColor = useColorModeValue('gray.300', 'gray.600');
   const selectedBorderColor = useColorModeValue('green.500', 'teal.500');
   const hoverBorderColor = useColorModeValue('green.300', 'teal.300');
   const selectedTextColor = useColorModeValue('green.500', 'teal.500');
-  const boxBg = useColorModeValue('green.50', 'green.900');
-  const borderGreen = useColorModeValue('green.500', 'green.400');
+  // determine feedback border color based on correctness
+  const feedbackBorderColor = submission.is_correct
+    ? useColorModeValue('green.500', 'green.400')
+    : useColorModeValue('red.500', 'red.400');
 
   return (
     <Box
@@ -124,7 +114,7 @@ const SubmissionSingleChoice: React.FC<Prop> = ({
       borderWidth={2}
       borderRadius="md"
       mt={5}
-      borderColor={submission.is_correct ? borderGreen : borderColor}
+      borderColor={borderColor}
     >
       <Flex justify="space-between" mb={4}>
         <Badge colorScheme="purple" px={2}>

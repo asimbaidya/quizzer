@@ -1,4 +1,4 @@
-import { Box, Text, Flex } from '@chakra-ui/react';
+import { Box, Text, Flex, Heading } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { TestQuestionWithSubmission } from '../../core/types/question';
 import SubmissionSingleChoice from './question/SubmissionSingleChoice';
@@ -11,10 +11,12 @@ interface TakeTestProp {
 }
 
 const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
-  const { duration, status, total_mark, start_time } = questionWithSubmission;
-  const [randomizedQuestions, setRandomizedQuestions] = useState<
-    TestQuestionWithSubmission['question_submissions']
-  >([]);
+  const { duration, status, total_mark, start_time, question_submissions } =
+    questionWithSubmission;
+
+  if (question_submissions?.length === 0) {
+    return <Heading fontSize={'4xl'}>No Questions Added Yet</Heading>;
+  }
 
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [timerExpired, setTimerExpired] = useState<boolean>(false);
@@ -40,14 +42,6 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
     }
   }, []);
 
-  // shuffle the questions only once, when the component mounts or when the questions change
-  useEffect(() => {
-    const shuffledQuestions = [
-      ...questionWithSubmission.question_submissions,
-    ].sort(() => Math.random() - 0.5);
-    setRandomizedQuestions(shuffledQuestions);
-  }, [questionWithSubmission]);
-
   // helper function to format time in mm:ss
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60000);
@@ -55,7 +49,7 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
     return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
   };
 
-  const _totalScore = randomizedQuestions.reduce((acc, { submission }) => {
+  const _totalScore = question_submissions.reduce((acc, { submission }) => {
     return acc + (submission.score || 0);
   }, 0);
   const totalScore = _totalScore ? _totalScore : 0;
@@ -64,11 +58,11 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
     (totalScore / total_mark) * questionWithSubmission.total_mark;
 
   const totalQuestions = questionWithSubmission.question_submissions.length;
-  const totalCorrect = randomizedQuestions.filter(
+  const totalCorrect = question_submissions.filter(
     ({ submission }) => submission.is_correct
   ).length;
 
-  const totalAttempts = randomizedQuestions.filter(
+  const totalAttempts = question_submissions.filter(
     ({ submission }) => submission.made_attempt
   ).length;
 
@@ -107,15 +101,15 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
       )}
 
       {/* render the questions */}
-      {randomizedQuestions.map((questionSubmission, index) => {
+      {question_submissions.map((questionSubmission, index) => {
         const { question, submission } = questionSubmission;
 
         // console.log('questionSubmission', questionSubmission);
 
-        if (status === 'in_progress' && submission.made_attempt === true) {
-          return null;
-        }
-        //
+        // if (status === 'in_progress' && submission.made_attempt === true) {
+        //   return null;
+        // }
+
         let canSubmit = false;
         if (status === 'in_progress' && submission.made_attempt === false) {
           canSubmit = true;

@@ -43,11 +43,12 @@ export default function ShowTestProgress({
 
   return (
     <Box>
-      <HStack spacing={4} mb={4} justify="space-between" align="center">
-        <Heading size="md">Test Progress</Heading>
+      <Heading size="md" my={4}>
+        Test Progress
+      </Heading>
+      <HStack spacing={4} mb={4}>
         <HStack spacing={2}>
           <Select
-            placeholder="Sort by"
             size="sm"
             width="200px"
             value={sortField}
@@ -75,26 +76,22 @@ export default function ShowTestProgress({
         <Table variant="simple" size="sm">
           <Thead>
             <Tr>
-              <Th>ID</Th>
               <Th>Email</Th>
-              <Th isNumeric>Marks</Th>
-              <Th isNumeric>Attempts</Th>
-              <Th isNumeric>Questions Done</Th>
               <Th isNumeric>Total Questions</Th>
-              <Th isNumeric>Possible Marks</Th>
-              <Th isNumeric>Weighted Marks</Th>
-              <Th isNumeric>Test Total</Th>
+              <Th isNumeric>Questions Done</Th>
+              <Th isNumeric>Total Scored</Th>
+              <Th isNumeric>Max Possible Score</Th>
+              <Th isNumeric>Graded Received</Th>
+              <Th isNumeric>Graded Possible</Th>
             </Tr>
           </Thead>
           <Tbody>
             {sortedData.map((progress) => (
               <Tr key={progress.student_id}>
-                <Td>{progress.student_id}</Td>
                 <Td whiteSpace="nowrap">{progress.email}</Td>
-                <Td isNumeric>{progress.received_marks}</Td>
-                <Td isNumeric>{progress.total_attempts}</Td>
-                <Td isNumeric>{progress.total_questions_attempted}</Td>
                 <Td isNumeric>{progress.total_questions}</Td>
+                <Td isNumeric>{progress.total_questions_attempted}</Td>
+                <Td isNumeric>{progress.received_marks}</Td>
                 <Td isNumeric>{progress.total_possible_marks}</Td>
                 <Td isNumeric>{progress.weighted_marks.toFixed(2)}</Td>
                 <Td isNumeric>{progress.test_total_mark}</Td>
