@@ -8,9 +8,9 @@ import { User } from '../../core/types/common';
 export default function Profile() {
   const { user } = useAuth();
 
-  if (user) {
-    console.log('User:', user);
-  }
+  // if (user) {
+  //   console.log('User:', user);
+  // }
 
   return (
     <Container maxW="full">

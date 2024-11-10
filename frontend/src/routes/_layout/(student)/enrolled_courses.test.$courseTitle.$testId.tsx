@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Container, Heading } from '@chakra-ui/react';
 import { useTestQuestions } from '../../../hooks/student';
 import TakeTest from '../../../ui/Student/TakeTest';
+import Loading from '../../../ui/Common/Loading';
 
 export const Route = createFileRoute(
   '/_layout/(student)/enrolled_courses/test/$courseTitle/$testId'
@@ -11,14 +12,16 @@ export const Route = createFileRoute(
 
 function EnrolledCoursesTestCourseTitleTestId() {
   const { courseTitle, testId } = Route.useParams();
-  console.log('courseTitle:', courseTitle);
+
   const {
     data: questions,
     error,
     isLoading,
   } = useTestQuestions(courseTitle, Number(testId));
-  console.log(error, isLoading, questions);
-  console.log('Route.useParams():', Route.useParams());
+
+  if (isLoading) {
+    return <Loading />;
+  }
   return (
     <Container maxW="full">
       <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>

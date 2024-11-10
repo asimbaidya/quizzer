@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Container, Heading } from '@chakra-ui/react';
 import TakeQuiz from '../../../ui/Student/TakeQuiz';
 import { useQuizQuestions } from '../../../hooks/student';
-import { Text } from '@chakra-ui/react';
+import Loading from '../../../ui/Common/Loading';
 
 export const Route = createFileRoute(
   '/_layout/(student)/enrolled_courses/quiz/$courseTitle/$quizId'
@@ -19,7 +19,11 @@ function EnrolledCoursesQuizCourseTitleQuizId() {
     isLoading,
   } = useQuizQuestions(courseTitle, Number(quizId));
 
-  console.log(questions);
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  // console.log(questions);
   return (
     <Container maxW="full">
       <Heading size="4lg" textAlign={{ base: 'center', md: 'left' }} py={12}>

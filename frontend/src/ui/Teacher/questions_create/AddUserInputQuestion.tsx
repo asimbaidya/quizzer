@@ -89,9 +89,9 @@ const AddUserInputQuestion = ({ apiEndPoint }: { apiEndPoint: string }) => {
 
   const onSubmit = (data: UserInputQuestionFormData) => {
     // include the image in the data
-    console.log(data);
+    // console.log(data);
     const formData = { ...data, image };
-    console.log(formData);
+    // console.log(formData);
 
     const signal = new AbortController().signal;
     mutation.mutate({

@@ -3,7 +3,7 @@ import { TestWithUrlAndStatus } from '../../core/types/common';
 import TestCard from './TestCard';
 
 const TestList = ({ tests }: { tests: TestWithUrlAndStatus[] }) => {
-  console.log(tests);
+  // console.log(tests);
 
   return (
     <Box p={5} userSelect={'none'}>

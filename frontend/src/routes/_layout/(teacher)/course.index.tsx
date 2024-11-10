@@ -5,15 +5,20 @@ import CourseList from '../../../ui/Teacher/CourseList';
 import { Box, Text } from '@chakra-ui/react';
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
 import CourseCreateForm from '../../../ui/Teacher/forms/CourseCreateForm';
+import Loading from '../../../ui/Common/Loading';
 
 export const Route = createFileRoute('/_layout/(teacher)/course/')({
   component: () => <Course />,
 });
 
 function Course() {
-  console.log('Route.useParams():', Route.useParams());
+  // console.log('Route.useParams():', Route.useParams());
 
   const { data, isLoading } = useCreatedCourses();
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <>

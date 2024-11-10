@@ -41,8 +41,8 @@ export default function Test({
   const windowStart = new Date(test.window_start);
   const current = new Date();
   const notOpened = current < windowStart;
-  console.log(windowStart, current);
-  console.log(notOpened);
+  // console.log(windowStart, current);
+  // console.log(notOpened);
 
   // ... shit shit ..
   // okey need to do shortcut here

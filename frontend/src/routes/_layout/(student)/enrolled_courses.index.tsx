@@ -5,6 +5,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import CourseList from '../../../ui/Student/CourseList';
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
 import EnrollForm from '../../../ui/Student/EnrollForm';
+import Loading from '../../../ui/Common/Loading';
 
 export const Route = createFileRoute('/_layout/(student)/enrolled_courses/')({
   component: () => <EnrolledCourses />,
@@ -12,6 +13,10 @@ export const Route = createFileRoute('/_layout/(student)/enrolled_courses/')({
 
 export default function EnrolledCourses() {
   const { data: courses, error, isLoading } = useEnrolledCourses();
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <Container maxW="full">

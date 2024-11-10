@@ -73,7 +73,7 @@ const SubmissionSingleChoice: React.FC<Prop> = ({
     setSelectedOption(option);
   };
 
-  console.log(image_url);
+  // console.log(image_url);
   const handleSubmit = () => {
     const user_answer = SingleChoiceResponseSchema.parse({
       question_type: 'single_choice',

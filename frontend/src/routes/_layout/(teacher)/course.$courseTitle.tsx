@@ -8,6 +8,7 @@ import TestList from '../../../ui/Teacher/TestList';
 import QuizList from '../../../ui/Teacher/QuizList';
 import TestCreateForm from '../../../ui/Teacher/forms/TestCreateForm';
 import QuizCreateForm from '../../../ui/Teacher/forms/QuizCreateForm';
+import Loading from '../../../ui/Common/Loading';
 
 export const Route = createFileRoute('/_layout/(teacher)/course/$courseTitle')({
   component: () => <CourseCourseTitle />,
@@ -15,18 +16,19 @@ export const Route = createFileRoute('/_layout/(teacher)/course/$courseTitle')({
 
 function CourseCourseTitle() {
   const { courseTitle } = Route.useParams();
-  console.log('Route.useParams():', Route.useParams());
+  // console.log('Route.useParams():', Route.useParams());
 
   const {
     data: quizAndTests,
-    isLoading,
+    isLoading: detailsLoading,
     isError,
   } = useCourseDetails(courseTitle);
 
-  const { data: students } = useEnrolledStudents(courseTitle);
+  const { data: students, isLoading: studentLoading } =
+    useEnrolledStudents(courseTitle);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
+  if (detailsLoading || studentLoading) {
+    return <Loading />;
   }
 
   return (

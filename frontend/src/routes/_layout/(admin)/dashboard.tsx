@@ -16,7 +16,7 @@ function DashBoard() {
       deleteUnusedImages(signal),
     onSuccess: (data: { success: true; detail: string }) => {
       const { success, detail } = data;
-      console.log(success, detail);
+      // console.log(success, detail);
       showToast({
         title: 'Success',
         description: detail,

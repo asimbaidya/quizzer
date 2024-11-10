@@ -3,7 +3,8 @@ import { Container, Heading } from '@chakra-ui/react';
 import { useTestQuestions } from '../../../hooks/teacher';
 import { CustomError } from '../../../core/request';
 import Test from '../../../ui/Teacher/Test';
-import { Question, TestQuestions } from '../../../core/types/question';
+import { TestQuestions } from '../../../core/types/question';
+import Loading from '../../../ui/Common/Loading';
 
 export const Route = createFileRoute(
   '/_layout/(teacher)/course/test/$courseTitle/$testId'
@@ -17,7 +18,10 @@ export const Route = createFileRoute(
       error,
     } = useTestQuestions(courseTitle, Number(testId));
 
-    if (isLoading) return <div>Loading...</div>;
+    if (isLoading) {
+      return <Loading />;
+    }
+
     if (error) {
       const customError = error as CustomError;
       <div>Error: {customError?.details}</div>;
@@ -33,7 +37,8 @@ function CourseTestCourseTitleTestId({
 }: {
   testQuestions: TestQuestions | undefined;
 }) {
-  console.log('Route.useParams():', Route.useParams());
+  // console.log('Route.useParams():', Route.useParams());
+
   const { courseTitle, testId } = Route.useParams();
   return (
     <Container maxW="full">

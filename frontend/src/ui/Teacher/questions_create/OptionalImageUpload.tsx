@@ -24,7 +24,7 @@ const OptionalImageUpload = ({ setFile }: ImageUploaderOptions) => {
 
   const handleBoxClick = () => {
     if (uploadedFilePath) {
-      console.log('File Already Uploaded; Remove it first to add another');
+      // console.log('File Already Uploaded; Remove it first to add another');
       return;
     }
 

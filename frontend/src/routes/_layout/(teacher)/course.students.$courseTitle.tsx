@@ -10,7 +10,7 @@ import { Container, Heading } from '@chakra-ui/react';
 
 function CourseStudentsCourseTitle() {
   const { courseTitle } = Route.useParams();
-  console.log('Route.useParams():', Route.useParams());
+  // console.log('Route.useParams():', Route.useParams());
   return (
     <Container maxW="full">
       <Heading size="lg" textAlign={{ base: 'center', md: 'left' }} py={12}>

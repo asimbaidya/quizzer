@@ -30,8 +30,9 @@ const Sidebar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const logout = () => {
-    console.log('logout');
-    alert('logout');
+    // console.log('logout');
+    // alert('logout');
+    // TODO: add logout from useAuth
   };
 
   const handleLogout = async () => {

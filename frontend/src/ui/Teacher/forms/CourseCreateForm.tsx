@@ -74,7 +74,7 @@ const CourseCreateForm = () => {
   });
 
   const onSubmit = (data: CourseFormData) => {
-    console.log(data);
+    // console.log(data);
     mutation.mutate({ courseData: data, signal: new AbortController().signal });
     // alert(JSON.stringify(data, null, 2));
   };

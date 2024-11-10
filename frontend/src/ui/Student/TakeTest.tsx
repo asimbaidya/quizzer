@@ -109,7 +109,9 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
       {/* render the questions */}
       {randomizedQuestions.map((questionSubmission, index) => {
         const { question, submission } = questionSubmission;
-        console.log('questionSubmission', questionSubmission);
+
+        // console.log('questionSubmission', questionSubmission);
+
         if (status === 'in_progress' && submission.made_attempt === true) {
           return null;
         }

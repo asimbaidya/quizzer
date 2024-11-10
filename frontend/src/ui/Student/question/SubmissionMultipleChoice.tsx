@@ -91,7 +91,8 @@ const SubmissionMultipleChoice: React.FC<Prop> = ({
       return;
     }
     // alert(JSON.stringify(user_response, null, 2));
-    console.log(user_answer);
+    // console.log(user_answer);
+
     mutation.mutate({
       apiEndPoint: question.url,
       answerData: user_answer,
