@@ -46,8 +46,6 @@ const CourseCreateForm = () => {
     onSuccess: () => {
       showToast({
         title: 'Course Created',
-        description:
-          'Course has been created successfully, you can now add Quiz and Test to this course',
         status: 'success',
       });
 
@@ -117,8 +115,8 @@ const CourseCreateForm = () => {
           <FormErrorMessage>{errors.course_pin?.message}</FormErrorMessage>
         </FormControl>
 
-        <Button mt={4} colorScheme="teal" type="submit">
-          Create Course
+        <Button type="submit" colorScheme="teal" width="full" mt={4}>
+          Create Quiz Create Course
         </Button>
       </form>
     </Box>

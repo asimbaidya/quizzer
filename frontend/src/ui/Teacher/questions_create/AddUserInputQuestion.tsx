@@ -50,7 +50,6 @@ const AddUserInputQuestion = ({ apiEndPoint }: { apiEndPoint: string }) => {
       showToast({
         title: 'Question Submitted',
         status: 'success',
-        duration: 3000,
         isClosable: true,
       });
     },

@@ -64,7 +64,6 @@ const QuizCreateForm = () => {
     onSuccess: () => {
       showToast({
         title: 'Quiz Created',
-        description: 'Quiz has been created successfully',
         status: 'success',
       });
 
@@ -160,8 +159,8 @@ const QuizCreateForm = () => {
           )}
         </HStack>
 
-        <Button mt={4} colorScheme="teal" type="submit">
-          Submit
+        <Button type="submit" colorScheme="teal" width="full" mt={4}>
+          Create Quiz
         </Button>
       </form>
     </Box>

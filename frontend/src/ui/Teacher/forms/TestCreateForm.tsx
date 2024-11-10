@@ -64,7 +64,6 @@ const TestCreateForm: React.FC = () => {
     onSuccess: () => {
       showToast({
         title: 'Test Created',
-        description: 'Test has been created successfully',
         status: 'success',
       });
 

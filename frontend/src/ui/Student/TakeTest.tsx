@@ -11,8 +11,14 @@ interface TakeTestProp {
 }
 
 const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
-  const { duration, status, total_mark, start_time, question_submissions } =
-    questionWithSubmission;
+  const {
+    duration,
+    status,
+    total_mark,
+    start_time,
+    question_submissions,
+    window_end,
+  } = questionWithSubmission;
 
   if (question_submissions?.length === 0) {
     return <Heading fontSize={'4xl'}>No Questions Added Yet</Heading>;
@@ -21,13 +27,17 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [timerExpired, setTimerExpired] = useState<boolean>(false);
 
-  // calculate the timer only if start_time is provided
   useEffect(() => {
-    if (start_time) {
-      const endTime = new Date(start_time).getTime() + duration * 60 * 1000;
+    if (start_time && window_end) {
+      const startTime = new Date(start_time).getTime();
+      const endTime = startTime + duration * 60 * 1000;
+      const windowEnd = new Date(window_end).getTime();
+
+      const actualEndTime = Math.min(endTime, windowEnd);
+
       const interval = setInterval(() => {
         const currentTime = new Date().getTime();
-        const timeRemaining = endTime - currentTime;
+        const timeRemaining = actualEndTime - currentTime;
 
         if (timeRemaining <= 0) {
           clearInterval(interval);
@@ -40,7 +50,26 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
       // cleanup interval on component unmount or when timer expired
       return () => clearInterval(interval);
     }
-  }, []);
+  }, [start_time, duration, window_end]);
+
+  // useEffect(() => {
+  //   if (start_time) {
+  //     const endTime = new Date(start_time).getTime() + duration * 60 * 1000;
+  //     const interval = setInterval(() => {
+  //       const currentTime = new Date().getTime();
+  //       const timeRemaining = endTime - currentTime;
+
+  //       if (timeRemaining <= 0) {
+  //         clearInterval(interval);
+  //         setTimerExpired(true);
+  //       } else {
+  //         setTimeLeft(timeRemaining);
+  //       }
+  //     }, 1000);
+
+  //     return () => clearInterval(interval);
+  //   }
+  // }, []);
 
   // helper function to format time in mm:ss
   const formatTime = (time: number) => {

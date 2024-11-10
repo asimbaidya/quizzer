@@ -33,21 +33,6 @@ const formatStatus = (status: TestStatus): string => {
   }
 };
 
-const getStatusColor = (status: TestStatus): string => {
-  switch (status) {
-    case 'not_opened':
-      return 'gray';
-    case 'not_started':
-      return 'yellow';
-    case 'in_progress':
-      return 'blue';
-    case 'completed':
-      return 'green';
-    default:
-      return 'gray';
-  }
-};
-
 const TestCard = ({ test }: { test: TestWithUrlAndStatus }) => {
   const cardBg = useColorModeValue('white', 'gray.700');
   const cardBorder = useColorModeValue('gray.200', 'gray.600');
@@ -69,7 +54,6 @@ const TestCard = ({ test }: { test: TestWithUrlAndStatus }) => {
       navigate({ to: test.url });
       showToast({
         title: 'Test Started',
-        description: 'Test has started',
         status: 'success',
       });
     },
@@ -121,7 +105,8 @@ const TestCard = ({ test }: { test: TestWithUrlAndStatus }) => {
     >
       {/* Status Badge */}
       <Badge
-        colorScheme={getStatusColor(test.status)}
+        colorScheme={'teal.200'}
+        color={'tomato'}
         position="absolute"
         top={4}
         right={4}

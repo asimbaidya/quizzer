@@ -127,7 +127,8 @@ export interface QuizQuestionWithSubmission {
 export interface TestQuestionWithSubmission {
   question_submissions: QuestionSubmission[];
   total_mark: number;
-  start_time: Date;
+  start_time?: Date;
+  window_end: Date;
   status: TestStatus;
   duration: number;
 }

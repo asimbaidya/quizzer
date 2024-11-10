@@ -58,8 +58,6 @@ const AddMultipleChoiceQuestion = ({
       showToast({
         title: 'Question Submitted',
         status: 'success',
-        duration: 3000,
-        isClosable: true,
       });
     },
     onError: (error) => {
@@ -67,8 +65,6 @@ const AddMultipleChoiceQuestion = ({
         title: 'Failed to submit question',
         description: error.message,
         status: 'error',
-        duration: 3000,
-        isClosable: true,
       });
     },
   });

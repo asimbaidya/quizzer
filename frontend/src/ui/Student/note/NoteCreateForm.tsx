@@ -47,7 +47,6 @@ const NoteCreateForm = () => {
       });
       showToast({
         title: 'Note Created',
-        description: 'Note has',
       });
     },
     onError: (error) => {

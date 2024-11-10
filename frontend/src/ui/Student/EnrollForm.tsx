@@ -33,8 +33,8 @@ const EnrollMetadataForm: React.FC = () => {
   } = useForm<EnrollMetadataFormInputs>({
     resolver: zodResolver(EnrollMetadataSchema),
     defaultValues: {
-      course_title: 'Democracy 101',
-      course_pin: 'KHUL_JA_SIM_SIM',
+      course_title: 'TNT101',
+      course_pin: '12345678',
     },
   });
 

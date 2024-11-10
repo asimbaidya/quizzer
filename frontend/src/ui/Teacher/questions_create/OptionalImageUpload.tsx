@@ -44,7 +44,6 @@ const OptionalImageUpload = ({ setFile }: ImageUploaderOptions) => {
 
     showToast({
       title: 'Image Removed',
-      description: 'The image has been successfully removed.',
       status: 'warning',
     });
   };

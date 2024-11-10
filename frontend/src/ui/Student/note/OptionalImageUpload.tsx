@@ -66,7 +66,6 @@ const OptionalImageUpload = ({
 
     showToast({
       title: 'Image Removed',
-      description: 'The image has been successfully removed.',
       status: 'warning',
     });
   };
