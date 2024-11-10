@@ -26,7 +26,7 @@ def mark_user_submission(  # noqa: C901
         if user_response.user_response == correct_answer:
             score = question_create.total_marks
             is_correct = True
-            feedback = f'Correct! Your answer is right [{correct_answer}]'
+            feedback = f'Correct! Your answer is right {correct_answer}'
         else:
             feedback = f'Incorrect. The correct answer is: {correct_answer}, you answered: str({user_response.user_response})'
 
@@ -44,7 +44,7 @@ def mark_user_submission(  # noqa: C901
         if user_answers == correct_answers:
             score = question_create.total_marks
             is_correct = True
-            feedback = f'Correct! All your answers are right [{correct_answer}]'
+            feedback = f'Correct! All your answers are right {correct_answers}'
         elif user_answers.intersection(correct_answers):
             feedback = f'Partially correct. The correct answers are: {correct_answers}., your answers are: {user_answers}'
         else:

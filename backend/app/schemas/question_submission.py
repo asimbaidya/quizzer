@@ -107,10 +107,12 @@ class QuestionSubmissionStudentView(BaseModel):
     user_response: Optional[QuestionStudentResponse] = None
     made_attempt: bool = False
     is_correct: Optional[bool] = False
+
+    # secure stuff
     score: Optional[int] = 0
     feedback: Optional[str] = ''
-
     attempt_time: Optional[datetime]
+
     attempt_count: Optional[int]
     status: SubmissionStatus
 
@@ -131,5 +133,6 @@ class TestQuestionWithSubmission(BaseModel):
     question_submissions: List[QuestionSubmission]
     total_mark: int
     start_time: Optional[datetime]
+    window_end: datetime
     status: TestStatus
     duration: int

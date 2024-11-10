@@ -235,6 +235,13 @@ def get_all_question_in_test(  # type: ignore
                 f'http://127.0.0.1:8000/API/image_show/{question.image}'
             )
 
+        # BUG FIX
+        if test_status == TestStatus.IN_PROGRESS and submission.made_attempt:
+            # Fairness
+            submission.is_correct = None
+            submission.score = None
+            submission.feedback = None
+
         question_submission = {
             'question': question,
             'submission': submission,
@@ -246,6 +253,7 @@ def get_all_question_in_test(  # type: ignore
         'total_mark': test.total_mark,
         'status': test_status,
         'start_time': start_time,
+        'window_end': test.window_end,
         'duration': test.duration,
     }  # type: ignore
 
