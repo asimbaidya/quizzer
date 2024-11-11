@@ -8,6 +8,13 @@ const useImageUpload = (onUploadSuccess: { (file: string | null): void }) => {
     const formData = new FormData();
     formData.append('file', file);
 
+    let token: string | null;
+    if (!localStorage.getItem('access_token')) {
+      throw new Error('No Token');
+    } else {
+      token = localStorage.getItem('access_token');
+    }
+
     try {
       const response = await axios.post(
         'http://127.0.0.1:8000/API/image_upload/',
@@ -15,8 +22,7 @@ const useImageUpload = (onUploadSuccess: { (file: string | null): void }) => {
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            Authorization:
-              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzExMzU1ODksInN1YiI6ImpvaG5fZG9lQGdtYWlsLmNvbSJ9.MHqLZEKKEgZlKATDecj6hiAxJXu4neBRzObQyY4Dfmw',
+            Authorization: `Bearer ${token}`,
           },
         }
       );

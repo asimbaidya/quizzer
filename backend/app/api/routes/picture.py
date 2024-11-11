@@ -4,7 +4,7 @@ import uuid
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from app.api.deps import CurrentTeacher
+from app.api.deps import CurrentUser
 from app.core.config import settings
 
 router = APIRouter()
@@ -12,7 +12,7 @@ router = APIRouter()
 
 # // but only teacher can upload image in question set
 @router.post('/image_upload/')
-async def upload_image(_current_teacher: CurrentTeacher, file: UploadFile = File(...)):
+async def upload_image(_: CurrentUser, file: UploadFile = File(...)):
     if not file.filename:
         raise HTTPException(status_code=400, detail='File name/extention is missing.')
 

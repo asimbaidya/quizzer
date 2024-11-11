@@ -5,6 +5,12 @@ const useImageUpload = (onUploadSuccess: { (file: string | null): void }) => {
   const [uploadedFilePath, setUploadedFilePath] = useState('');
 
   const uploadImage = async (file: File) => {
+    let token: string | null;
+    if (!localStorage.getItem('access_token')) {
+      throw new Error('No Token');
+    } else {
+      token = localStorage.getItem('access_token');
+    }
     const formData = new FormData();
     formData.append('file', file);
 
@@ -15,8 +21,7 @@ const useImageUpload = (onUploadSuccess: { (file: string | null): void }) => {
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            Authorization:
-              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzExMzU1ODksInN1YiI6ImpvaG5fZG9lQGdtYWlsLmNvbSJ9.MHqLZEKKEgZlKATDecj6hiAxJXu4neBRzObQyY4Dfmw',
+            Authorization: `Bearer ${token}`,
           },
         }
       );
