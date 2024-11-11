@@ -54,7 +54,7 @@ const OptionalImageUpload = ({ setFile }: ImageUploaderOptions) => {
       borderColor={uploadedFilePath ? 'transparent' : 'gray.100'}
       borderRadius={uploadedFilePath ? 'none' : 'md'}
       borderWidth={uploadedFilePath ? 'none' : '2px'}
-      bg={uploadedFilePath ? 'none' : 'purple.200'}
+      bg={uploadedFilePath ? 'none' : 'teal.500'}
     >
       <input
         type="file"
@@ -103,7 +103,7 @@ const OptionalImageUpload = ({ setFile }: ImageUploaderOptions) => {
             display="flex"
             alignItems="center"
             justifyContent="center"
-            color="purple.500"
+            color="teal.200"
             fontStyle="italic"
             fontWeight="bold"
             fontSize={{ base: '4xl', md: '6xl' }}

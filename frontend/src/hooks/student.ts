@@ -5,11 +5,7 @@ import {
   fetchQuizQuestions,
   fetchTestQuestions,
   fetchNotes,
-  createNote,
   fetchNote,
-  updateNote,
-  deleteNote,
-  submitQuestionAnswerAtAPI,
 } from '../core/services/student';
 
 export const useEnrolledCourses = () => {

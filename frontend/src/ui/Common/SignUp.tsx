@@ -16,7 +16,10 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UserCreateSchema } from '../../core/schemas/common';
 import useCustomToast from '../../hooks/useCustomToast';
-
+import { useMutation } from '@tanstack/react-query';
+import { signUp } from '../../core/services/user';
+import { CustomError } from '../../core/request';
+import { redirect } from '@tanstack/react-router';
 type SignupFormData = z.infer<typeof UserCreateSchema>;
 
 export default function Signup() {
@@ -24,26 +27,48 @@ export default function Signup() {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<SignupFormData>({
     resolver: zodResolver(UserCreateSchema),
   });
 
   const { showToast } = useCustomToast();
 
+  const mutation = useMutation({
+    mutationFn: ({ signal, data }: { signal: AbortSignal; data: any }) =>
+      signUp(signal, data),
+    onSuccess: () => {
+      reset();
+      showToast({
+        title: 'Signup Successfull',
+        status: 'success',
+      });
+      redirect({ to: '/login' });
+    },
+    onError: (error) => {
+      let msg = error.message;
+      if (error instanceof CustomError) {
+        msg = error.details;
+      }
+      showToast({
+        title: 'Error',
+        description: msg,
+        status: 'error',
+      });
+    },
+  });
+
   const onSubmit = (data: SignupFormData) => {
     const { confirm_password, ...submitData } = data;
-    // handle signup logic with submitData (e.g., send to the backend)
-    showToast({
-      title: 'Signup Successful',
-      description: `${JSON.stringify(submitData, null, 2)}`,
-      status: 'success',
-      duration: 5000,
-      isClosable: true,
+
+    mutation.mutate({
+      data: submitData,
+      signal: new AbortController().signal,
     });
   };
 
   return (
-    // Gradient Background Wrapper
+    // gradient background wrapper
     <Box
       minHeight="100vh"
       bgGradient="linear(to-r, pink.100, purple.300)"
@@ -51,7 +76,6 @@ export default function Signup() {
       alignItems="center"
       justifyContent="center"
     >
-      {/* Form Container with Blurry Dark Background */}
       <Box
         maxWidth="500px"
         width="90%"

@@ -28,13 +28,13 @@ export default function ViewQuestions({
     return <Heading>No Question Found, Add Question from the Tabs</Heading>;
   }
 
-  const totalMarks = questions.reduce(
+  const totalMarks = questions?.reduce(
     (sum, question) => sum + question.total_marks,
     0
   );
-  const tags = Array.from(new Set(questions.map((question) => question.tag)));
+  const tags = Array.from(new Set(questions?.map((question) => question.tag)));
 
-  const filteredQuestions = questions.filter((question) => {
+  const filteredQuestions = questions?.filter((question) => {
     return (
       (filterType === 'all' || question.question_type === filterType) &&
       (filterTag === 'all' || question.tag === filterTag)

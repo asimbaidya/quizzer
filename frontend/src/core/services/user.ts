@@ -11,3 +11,12 @@ export const fetchUserData = async (signal: AbortSignal) => {
     signal,
   });
 };
+
+export const signUp = async (signal: AbortSignal, data: User): Promise<any> => {
+  return await request({
+    method: 'POST',
+    url: '/API/user/signup',
+    signal,
+    body: data,
+  });
+};
