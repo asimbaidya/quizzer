@@ -78,15 +78,32 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
     return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
   };
 
+  const totalPossibleScore = question_submissions.reduce(
+    (acc, { question }) => {
+      return acc + (question.total_marks || 0);
+    },
+    0
+  );
   const _totalScore = question_submissions.reduce((acc, { submission }) => {
     return acc + (submission.score || 0);
   }, 0);
+
   const totalScore = _totalScore ? _totalScore : 0;
 
   const totalWeightedScore =
-    (totalScore / total_mark) * questionWithSubmission.total_mark;
-
+    (totalScore / totalPossibleScore / 100) * total_mark * 100;
   const totalQuestions = questionWithSubmission.question_submissions.length;
+
+  // const _totalScore = question_submissions.reduce((acc, { submission }) => {
+  //   return acc + (submission.score || 0);
+  // }, 0);
+  // const totalScore = _totalScore ? _totalScore : 0;
+
+  // const totalWeightedScore =
+  //   (totalScore / total_mark) * questionWithSubmission.total_mark;
+
+  // const totalQuestions = questionWithSubmission.question_submissions.length;
+
   const totalCorrect = question_submissions.filter(
     ({ submission }) => submission.is_correct
   ).length;
@@ -106,10 +123,7 @@ const TakeTest: React.FC<TakeTestProp> = ({ questionWithSubmission }) => {
           justifyContent="space-between"
         >
           <Text>Total Score: {totalScore}</Text>
-          <Text>
-            Total Weighted Score: {totalWeightedScore.toFixed(2)} /
-            {questionWithSubmission.total_mark}
-          </Text>
+          <Text>Total Weighted Score: {totalWeightedScore.toFixed(2)}</Text>
           <Text>Total Questions: {totalQuestions}</Text>
           <Text>
             Total Correct: {totalCorrect} / {totalQuestions}

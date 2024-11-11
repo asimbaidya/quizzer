@@ -39,7 +39,7 @@ export default function Quiz({
 
       <TabPanels>
         <TabPanel>
-          {questions ? (
+          {Array.isArray(questions) && questions.length > 0 ? (
             // Temporary Criticall BUG:
             <ViewQuestions questions={questions} totalGradedMark={30} />
           ) : (
