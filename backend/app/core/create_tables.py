@@ -24,6 +24,5 @@ def create_all_tables():
 
 def drop_all_tables():
     Base.metadata.drop_all(engine)
-
     for table in Base.metadata.tables:
         print(f'{table} dropped')
