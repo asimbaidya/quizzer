@@ -21,6 +21,9 @@ export function AppSidebar() {
   if (currentUser?.role === "student") {
     items.push({ icon: BookOpen, title: "My Courses", path: "/courses" })
   }
+  if (currentUser?.role === "teacher") {
+    items.push({ icon: BookOpen, title: "Teaching", path: "/teach" })
+  }
   if (currentUser?.is_superuser || currentUser?.role === "admin") {
     items.push({ icon: Users, title: "Admin", path: "/admin" })
   }
