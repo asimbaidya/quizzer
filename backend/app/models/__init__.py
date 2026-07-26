@@ -37,7 +37,15 @@ from app.models.payloads import (
     QuestionTeacherData,
     StudentChoice,
 )
-from app.models.question import Question, QuestionSubmission
+from app.models.question import (
+    Question,
+    QuestionCreate,
+    QuestionStudentView,
+    QuestionSubmission,
+    QuestionWithSubmission,
+    StudentAnswer,
+    SubmissionStudentView,
+)
 from app.models.quiz import (
     QuestionSet,
     Quiz,
@@ -97,7 +105,12 @@ __all__ = [
     "UserTestSession",
     # question / submission
     "Question",
+    "QuestionCreate",
+    "QuestionStudentView",
     "QuestionSubmission",
+    "QuestionWithSubmission",
+    "StudentAnswer",
+    "SubmissionStudentView",
     # note
     "Note",
     "NoteBase",
