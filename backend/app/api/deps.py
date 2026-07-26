@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from typing import Annotated
 
 import jwt
@@ -5,76 +6,85 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 
 from app.core import security
 from app.core.config import settings
-from app.core.db import get_db
-from app.crud import user_crud
-from app.models.user import User
-from app.schemas.user import UserRole
-from app.schemas.util import TokenPayload
+from app.core.db import engine
+from app.models import TokenPayload, User
+from app.models.user import UserRole
 
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl='API/login/access-token')
+reusable_oauth2 = OAuth2PasswordBearer(
+    tokenUrl=f"{settings.API_V1_STR}/login/access-token"
+)
 
 
-# this automatically call get_db and return the yielded value
+def get_db() -> Generator[Session]:
+    with Session(engine) as session:
+        yield session
+
+
 SessionDep = Annotated[Session, Depends(get_db)]
-
-# this automatically extract Bearer token from Authorization header
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
-def get_current_user(db: SessionDep, token: TokenDep) -> User:
+def get_current_user(session: SessionDep, token: TokenDep) -> User:
     try:
-        payload = jwt.decode(  # type: ignore
+        payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
-    except (InvalidTokenError, ValidationError):
+    except InvalidTokenError, ValidationError:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail='Could not validate credentials',
+            detail="Could not validate credentials",
         )
-    user = user_crud.get_user_by_email(db, str(token_data.sub))
+    user = session.get(User, token_data.sub)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='User not found with provided credentials',
-        )
+        raise HTTPException(status_code=404, detail="User not found")
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
     return user
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-def get_current_active_admin(current_user: CurrentUser) -> User:
-    if not current_user.role == UserRole.ADMIN:  # type: ignore
+def get_current_active_superuser(current_user: CurrentUser) -> User:
+    if not current_user.is_superuser:
         raise HTTPException(
-            status_code=403,
-            detail="The user doesn't have enough privileges, Admin Privileges Required",
+            status_code=403, detail="The user doesn't have enough privileges"
         )
     return current_user
 
 
-def get_current_active_teacher(current_user: CurrentUser) -> User:
-    if not current_user.role == UserRole.TEACHER:  # type: ignore
+def _require_role(role: UserRole) -> object:
+    """Build a dependency that admits users of a given role (admins always pass)."""
+
+    def dependency(current_user: CurrentUser) -> User:
+        if current_user.role != role and not current_user.is_superuser:
+            raise HTTPException(
+                status_code=403,
+                detail=f"The user doesn't have enough privileges "
+                f"({role.value} privileges required)",
+            )
+        return current_user
+
+    return dependency
+
+
+def get_current_admin(current_user: CurrentUser) -> User:
+    if current_user.role != UserRole.ADMIN and not current_user.is_superuser:
         raise HTTPException(
             status_code=403,
-            detail="The user doesn't have enough privileges, Teacher Privileges Required",  # noqa: E501
+            detail="The user doesn't have enough privileges (admin required)",
         )
     return current_user
 
 
-def get_current_active_student(current_user: CurrentUser) -> User:
-    if not current_user.role == UserRole.STUDENT:  # type: ignore
-        raise HTTPException(
-            status_code=403,
-            detail="The user doesn't have enough privileges, Student Privileges Required",  # noqa: E501
-        )
-    return current_user
+get_current_teacher = _require_role(UserRole.TEACHER)
+get_current_student = _require_role(UserRole.STUDENT)
 
-
-CurrentAdmin = Annotated[User, Depends(get_current_active_admin)]
-CurrentTeacher = Annotated[User, Depends(get_current_active_teacher)]
-CurrentStudent = Annotated[User, Depends(get_current_active_student)]
+CurrentAdmin = Annotated[User, Depends(get_current_admin)]
+CurrentTeacher = Annotated[User, Depends(get_current_teacher)]
+CurrentStudent = Annotated[User, Depends(get_current_student)]

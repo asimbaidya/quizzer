@@ -1,63 +1,80 @@
+import uuid
 from datetime import datetime
-from typing import Optional
+from enum import StrEnum
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, func
-from sqlalchemy import (
-    Enum as EnumType,
-)
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import (
-    Mapped,
-    mapped_column,
-    relationship,
-)
+from pydantic import EmailStr
+from sqlalchemy import DateTime
+from sqlmodel import Field, SQLModel
 
-from app.core.db import Base
-from app.schemas.enums import UserRole
-from app.schemas.user import Note
+from app.models.common import get_datetime_utc
 
 
-class Note(Base):
-    __tablename__ = 'note'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    title: Mapped[str] = mapped_column(String, nullable=False, default='Untitled')
-    note_data: Mapped[Note] = mapped_column(JSONB, nullable=False)
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey('users.id'), nullable=False
+class UserRole(StrEnum):
+    """Application roles. Admins are also flagged ``is_superuser``."""
+
+    ADMIN = "admin"
+    TEACHER = "teacher"
+    STUDENT = "student"
+
+
+# Shared properties
+class UserBase(SQLModel):
+    email: EmailStr = Field(unique=True, index=True, max_length=255)
+    is_active: bool = True
+    is_superuser: bool = False
+    role: UserRole = Field(default=UserRole.STUDENT)
+    full_name: str | None = Field(default=None, max_length=255)
+
+
+# Properties to receive via API on creation (admin-only endpoint)
+class UserCreate(UserBase):
+    password: str = Field(min_length=8, max_length=128)
+
+
+# Public self-service registration: role is intentionally NOT accepted here,
+# so nobody can self-elevate to teacher/admin. New signups are always students.
+class UserRegister(SQLModel):
+    email: EmailStr = Field(max_length=255)
+    password: str = Field(min_length=8, max_length=128)
+    full_name: str | None = Field(default=None, max_length=255)
+
+
+# Properties to receive via API on update, all optional
+class UserUpdate(SQLModel):
+    email: EmailStr | None = Field(default=None, max_length=255)
+    is_active: bool | None = None
+    is_superuser: bool | None = None
+    role: UserRole | None = None
+    full_name: str | None = Field(default=None, max_length=255)
+    password: str | None = Field(default=None, min_length=8, max_length=128)
+
+
+class UserUpdateMe(SQLModel):
+    full_name: str | None = Field(default=None, max_length=255)
+    email: EmailStr | None = Field(default=None, max_length=255)
+
+
+class UpdatePassword(SQLModel):
+    current_password: str = Field(min_length=8, max_length=128)
+    new_password: str = Field(min_length=8, max_length=128)
+
+
+# Database model
+class User(UserBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    hashed_password: str
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore[call-overload]
     )
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
-    updated_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), onupdate=func.now()
-    )
 
-    creator = relationship('User', back_populates='notes')
+# Properties to return via API, id is always required
+class UserPublic(UserBase):
+    id: uuid.UUID
+    created_at: datetime | None = None
 
 
-class User(Base):
-    __tablename__ = 'users'
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    full_name: Mapped[str] = mapped_column(String, nullable=False)
-    email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
-    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
-    role: Mapped[UserRole] = mapped_column(EnumType(UserRole), nullable=False)
-    joined_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
-
-    course = relationship(
-        'Course', back_populates='creator', cascade='all, delete-orphan'
-    )
-
-    enrollments = relationship('Enrollment', back_populates='student')
-
-    question_submssions = relationship(
-        'QuestionSubmission', back_populates='user', cascade='all, delete-orphan'
-    )
-
-    notes = relationship('Note', back_populates='creator', cascade='all, delete-orphan')
-
-    user_test_sessions = relationship('UserTestSession', back_populates='user')
+class UsersPublic(SQLModel):
+    data: list[UserPublic]
+    count: int

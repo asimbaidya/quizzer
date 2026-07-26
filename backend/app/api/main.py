@@ -1,17 +1,11 @@
 from fastapi import APIRouter
 
-from app.api.routes import admin, login, picture, student, teacher, test, user
+from app.api.routes import login, users, utils
 
 api_router = APIRouter()
+api_router.include_router(login.router)
+api_router.include_router(users.router)
+api_router.include_router(utils.router)
 
-
-api_router.include_router(login.router, tags=['login'])
-api_router.include_router(test.router, prefix='/test', tags=['test'])
-api_router.include_router(user.router, prefix='/user', tags=['user'])
-
-# Role Based Routes
-api_router.include_router(student.router, prefix='/student', tags=['student'])
-api_router.include_router(teacher.router, prefix='/teacher', tags=['teacher'])
-api_router.include_router(admin.router, prefix='/admin', tags=['admin'])
-
-api_router.include_router(picture.router, tags=['File'])
+# Domain routers (courses, quizzes, tests, questions, submissions, notes)
+# are registered here as they are ported.
