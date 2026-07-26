@@ -5,6 +5,9 @@
 *.pem
 *.key
 
+# ---- Local-only test credentials (throwaway demo accounts) ----
+.test-credentials.md
+
 # ---- Python ----
 __pycache__/
 *.py[cod]
