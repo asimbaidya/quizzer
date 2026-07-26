@@ -1,42 +1,19 @@
-import { useToast } from '@chakra-ui/react';
-
-interface ToastOptions {
-  title: string;
-  description?: string;
-  status?: 'info' | 'warning' | 'success' | 'error';
-  duration?: number;
-  isClosable?: boolean;
-  position?:
-    | 'top-right'
-    | 'top-left'
-    | 'bottom-right'
-    | 'bottom-left'
-    | 'top'
-    | 'bottom';
-}
+import { toast } from "sonner"
 
 const useCustomToast = () => {
-  const toast = useToast();
-
-  const showToast = ({
-    title,
-    description,
-    status = 'info',
-    duration = 5000,
-    isClosable = true,
-    position = 'bottom-right',
-  }: ToastOptions) => {
-    toast({
-      title,
+  const showSuccessToast = (description: string) => {
+    toast.success("Success!", {
       description,
-      status,
-      duration,
-      isClosable,
-      position,
-    });
-  };
+    })
+  }
 
-  return { showToast };
-};
+  const showErrorToast = (description: string) => {
+    toast.error("Something went wrong!", {
+      description,
+    })
+  }
 
-export default useCustomToast;
+  return { showSuccessToast, showErrorToast }
+}
+
+export default useCustomToast

@@ -1,91 +1,70 @@
-import { useNavigate } from '@tanstack/react-router';
-import { useQuery, useMutation, QueryClient } from '@tanstack/react-query';
-import request, { CustomError } from '../core/request';
-import { useState } from 'react';
-import { fetchUserData } from '../core/services/user';
-import useCustomToast from './useCustomToast';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
 
-interface Token {
-  access_token: string;
-  token_type: string;
+import {
+  type Body_login_login_access_token as AccessToken,
+  LoginService,
+  type UserPublic,
+  type UserRegister,
+  UsersService,
+} from "@/client"
+import { handleError } from "@/utils"
+import useCustomToast from "./useCustomToast"
+
+const isLoggedIn = () => {
+  return localStorage.getItem("access_token") !== null
 }
 
-export const isLoggedIn = () => {
-  return localStorage.getItem('access_token') !== null;
-};
+const useAuth = () => {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { showErrorToast } = useCustomToast()
 
-export default function useAuth() {
-  const navigate = useNavigate();
-  const [loginError, setLoginError] = useState<string | null>(null);
-  const queryClient = new QueryClient();
-  const { showToast } = useCustomToast();
+  const { data: user } = useQuery<UserPublic | null, Error>({
+    queryKey: ["currentUser"],
+    queryFn: UsersService.readUserMe,
+    enabled: isLoggedIn(),
+  })
 
-  const {
-    data: user,
-    error,
-    isLoading,
-  } = useQuery({
-    queryKey: ['user'],
-    queryFn: ({ signal }) => fetchUserData(signal),
-    enabled: localStorage.getItem('access_token') !== null,
-  });
-
-  const mutation = useMutation({
-    mutationKey: ['login'],
-    mutationFn: async (credentials: { username: string; password: string }) => {
-      const data = await request<Token>({
-        method: 'POST',
-        url: '/API/login/access-token',
-        formData: {
-          grant_type: 'password',
-          username: credentials.username,
-          password: credentials.password,
-        },
-      });
-      return data;
+  const signUpMutation = useMutation({
+    mutationFn: (data: UserRegister) =>
+      UsersService.registerUser({ requestBody: data }),
+    onSuccess: () => {
+      navigate({ to: "/login" })
     },
-    onSuccess: (data) => {
-      localStorage.setItem('access_token', data.access_token);
-      showToast({
-        title: 'Login',
-        description: 'You have been successfully logged in.',
-        status: 'success',
-        duration: 2000,
-      });
-      setLoginError(null);
-      navigate({ to: '/' });
+    onError: handleError.bind(showErrorToast),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] })
     },
+  })
 
-    onError: (error: CustomError) => {
-      console.error('API Error:', error.message, error.details);
-      setLoginError(error.details);
+  const login = async (data: AccessToken) => {
+    const response = await LoginService.loginAccessToken({
+      formData: data,
+    })
+    localStorage.setItem("access_token", response.access_token)
+  }
+
+  const loginMutation = useMutation({
+    mutationFn: login,
+    onSuccess: () => {
+      navigate({ to: "/" })
     },
-  });
-
-  const login = (username: string, password: string) => {
-    mutation.mutate({ username, password });
-  };
+    onError: handleError.bind(showErrorToast),
+  })
 
   const logout = () => {
-    localStorage.removeItem('access_token');
-    queryClient.refetchQueries({ queryKey: ['user'] });
-    // window.location.reload();
-    showToast({
-      title: 'Logout',
-      description: 'Your have been successfully logged out.',
-      status: 'info',
-      duration: 2000,
-    });
-    navigate({ to: '/' });
-  };
+    localStorage.removeItem("access_token")
+    navigate({ to: "/login" })
+  }
 
   return {
-    user,
-    loginError,
-    setLoginError,
-    login,
+    signUpMutation,
+    loginMutation,
     logout,
-    error,
-    isLoading,
-  } as const;
+    user,
+  }
 }
+
+export { isLoggedIn }
+export default useAuth

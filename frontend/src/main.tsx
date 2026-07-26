@@ -1,53 +1,52 @@
-import { ChakraProvider } from '@chakra-ui/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query"
+import { createRouter, RouterProvider } from "@tanstack/react-router"
+import { StrictMode } from "react"
+import ReactDOM from "react-dom/client"
+import { ApiError, OpenAPI } from "./client"
+import { ThemeProvider } from "./components/theme-provider"
+import { Toaster } from "./components/ui/sonner"
+import "./index.css"
+import { routeTree } from "./routeTree.gen"
 
-import ReactDOM from 'react-dom/client';
-import { RouterProvider, createRouter } from '@tanstack/react-router';
-import { routeTree } from './routeTree.gen';
-import { StrictMode } from 'react';
-
-import theme from './theme';
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      {/* The rest of your application */}
-    </QueryClientProvider>
-  );
+OpenAPI.BASE = import.meta.env.VITE_API_URL
+OpenAPI.TOKEN = async () => {
+  return localStorage.getItem("access_token") || ""
 }
 
-// Set up a Router instance
-const router = createRouter({
-  routeTree,
-  defaultPreload: 'intent',
-});
+const handleApiError = (error: Error) => {
+  if (error instanceof ApiError && [401, 403].includes(error.status)) {
+    localStorage.removeItem("access_token")
+    window.location.href = "/login"
+  }
+}
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: handleApiError,
+  }),
+  mutationCache: new MutationCache({
+    onError: handleApiError,
+  }),
+})
 
-// Register things for typesafety
-declare module '@tanstack/react-router' {
+const router = createRouter({ routeTree })
+declare module "@tanstack/react-router" {
   interface Register {
-    router: typeof router;
+    router: typeof router
   }
 }
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 0,
-    },
-  },
-});
-
-const rootElement = document.getElementById('app')!;
-
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
-  root.render(
-    <StrictMode>
-      <ChakraProvider theme={theme}>
-        <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-        </QueryClientProvider>
-      </ChakraProvider>
-    </StrictMode>
-  );
-}
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <Toaster richColors closeButton />
+      </QueryClientProvider>
+    </ThemeProvider>
+  </StrictMode>,
+)
