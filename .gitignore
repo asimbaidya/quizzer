@@ -1,10 +1,38 @@
-# python module cache
-__pycache__
+# ---- Secrets & environment ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
 
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
 
+# ---- Node / frontend ----
+node_modules/
+dist/
+.vite/
+*.local
 
-# security related
-# .env
+# ---- Editor / OS ----
+.vscode/
+.idea/
+.DS_Store
 
-
+# ---- Project scratch ----
 __test
+static/pictures/*
+!static/pictures/.gitkeep
+
+# ---- Reference: upstream template clone (read-only, not part of the repo) ----
+my-full-stack/
