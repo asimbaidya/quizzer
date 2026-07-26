@@ -166,7 +166,6 @@ export default function AddQuestionDialog({
             <div className="space-y-2">
               <Label>Choices (4–6, mark the correct one/s)</Label>
               {choices.map((c, i) => (
-                // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length editable rows
                 <div key={i} className="flex items-center gap-2">
                   <Checkbox
                     checked={c.correct}

@@ -1,0 +1,33 @@
+# Install with:  uv run --project backend pre-commit install   (or: prek install)
+# Run on all files: pre-commit run --all-files
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+        exclude: ^frontend/src/(routeTree\.gen\.ts|client/)
+      - id: trailing-whitespace
+        exclude: ^frontend/src/(routeTree\.gen\.ts|client/)
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.4
+    hooks:
+      - id: ruff
+        name: ruff (backend)
+        args: [--fix]
+        files: ^backend/
+      - id: ruff-format
+        name: ruff-format (backend)
+        files: ^backend/
+
+  - repo: local
+    hooks:
+      - id: biome
+        name: biome (frontend)
+        language: system
+        entry: bash -c 'cd frontend && bunx biome check --write --no-errors-on-unmatched "$@"' --
+        files: ^frontend/.*\.(ts|tsx|js|jsx|json)$
+        exclude: ^frontend/src/(routeTree\.gen\.ts|client/)
