@@ -1,4 +1,4 @@
-import { BookOpen, Home, Users } from "lucide-react"
+import { BookOpen, Home, StickyNote, Users } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
@@ -20,6 +20,7 @@ export function AppSidebar() {
   const items: Item[] = [{ icon: Home, title: "Dashboard", path: "/" }]
   if (currentUser?.role === "student") {
     items.push({ icon: BookOpen, title: "My Courses", path: "/courses" })
+    items.push({ icon: StickyNote, title: "Notes", path: "/notes" })
   }
   if (currentUser?.role === "teacher") {
     items.push({ icon: BookOpen, title: "Teaching", path: "/teach" })

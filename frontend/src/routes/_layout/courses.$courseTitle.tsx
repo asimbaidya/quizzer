@@ -78,18 +78,24 @@ function CourseDetail() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {tests.map((test) => (
-              <Card key={test.id}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    {test.title}
-                    <Badge variant="secondary">{test.total_mark} marks</Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    {test.duration} min · closes{" "}
-                    {new Date(test.window_end).toLocaleString()}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+              <Link
+                key={test.id}
+                to="/test/$courseTitle/$testId"
+                params={{ courseTitle, testId: test.id }}
+              >
+                <Card className="transition-colors hover:border-primary">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      {test.title}
+                      <Badge variant="secondary">{test.total_mark} marks</Badge>
+                    </CardTitle>
+                    <CardDescription>
+                      {test.duration} min · closes{" "}
+                      {new Date(test.window_end).toLocaleString()}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
             ))}
           </div>
         )}
