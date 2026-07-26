@@ -1,12 +1,19 @@
 import uuid
 from datetime import datetime
 from enum import StrEnum
+from typing import TYPE_CHECKING
 
 from pydantic import EmailStr
 from sqlalchemy import DateTime
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 
 from app.models.common import get_datetime_utc
+
+if TYPE_CHECKING:
+    from app.models.course import Course, Enrollment
+    from app.models.note import Note
+    from app.models.question import QuestionSubmission
+    from app.models.quiz import UserTestSession
 
 
 class UserRole(StrEnum):
@@ -66,6 +73,21 @@ class User(UserBase, table=True):
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),  # type: ignore[call-overload]
+    )
+
+    # Domain relationships. Deleting a user cascades to everything they own.
+    courses: list["Course"] = Relationship(
+        back_populates="creator", cascade_delete=True
+    )
+    enrollments: list["Enrollment"] = Relationship(
+        back_populates="student", cascade_delete=True
+    )
+    question_submissions: list["QuestionSubmission"] = Relationship(
+        back_populates="user", cascade_delete=True
+    )
+    notes: list["Note"] = Relationship(back_populates="creator", cascade_delete=True)
+    user_test_sessions: list["UserTestSession"] = Relationship(
+        back_populates="user", cascade_delete=True
     )
 
 
