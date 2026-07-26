@@ -182,6 +182,7 @@ def get_quiz_with_submissions(
             submit_enabled=True,
             hide_result=False,
         ),
+        "question_set_id": quiz.question_set_id,
         "total_mark": quiz.total_mark,
         "allowed_attempt": quiz.allowed_attempt,
         "is_unlimited_attempt": quiz.is_unlimited_attempt,
@@ -245,6 +246,7 @@ def get_test_with_submissions(
             submit_enabled=in_progress,
             hide_result=in_progress,  # keep answers hidden until the test ends
         ),
+        "question_set_id": test.question_set_id,
         "total_mark": test.total_mark,
         "status": status,
         "start_time": test_session.start_time if test_session else None,

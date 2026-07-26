@@ -1,4 +1,4 @@
-import { Home, Users } from "lucide-react"
+import { BookOpen, Home, Users } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
@@ -18,6 +18,9 @@ export function AppSidebar() {
   // Role-based navigation. Screen groups (student/teacher) are added to this
   // list as their routes are built.
   const items: Item[] = [{ icon: Home, title: "Dashboard", path: "/" }]
+  if (currentUser?.role === "student") {
+    items.push({ icon: BookOpen, title: "My Courses", path: "/courses" })
+  }
   if (currentUser?.is_superuser || currentUser?.role === "admin") {
     items.push({ icon: Users, title: "Admin", path: "/admin" })
   }
