@@ -28,6 +28,7 @@ openapi.json
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+/coverage/
 
 # TanStack Router temp
 .tanstack
