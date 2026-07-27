@@ -18,7 +18,9 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
       - POSTGRES_DB=${POSTGRES_DB:-quizzer}
     volumes:
-      - quizzer-db-data:/var/lib/postgresql/data
+      # Postgres 18+ images store data in a version subdir and expect the mount
+      # at /var/lib/postgresql (NOT .../data, which the old images used).
+      - quizzer-db-data:/var/lib/postgresql
       # Creates the separate <db>_test database used by the pytest suite.
       - ./scripts/init-test-db.sh:/docker-entrypoint-initdb.d/init-test-db.sh
     healthcheck:
