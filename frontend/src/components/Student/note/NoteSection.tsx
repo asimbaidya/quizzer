@@ -1,9 +1,11 @@
 import {
-  ChevronDown,
   ChevronRight,
+  GripVertical,
   ImagePlus,
   Loader2,
-  MoreVertical,
+  MoreHorizontal,
+  Plus,
+  Trash2,
   X,
 } from "lucide-react"
 import { useRef, useState } from "react"
@@ -14,32 +16,44 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
 import useCustomToast from "@/hooks/useCustomToast"
 import { cn } from "@/lib/utils"
+import AutoTextarea from "./AutoTextarea"
 import { FLAG_SCHEMES, flagBorder, imageUrl } from "./flag-schemes"
 
 interface Props {
   section: NoteItem
-  index: number
   isExpanded: boolean
+  isDragOver: boolean
+  dragDisabled: boolean
   onToggle: () => void
   onChange: (field: keyof NoteItem, value: string | number | null) => void
   onDelete: () => void
+  onAddBelow: () => void
+  onDragStart: () => void
+  onDragEnter: () => void
+  onDragEnd: () => void
 }
 
 export default function NoteSection({
   section,
-  index,
   isExpanded,
+  isDragOver,
+  dragDisabled,
   onToggle,
   onChange,
   onDelete,
+  onAddBelow,
+  onDragStart,
+  onDragEnter,
+  onDragEnd,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [draggable, setDraggable] = useState(false)
   const { showErrorToast } = useCustomToast()
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,75 +76,153 @@ export default function NoteSection({
     }
   }
 
+  const previewText = section.content.trim() || "Empty section"
+
   return (
-    <div className={cn("rounded-md border p-4", flagBorder(section.flag))}>
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onToggle}
-          aria-label={isExpanded ? "Collapse section" : "Expand section"}
+    // biome-ignore lint/a11y/noStaticElementInteractions: native drag-reorder container, activated via the grip handle
+    <div
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragEnd={() => {
+        setDraggable(false)
+        onDragEnd()
+      }}
+      onDragEnter={(e) => {
+        e.preventDefault()
+        onDragEnter()
+      }}
+      onDragOver={(e) => e.preventDefault()}
+      className={cn(
+        "group relative -mx-2 flex gap-1 rounded-lg px-2 py-1.5 transition-colors",
+        "hover:bg-muted/40",
+        isDragOver &&
+          "before:absolute before:inset-x-2 before:-top-px before:h-0.5 before:rounded-full before:bg-primary",
+      )}
+    >
+      {/* Hover gutter: add-below + drag handle */}
+      <div
+        className={cn(
+          "flex w-9 shrink-0 items-start justify-end gap-0.5 pt-1 text-muted-foreground",
+          "opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100",
+        )}
+      >
+        <button
+          type="button"
+          onClick={onAddBelow}
+          aria-label="Add section below"
+          disabled={dragDisabled}
+          className={cn(
+            "rounded p-0.5 hover:bg-muted hover:text-foreground",
+            dragDisabled &&
+              "cursor-not-allowed opacity-40 hover:bg-transparent",
+          )}
         >
-          {isExpanded ? <ChevronDown /> : <ChevronRight />}
-        </Button>
-        <Input
-          value={section.title}
-          placeholder={`Section ${index + 1} title`}
-          onChange={(e) => onChange("title", e.target.value)}
-          className="border-none px-0 text-base font-semibold shadow-none focus-visible:ring-0"
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon-sm" aria-label="Section options">
-              <MoreVertical />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem variant="destructive" onClick={onDelete}>
-              Delete section
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          <Plus className="size-4" />
+        </button>
+        <button
+          type="button"
+          aria-label="Drag to reorder"
+          disabled={dragDisabled}
+          onMouseDown={() => !dragDisabled && setDraggable(true)}
+          onMouseUp={() => setDraggable(false)}
+          className={cn(
+            "rounded p-0.5 hover:bg-muted hover:text-foreground",
+            dragDisabled ? "cursor-not-allowed opacity-40" : "cursor-grab",
+          )}
+        >
+          <GripVertical className="size-4" />
+        </button>
       </div>
 
-      {isExpanded && (
-        <div className="mt-4 flex flex-col gap-4 pl-10">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="mr-1 text-xs text-muted-foreground">Flag</span>
-            <button
-              type="button"
-              onClick={() => onChange("flag", 0)}
-              aria-label="No flag"
-              className={cn(
-                "size-5 rounded-full border border-muted-foreground/40",
-                section.flag === 0 &&
-                  "ring-2 ring-ring ring-offset-1 ring-offset-background",
-              )}
-            />
-            {FLAG_SCHEMES.map((f) => (
-              <button
-                key={f.value}
-                type="button"
-                onClick={() => onChange("flag", f.value)}
-                aria-label={f.label}
-                className={cn(
-                  "size-5 rounded-full",
-                  f.dot,
-                  section.flag === f.value &&
-                    "ring-2 ring-ring ring-offset-1 ring-offset-background",
-                )}
-              />
-            ))}
-          </div>
+      {/* Content column, with a colored rail when flagged */}
+      <div
+        className={cn(
+          "min-w-0 flex-1",
+          section.flag > 0 && cn("border-l-2 pl-3", flagBorder(section.flag)),
+        )}
+      >
+        <div className="flex items-start gap-1">
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={isExpanded ? "Collapse section" : "Expand section"}
+            className={cn(
+              "mt-1 rounded p-0.5 text-muted-foreground transition-transform hover:bg-muted hover:text-foreground",
+              isExpanded && "rotate-90",
+              !isExpanded && "text-foreground",
+            )}
+          >
+            <ChevronRight className="size-4" />
+          </button>
 
-          <textarea
-            className="min-h-32 w-full rounded-md border bg-transparent p-3 text-sm"
-            placeholder="Write your note…"
-            value={section.content}
-            onChange={(e) => onChange("content", e.target.value)}
+          <input
+            value={section.title}
+            placeholder="Untitled section"
+            onChange={(e) => onChange("title", e.target.value)}
+            className="min-w-0 flex-1 border-none bg-transparent py-0.5 text-lg font-semibold outline-none placeholder:text-muted-foreground/50 focus-visible:ring-0"
           />
 
-          <div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Section options"
+                className="opacity-0 transition-opacity group-hover:opacity-100 data-[state=open]:opacity-100"
+              >
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <div className="px-2 py-1.5">
+                <p className="mb-1.5 text-xs font-medium text-muted-foreground">
+                  Flag
+                </p>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => onChange("flag", 0)}
+                    aria-label="No flag"
+                    className={cn(
+                      "size-5 rounded-full border border-muted-foreground/40",
+                      section.flag === 0 &&
+                        "ring-2 ring-ring ring-offset-1 ring-offset-popover",
+                    )}
+                  />
+                  {FLAG_SCHEMES.map((f) => (
+                    <button
+                      key={f.value}
+                      type="button"
+                      onClick={() => onChange("flag", f.value)}
+                      aria-label={f.label}
+                      className={cn(
+                        "size-5 rounded-full",
+                        f.dot,
+                        section.flag === f.value &&
+                          "ring-2 ring-ring ring-offset-1 ring-offset-popover",
+                      )}
+                    />
+                  ))}
+                </div>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onClick={onDelete}>
+                <Trash2 />
+                Delete section
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {isExpanded ? (
+          <div className="flex flex-col gap-3 pl-6 pr-1">
+            <AutoTextarea
+              value={section.content}
+              placeholder="Write something, or leave it blank…"
+              onChange={(e) => onChange("content", e.target.value)}
+              className="text-[15px] leading-7 text-foreground/90"
+            />
+
             <input
               type="file"
               accept="image/*"
@@ -139,16 +231,16 @@ export default function NoteSection({
               className="hidden"
             />
             {section.image ? (
-              <div className="relative inline-block">
+              <div className="group/img relative w-fit">
                 <img
                   src={imageUrl(section.image)}
                   alt="note attachment"
-                  className="max-h-64 rounded-md border object-contain"
+                  className="max-h-80 rounded-lg border object-contain"
                 />
                 <Button
-                  variant="destructive"
+                  variant="secondary"
                   size="icon-sm"
-                  className="absolute right-2 top-2"
+                  className="absolute right-2 top-2 opacity-0 shadow-sm transition-opacity group-hover/img:opacity-100"
                   onClick={() => onChange("image", null)}
                   aria-label="Remove image"
                 >
@@ -156,23 +248,31 @@ export default function NoteSection({
                 </Button>
               </div>
             ) : (
-              <Button
-                variant="outline"
-                size="sm"
+              <button
+                type="button"
                 disabled={uploading}
                 onClick={() => fileInputRef.current?.click()}
+                className="flex w-fit items-center gap-2 rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 {uploading ? (
-                  <Loader2 className="animate-spin" />
+                  <Loader2 className="size-4 animate-spin" />
                 ) : (
-                  <ImagePlus />
+                  <ImagePlus className="size-4" />
                 )}
                 Add image
-              </Button>
+              </button>
             )}
           </div>
-        </div>
-      )}
+        ) : (
+          <button
+            type="button"
+            onClick={onToggle}
+            className="block w-full truncate pl-6 text-left text-sm text-muted-foreground/80"
+          >
+            {previewText}
+          </button>
+        )}
+      </div>
     </div>
   )
 }

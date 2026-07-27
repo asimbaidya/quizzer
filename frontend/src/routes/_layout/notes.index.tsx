@@ -4,7 +4,7 @@ import { Plus } from "lucide-react"
 import { useState } from "react"
 
 import { type NotePublic, StudentService } from "@/client"
-import { Badge } from "@/components/ui/badge"
+import { flagScheme } from "@/components/Student/note/flag-schemes"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label"
 import { LoadingButton } from "@/components/ui/loading-button"
 import { Skeleton } from "@/components/ui/skeleton"
 import useCustomToast from "@/hooks/useCustomToast"
+import { cn } from "@/lib/utils"
 import { handleError } from "@/utils"
 
 export const Route = createFileRoute("/_layout/notes/")({
@@ -113,25 +114,48 @@ function Notes() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {notes.map((note: NotePublic) => {
-            const flagged = note.note_data.filter((s) => s.flag > 0).length
+            const flags = [
+              ...new Set(
+                note.note_data.filter((s) => s.flag > 0).map((s) => s.flag),
+              ),
+            ]
+            const preview = note.note_data
+              .map((s) => s.content.trim())
+              .find((c) => c.length > 0)
             return (
               <Link
                 key={note.id}
                 to="/notes/$noteId"
                 params={{ noteId: note.id }}
+                className="group"
               >
-                <Card className="h-full transition-colors hover:border-primary">
+                <Card className="h-full transition-colors group-hover:border-primary/60">
                   <CardHeader>
-                    <CardTitle>{note.title}</CardTitle>
-                    <CardDescription className="flex flex-wrap gap-2 pt-1">
-                      <Badge variant="secondary">
-                        {note.note_data.length} section
-                        {note.note_data.length === 1 ? "" : "s"}
-                      </Badge>
-                      {flagged > 0 && (
-                        <Badge variant="outline">{flagged} flagged</Badge>
+                    <div className="flex items-start justify-between gap-2">
+                      <CardTitle className="truncate">
+                        {note.title || "Untitled"}
+                      </CardTitle>
+                      {flags.length > 0 && (
+                        <div className="mt-1 flex shrink-0 gap-1">
+                          {flags.map((flag) => (
+                            <span
+                              key={flag}
+                              className={cn(
+                                "size-2.5 rounded-full",
+                                flagScheme(flag)?.dot,
+                              )}
+                            />
+                          ))}
+                        </div>
                       )}
+                    </div>
+                    <CardDescription className="line-clamp-2 min-h-[2.5rem] pt-1">
+                      {preview || "No content yet."}
                     </CardDescription>
+                    <p className="pt-2 text-xs text-muted-foreground">
+                      {note.note_data.length} section
+                      {note.note_data.length === 1 ? "" : "s"}
+                    </p>
                   </CardHeader>
                 </Card>
               </Link>
