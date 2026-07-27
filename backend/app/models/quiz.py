@@ -77,6 +77,12 @@ class UserTestSession(SQLModel, table=True):
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),  # type: ignore[call-overload]
     )
+    # Set when the student submits (or auto-submits on timeout). Once set, the
+    # test is locked: it can never be started or submitted again.
+    submitted_at: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),  # type: ignore[call-overload]
+    )
 
     test: "Test" = Relationship(back_populates="user_test_sessions")
     user: "User" = Relationship(back_populates="user_test_sessions")

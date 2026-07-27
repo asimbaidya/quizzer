@@ -1,76 +1,49 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
-
-import { StudentService } from "@/client"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
-import { LoadingButton } from "@/components/ui/loading-button"
-import useCustomToast from "@/hooks/useCustomToast"
-import type { QuestionWithSubmission } from "@/lib/quiz"
+import type { AnswerValue, QuestionWithSubmission } from "@/lib/quiz"
 import { cn } from "@/lib/utils"
-import { handleError } from "@/utils"
 
 interface Props {
   item: QuestionWithSubmission
-  courseTitle: string
-  questionSetId: string
-  invalidateKey: unknown[]
+  /** The student's current (unsubmitted) answer for this question. */
+  value: AnswerValue
+  onChange: (value: AnswerValue) => void
+  /** When true, inputs are read-only (locked test / after submission). */
+  disabled?: boolean
+  index?: number
 }
 
 export default function QuestionCard({
   item,
-  courseTitle,
-  questionSetId,
-  invalidateKey,
+  value,
+  onChange,
+  disabled = false,
+  index,
 }: Props) {
   const { question, submission } = item
   const qtype = question.question_type
-  const queryClient = useQueryClient()
-  const { showSuccessToast, showErrorToast } = useCustomToast()
-
-  const [single, setSingle] = useState<string>("")
-  const [multi, setMulti] = useState<string[]>([])
-  const [text, setText] = useState<string>("")
-  const [bool, setBool] = useState<boolean | null>(null)
-
-  const canSubmit = question.submit_url != null
-
-  const mutation = useMutation({
-    mutationFn: (value: string | string[] | boolean) =>
-      StudentService.submitAnswer({
-        courseTitle,
-        questionId: question.id,
-        questionSetId,
-        requestBody: {
-          question_type: qtype,
-          user_response: { question_type: qtype, user_response: value },
-        },
-      }),
-    onSuccess: () => {
-      showSuccessToast("Answer submitted")
-      queryClient.invalidateQueries({ queryKey: invalidateKey })
-    },
-    onError: handleError.bind(showErrorToast),
-  })
-
-  const submit = () => {
-    if (qtype === "single_choice") mutation.mutate(single)
-    else if (qtype === "multiple_choice") mutation.mutate(multi)
-    else if (qtype === "user_input") mutation.mutate(text)
-    else if (qtype === "true_false" && bool !== null) mutation.mutate(bool)
-  }
-
-  const answered = submission?.made_attempt
   const choices = question.question_data.choices ?? []
 
+  // Results are shown only once the backend reveals them (is_correct set).
+  const graded = submission != null && submission.is_correct !== null
+  const single = typeof value === "string" ? value : ""
+  const multi = Array.isArray(value) ? value : []
+  const text = typeof value === "string" ? value : ""
+  const bool = typeof value === "boolean" ? value : null
+
   return (
-    <Card>
+    <Card className={cn(disabled && "opacity-95")}>
       <CardHeader>
         <CardTitle className="flex items-start justify-between gap-4 text-base">
-          <span>{question.question_data.question_text}</span>
+          <span>
+            {index != null && (
+              <span className="mr-2 text-muted-foreground">Q{index}.</span>
+            )}
+            {question.question_data.question_text}
+          </span>
           <Badge variant="secondary" className="shrink-0">
             {question.total_marks} marks
           </Badge>
@@ -91,9 +64,10 @@ export default function QuestionCard({
               <Button
                 key={c.text}
                 type="button"
+                disabled={disabled}
                 variant={single === c.text ? "default" : "outline"}
                 className="justify-start"
-                onClick={() => setSingle(c.text)}
+                onClick={() => onChange(c.text)}
               >
                 {c.text}
               </Button>
@@ -109,12 +83,13 @@ export default function QuestionCard({
                 <button
                   key={c.text}
                   type="button"
-                  className="flex items-center gap-3 rounded-md border p-3 text-left"
+                  disabled={disabled}
+                  className="flex items-center gap-3 rounded-md border p-3 text-left disabled:opacity-60"
                   onClick={() =>
-                    setMulti((prev) =>
+                    onChange(
                       checked
-                        ? prev.filter((t) => t !== c.text)
-                        : [...prev, c.text],
+                        ? multi.filter((t) => t !== c.text)
+                        : [...multi, c.text],
                     )
                   }
                 >
@@ -132,8 +107,9 @@ export default function QuestionCard({
               <Button
                 key={String(v)}
                 type="button"
+                disabled={disabled}
                 variant={bool === v ? "default" : "outline"}
-                onClick={() => setBool(v)}
+                onClick={() => onChange(v)}
               >
                 {v ? "True" : "False"}
               </Button>
@@ -144,12 +120,13 @@ export default function QuestionCard({
         {qtype === "user_input" && (
           <Input
             value={text}
+            disabled={disabled}
             placeholder="Type your answer"
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => onChange(e.target.value)}
           />
         )}
 
-        {answered && submission?.feedback && (
+        {graded && submission?.feedback && (
           <p
             className={cn(
               "rounded-md border p-3 text-sm",
@@ -161,14 +138,6 @@ export default function QuestionCard({
             {submission.feedback}
             {submission.score != null && ` (score: ${submission.score})`}
           </p>
-        )}
-
-        {canSubmit && (
-          <div>
-            <LoadingButton loading={mutation.isPending} onClick={submit}>
-              Submit answer
-            </LoadingButton>
-          </div>
         )}
       </CardContent>
     </Card>

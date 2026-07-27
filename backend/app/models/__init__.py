@@ -38,6 +38,8 @@ from app.models.payloads import (
     StudentChoice,
 )
 from app.models.question import (
+    BatchAnswer,
+    BatchSubmission,
     Question,
     QuestionCreate,
     QuestionStudentView,
@@ -104,6 +106,8 @@ __all__ = [
     "TestCreate",
     "UserTestSession",
     # question / submission
+    "BatchAnswer",
+    "BatchSubmission",
     "Question",
     "QuestionCreate",
     "QuestionStudentView",

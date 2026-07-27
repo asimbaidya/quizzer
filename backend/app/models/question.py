@@ -112,3 +112,17 @@ class StudentAnswer(SQLModel):
 
     question_type: QuestionType
     user_response: QuestionStudentResponse
+
+
+class BatchAnswer(SQLModel):
+    """A single answer inside a batch (submit-all) submission."""
+
+    question_id: uuid.UUID
+    question_type: QuestionType
+    user_response: QuestionStudentResponse
+
+
+class BatchSubmission(SQLModel):
+    """Payload for submitting a whole quiz or test at once."""
+
+    answers: list[BatchAnswer] = []

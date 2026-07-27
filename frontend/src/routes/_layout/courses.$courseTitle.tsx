@@ -10,7 +10,30 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import type { QuizzesAndTests } from "@/lib/quiz"
+import type { QuizzesAndTests, TestStatus } from "@/lib/quiz"
+
+const TEST_STATUS_LABEL: Record<TestStatus, string> = {
+  not_opened: "Not open yet",
+  not_started: "Available",
+  in_progress: "In progress",
+  in_waiting_for_result: "Submitted",
+  completed: "Completed",
+  not_participated: "Missed",
+}
+
+function TestStatusBadge({ status }: { status: TestStatus }) {
+  const variant =
+    status === "not_participated"
+      ? "destructive"
+      : status === "not_started" || status === "in_progress"
+        ? "default"
+        : "secondary"
+  return (
+    <Badge variant={variant} className="shrink-0">
+      {TEST_STATUS_LABEL[status]}
+    </Badge>
+  )
+}
 
 export const Route = createFileRoute("/_layout/courses/$courseTitle")({
   component: CourseDetail,
@@ -62,7 +85,11 @@ function CourseDetail() {
                       {quiz.title}
                       <Badge variant="secondary">{quiz.total_mark} marks</Badge>
                     </CardTitle>
-                    <CardDescription>Quiz</CardDescription>
+                    <CardDescription>
+                      {quiz.is_unlimited_attempt
+                        ? "Quiz · unlimited attempts"
+                        : `Quiz · ${quiz.attempts_used}/${quiz.allowed_attempt} attempts used`}
+                    </CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
@@ -85,12 +112,12 @@ function CourseDetail() {
               >
                 <Card className="transition-colors hover:border-primary">
                   <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
+                    <CardTitle className="flex items-center justify-between gap-2">
                       {test.title}
-                      <Badge variant="secondary">{test.total_mark} marks</Badge>
+                      <TestStatusBadge status={test.status} />
                     </CardTitle>
                     <CardDescription>
-                      {test.duration} min · closes{" "}
+                      {test.total_mark} marks · {test.duration} min · closes{" "}
                       {new Date(test.window_end).toLocaleString()}
                     </CardDescription>
                   </CardHeader>

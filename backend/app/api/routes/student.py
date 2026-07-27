@@ -6,9 +6,9 @@ from fastapi import APIRouter
 from app.api.deps import CurrentStudent, SessionDep
 from app.crud import course as course_crud
 from app.crud import note as note_crud
-from app.crud import quiz as quiz_crud
 from app.crud import submission as submission_crud
 from app.models import (
+    BatchSubmission,
     CoursePublic,
     EnrollMetadata,
     NoteCreate,
@@ -39,9 +39,9 @@ def enroll_course(
 def get_quizzes_and_tests(
     course_title: str, session: SessionDep, student: CurrentStudent
 ) -> dict[str, Any]:
-    course, _ = course_crud.require_enrollment(session, course_title, student.id)
-    quizzes, tests = quiz_crud.get_quizzes_and_tests(session, course)
-    return {"quizzes": quizzes, "tests": tests}
+    return submission_crud.get_course_contents_with_status(
+        session, course_title, student.id
+    )
 
 
 # ---- Quiz / Test taking ----
@@ -76,6 +76,34 @@ def get_test_questions(
 ) -> Any:
     return submission_crud.get_test_with_submissions(
         session, course_title, test_id, student.id
+    )
+
+
+@router.post("/enrolled_courses/quiz/{course_title}/{quiz_id}/submit")
+def submit_quiz(
+    course_title: str,
+    quiz_id: uuid.UUID,
+    submission: BatchSubmission,
+    session: SessionDep,
+    student: CurrentStudent,
+) -> Any:
+    """Submit an entire quiz at once (one submission = one attempt)."""
+    return submission_crud.submit_quiz_batch(
+        session, course_title, quiz_id, student.id, submission.answers
+    )
+
+
+@router.post("/enrolled_courses/test/{course_title}/{test_id}/submit")
+def submit_test(
+    course_title: str,
+    test_id: uuid.UUID,
+    submission: BatchSubmission,
+    session: SessionDep,
+    student: CurrentStudent,
+) -> Any:
+    """Submit an entire test at once and lock it (also used for auto-submit)."""
+    return submission_crud.submit_test_batch(
+        session, course_title, test_id, student.id, submission.answers
     )
 
 

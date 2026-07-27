@@ -7,10 +7,12 @@ from sqlmodel import Session, select
 
 from app.crud.course import require_enrollment
 from app.crud.question import image_url
-from app.crud.quiz import get_quiz_or_404, get_test_or_404
+from app.crud.quiz import get_quiz_or_404, get_quizzes_and_tests, get_test_or_404
 from app.marking import mark_submission
 from app.models import (
+    BatchAnswer,
     Question,
+    QuestionStudentResponse,
     QuestionSubmission,
     QuestionTeacherData,
     Quiz,
@@ -58,6 +60,15 @@ def get_test_status(
     now = datetime.now(UTC)
     window_start = window_start.astimezone(UTC)
     window_end = window_end.astimezone(UTC)
+
+    # A submitted (or auto-submitted) test is locked. Results stay hidden while
+    # the window is still open, then become visible once it closes.
+    if test_session is not None and test_session.submitted_at is not None:
+        return (
+            TestStatus.IN_WAITING_FOR_RESULT
+            if now <= window_end
+            else TestStatus.COMPLETED
+        )
 
     if now < window_start:
         return TestStatus.NOT_OPENED
@@ -163,6 +174,66 @@ def _questions_with_submissions(
     return result
 
 
+# ---- Course contents with per-student status ---------------------------------
+def _quiz_attempts_used(
+    session: Session, question_set_id: uuid.UUID, student_id: uuid.UUID
+) -> int:
+    return max(
+        (
+            s.attempt_count
+            for s in session.exec(
+                select(QuestionSubmission)
+                .join(Question, QuestionSubmission.question_id == Question.id)  # type: ignore[arg-type]
+                .where(
+                    Question.question_set_id == question_set_id,
+                    QuestionSubmission.user_id == student_id,
+                )
+            ).all()
+        ),
+        default=0,
+    )
+
+
+def get_course_contents_with_status(
+    session: Session, course_title: str, student_id: uuid.UUID
+) -> dict[str, Any]:
+    """Quizzes and tests for a course, annotated with this student's status."""
+    course, _ = require_enrollment(session, course_title, student_id)
+    quizzes, tests = get_quizzes_and_tests(session, course)
+
+    quiz_views = [
+        {
+            "id": quiz.id,
+            "title": quiz.title,
+            "total_mark": quiz.total_mark,
+            "allowed_attempt": quiz.allowed_attempt,
+            "is_unlimited_attempt": quiz.is_unlimited_attempt,
+            "attempts_used": _quiz_attempts_used(
+                session, quiz.question_set_id, student_id
+            ),
+        }
+        for quiz in quizzes
+    ]
+    test_views = [
+        {
+            "id": test.id,
+            "title": test.title,
+            "total_mark": test.total_mark,
+            "duration": test.duration,
+            "window_start": test.window_start,
+            "window_end": test.window_end,
+            "status": get_test_status(
+                test.window_start,
+                test.window_end,
+                _test_session(session, test.id, student_id),
+                test.duration,
+            ),
+        }
+        for test in tests
+    ]
+    return {"quizzes": quiz_views, "tests": test_views}
+
+
 # ---- Quiz (student) -----------------------------------------------------------
 def get_quiz_with_submissions(
     session: Session, course_title: str, quiz_id: uuid.UUID, student_id: uuid.UUID
@@ -225,37 +296,68 @@ def get_test_with_submissions(
     status = get_test_status(
         test.window_start, test.window_end, test_session, test.duration
     )
+
+    base = {
+        "question_set_id": test.question_set_id,
+        "total_mark": test.total_mark,
+        "status": status,
+        "start_time": test_session.start_time if test_session else None,
+        "submitted_at": test_session.submitted_at if test_session else None,
+        "window_start": test.window_start,
+        "window_end": test.window_end,
+        "duration": test.duration,
+    }
+
+    # Before the student is allowed to see questions (window not open, not yet
+    # started, or missed entirely) return status only — never leak questions.
     if status in (
         TestStatus.NOT_OPENED,
         TestStatus.NOT_STARTED,
         TestStatus.NOT_PARTICIPATED,
-        TestStatus.IN_WAITING_FOR_RESULT,
     ):
-        raise HTTPException(
-            status_code=400, detail="Unauthorized to view the test questions"
-        )
+        return {**base, "question_submissions": []}
 
     ensure_question_submissions(session, test.question_set_id, student_id)
-    in_progress = status == TestStatus.IN_PROGRESS
     return {
+        **base,
         "question_submissions": _questions_with_submissions(
             session,
             test.question_set_id,
             student_id,
             course_title,
-            submit_enabled=in_progress,
-            hide_result=in_progress,  # keep answers hidden until the test ends
+            # No per-question submit; the whole test is submitted at once.
+            submit_enabled=False,
+            # Keep answers/scores hidden until the test window ends.
+            hide_result=status != TestStatus.COMPLETED,
         ),
-        "question_set_id": test.question_set_id,
-        "total_mark": test.total_mark,
-        "status": status,
-        "start_time": test_session.start_time if test_session else None,
-        "window_end": test.window_end,
-        "duration": test.duration,
     }
 
 
 # ---- Answer submission --------------------------------------------------------
+def _mark_submission(
+    question: Question,
+    submission: QuestionSubmission,
+    response: QuestionStudentResponse,
+) -> None:
+    """Grade a single response and record it on the submission row.
+
+    Raises ``ValueError`` (from the marker) on an un-markable response; callers
+    translate that into an HTTP error.
+    """
+    result = mark_submission(
+        question_data=QuestionTeacherData.model_validate(question.question_data),
+        total_marks=question.total_marks,
+        response=response,
+    )
+    submission.status = SubmissionStatus.SUBMITTED
+    submission.attempt_count += 1
+    submission.made_attempt = True
+    submission.score = result.score
+    submission.is_correct = result.is_correct
+    submission.feedback = result.feedback
+    submission.user_response = response.model_dump()
+
+
 def _validate_quiz_attempt(quiz: Quiz, attempt_count: int) -> None:
     if not quiz.is_unlimited_attempt and attempt_count >= quiz.allowed_attempt:
         raise HTTPException(status_code=403, detail="Maximum attempts reached")
@@ -326,22 +428,133 @@ def submit_answer(
         raise HTTPException(status_code=404, detail="Quiz or Test not found")
 
     try:
-        result = mark_submission(
-            question_data=QuestionTeacherData.model_validate(question.question_data),
-            total_marks=question.total_marks,
-            response=answer.user_response,
-        )
+        _mark_submission(question, submission, answer.user_response)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
-    submission.status = SubmissionStatus.SUBMITTED
-    submission.attempt_count += 1
-    submission.made_attempt = True
-    submission.score = result.score
-    submission.is_correct = result.is_correct
-    submission.feedback = result.feedback
-    submission.user_response = answer.user_response.model_dump()
     session.add(submission)
     session.commit()
     session.refresh(submission)
     return submission
+
+
+# ---- Batch (submit-all) submission -------------------------------------------
+def _apply_batch_answers(
+    session: Session,
+    question_set_id: uuid.UUID,
+    student_id: uuid.UUID,
+    answers: list[BatchAnswer],
+) -> None:
+    """Grade every supplied answer against its question in ``question_set_id``.
+
+    Questions left unanswered keep their existing (VIEWED / score-None) row, so
+    they simply contribute 0 — no need to touch them here.
+    """
+    submissions = {
+        s.question_id: s
+        for s in session.exec(
+            select(QuestionSubmission)
+            .join(Question, QuestionSubmission.question_id == Question.id)  # type: ignore[arg-type]
+            .where(
+                Question.question_set_id == question_set_id,
+                QuestionSubmission.user_id == student_id,
+            )
+        ).all()
+    }
+    questions = {
+        q.id: q
+        for q in session.exec(
+            select(Question).where(Question.question_set_id == question_set_id)
+        ).all()
+    }
+    for answer in answers:
+        question = questions.get(answer.question_id)
+        submission = submissions.get(answer.question_id)
+        if question is None or submission is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Question {answer.question_id} not part of this assessment",
+            )
+        if question.question_type != answer.question_type:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Invalid submission: expected {question.question_type} "
+                    f"but got {answer.question_type}"
+                ),
+            )
+        try:
+            _mark_submission(question, submission, answer.user_response)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
+        session.add(submission)
+
+
+def submit_quiz_batch(
+    session: Session,
+    course_title: str,
+    quiz_id: uuid.UUID,
+    student_id: uuid.UUID,
+    answers: list[BatchAnswer],
+) -> dict[str, Any]:
+    """Submit a whole quiz at once. One submission counts as one attempt."""
+    course, _ = require_enrollment(session, course_title, student_id)
+    quiz = get_quiz_or_404(session, quiz_id)
+    if quiz.course_id != course.id:
+        raise HTTPException(status_code=404, detail="Quiz not found in this course")
+
+    ensure_question_submissions(session, quiz.question_set_id, student_id)
+    # Attempts used so far = the highest per-question attempt count in this quiz.
+    attempts_used = max(
+        (
+            s.attempt_count
+            for s in session.exec(
+                select(QuestionSubmission)
+                .join(Question, QuestionSubmission.question_id == Question.id)  # type: ignore[arg-type]
+                .where(
+                    Question.question_set_id == quiz.question_set_id,
+                    QuestionSubmission.user_id == student_id,
+                )
+            ).all()
+        ),
+        default=0,
+    )
+    _validate_quiz_attempt(quiz, attempts_used)
+
+    _apply_batch_answers(session, quiz.question_set_id, student_id, answers)
+    session.commit()
+    return get_quiz_with_submissions(session, course_title, quiz_id, student_id)
+
+
+def submit_test_batch(
+    session: Session,
+    course_title: str,
+    test_id: uuid.UUID,
+    student_id: uuid.UUID,
+    answers: list[BatchAnswer],
+) -> dict[str, Any]:
+    """Submit a whole test at once and lock it. Used for both the explicit
+    submit action and the client's auto-submit on timeout."""
+    course, _ = require_enrollment(session, course_title, student_id)
+    test = get_test_or_404(session, test_id)
+    if test.course_id != course.id:
+        raise HTTPException(status_code=404, detail="Test not found in this course")
+
+    test_session = _test_session(session, test_id, student_id)
+    if test_session is None:
+        raise HTTPException(status_code=400, detail="Test has not been started")
+    if test_session.submitted_at is not None:
+        raise HTTPException(status_code=400, detail="Test has already been submitted")
+
+    now = datetime.now(UTC)
+    if now > test.window_end.astimezone(UTC):
+        raise HTTPException(status_code=400, detail="Test window has expired")
+    # The duration limit is enforced client-side via auto-submit; the server
+    # still accepts a slightly-late submission (while the window is open) so a
+    # student never loses answers to a clock skew of a few seconds.
+
+    _apply_batch_answers(session, test.question_set_id, student_id, answers)
+    test_session.submitted_at = now
+    session.add(test_session)
+    session.commit()
+    return get_test_with_submissions(session, course_title, test_id, student_id)

@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AdminAddUserData, AdminAddUserResponse, AdminDeleteUnusedImagesResponse, ImagesUploadImageData, ImagesUploadImageResponse, ImagesShowImageData, ImagesShowImageResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, StudentGetEnrolledCoursesResponse, StudentEnrollCourseData, StudentEnrollCourseResponse, StudentGetQuizzesAndTestsData, StudentGetQuizzesAndTestsResponse, StudentGetQuizQuestionsData, StudentGetQuizQuestionsResponse, StudentStartTestData, StudentStartTestResponse, StudentGetTestQuestionsData, StudentGetTestQuestionsResponse, StudentSubmitAnswerData, StudentSubmitAnswerResponse, StudentGetNotesResponse, StudentCreateNoteData, StudentCreateNoteResponse, StudentGetNoteData, StudentGetNoteResponse, StudentUpdateNoteData, StudentUpdateNoteResponse, StudentDeleteNoteData, StudentDeleteNoteResponse, TeacherGetCoursesResponse, TeacherCreateCourseData, TeacherCreateCourseResponse, TeacherGetQuizzesAndTestsData, TeacherGetQuizzesAndTestsResponse, TeacherGetEnrolledStudentsData, TeacherGetEnrolledStudentsResponse, TeacherCreateQuizData, TeacherCreateQuizResponse, TeacherCreateTestData, TeacherCreateTestResponse, TeacherGetQuestionsInQuizData, TeacherGetQuestionsInQuizResponse, TeacherCreateQuestionInQuizData, TeacherCreateQuestionInQuizResponse, TeacherGetQuestionsInTestData, TeacherGetQuestionsInTestResponse, TeacherCreateQuestionInTestData, TeacherCreateQuestionInTestResponse, TeacherGetQuizProgressData, TeacherGetQuizProgressResponse, TeacherGetTestProgressData, TeacherGetTestProgressResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { AdminAddUserData, AdminAddUserResponse, AdminDeleteUnusedImagesResponse, ImagesUploadImageData, ImagesUploadImageResponse, ImagesShowImageData, ImagesShowImageResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, StudentGetEnrolledCoursesResponse, StudentEnrollCourseData, StudentEnrollCourseResponse, StudentGetQuizzesAndTestsData, StudentGetQuizzesAndTestsResponse, StudentGetQuizQuestionsData, StudentGetQuizQuestionsResponse, StudentStartTestData, StudentStartTestResponse, StudentGetTestQuestionsData, StudentGetTestQuestionsResponse, StudentSubmitQuizData, StudentSubmitQuizResponse, StudentSubmitTestData, StudentSubmitTestResponse, StudentSubmitAnswerData, StudentSubmitAnswerResponse, StudentGetNotesResponse, StudentCreateNoteData, StudentCreateNoteResponse, StudentGetNoteData, StudentGetNoteResponse, StudentUpdateNoteData, StudentUpdateNoteResponse, StudentDeleteNoteData, StudentDeleteNoteResponse, TeacherGetCoursesResponse, TeacherCreateCourseData, TeacherCreateCourseResponse, TeacherGetQuizzesAndTestsData, TeacherGetQuizzesAndTestsResponse, TeacherGetEnrolledStudentsData, TeacherGetEnrolledStudentsResponse, TeacherCreateQuizData, TeacherCreateQuizResponse, TeacherCreateTestData, TeacherCreateTestResponse, TeacherGetQuestionsInQuizData, TeacherGetQuestionsInQuizResponse, TeacherCreateQuestionInQuizData, TeacherCreateQuestionInQuizResponse, TeacherGetQuestionsInTestData, TeacherGetQuestionsInTestResponse, TeacherCreateQuestionInTestData, TeacherCreateQuestionInTestResponse, TeacherGetQuizProgressData, TeacherGetQuizProgressResponse, TeacherGetTestProgressData, TeacherGetTestProgressResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class AdminService {
     /**
@@ -290,6 +290,58 @@ export class StudentService {
                 course_title: data.courseTitle,
                 test_id: data.testId
             },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Submit Quiz
+     * Submit an entire quiz at once (one submission = one attempt).
+     * @param data The data for the request.
+     * @param data.courseTitle
+     * @param data.quizId
+     * @param data.requestBody
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static submitQuiz(data: StudentSubmitQuizData): CancelablePromise<StudentSubmitQuizResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/student/enrolled_courses/quiz/{course_title}/{quiz_id}/submit',
+            path: {
+                course_title: data.courseTitle,
+                quiz_id: data.quizId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Submit Test
+     * Submit an entire test at once and lock it (also used for auto-submit).
+     * @param data The data for the request.
+     * @param data.courseTitle
+     * @param data.testId
+     * @param data.requestBody
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static submitTest(data: StudentSubmitTestData): CancelablePromise<StudentSubmitTestResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/student/enrolled_courses/test/{course_title}/{test_id}/submit',
+            path: {
+                course_title: data.courseTitle,
+                test_id: data.testId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: 'Validation Error'
             }
